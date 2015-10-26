@@ -12,26 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(output-directory = "build")
-
-java-jar(
+java_jar(
   name = "Echo"
-  source = all-files("source"))
+  source = get_files("source"))
 
-java-jar(
+java_jar(
   name = "EchoTest"
-  source = all-files("tests/source")
+  source = get_files("tests/source")
   library = [
     "Echo"
     "junit"
   ])
 
-junit(
+java_junit(
   name = "EchoTestResult"
-  test-jar = "EchoTest"
-  target-jar = "Echo"
-  main-class = "main.AllTests")
+  test_jar = "EchoTest"
+  target_jar = "Echo"
+  main_class = "main.AllTests")
 
-java-run(
+java_run(
   jar = "Echo"
   input = "Hello, World")

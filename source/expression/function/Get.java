@@ -23,15 +23,11 @@ import java.util.Map;
 
 public class Get extends Function {
 
-    static {
-        register(Get.class, "get");
-    }
-
     public Get(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
     }
 
     public String resolve() {
-        return mTarget.getProperty(getParameter(ANONYMOUS).resolve());
+        return mMatch.getProperty(getParameter(ANONYMOUS).resolve());
     }
 }

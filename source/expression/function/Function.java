@@ -29,8 +29,6 @@ public abstract class Function extends Expression implements IFunction {
 
     public static final String ANONYMOUS = "_";
 
-    private static Map<String, Class<? extends Function>> sFunctions = new HashMap<String, Class<? extends Function>>();
-
     private Map<String, IExpression> mParameters = new HashMap<String, IExpression>();
 
     public Function(IMatch match, ITarget target, Map<String, IExpression> parameters) {
@@ -51,18 +49,25 @@ public abstract class Function extends Expression implements IFunction {
     public IExpression getParameter(String key) {
         IExpression parameter =  mParameters.get(key);
         if (parameter == null) {
-            Match.error("missing parameter %s", key);
+            mMatch.error(String.format("missing parameter %s", key));
         }
         return parameter;
     }
 
-    static void register(Class<? extends Function> clazz, String name) {
-        sFunctions.put(name, clazz);
-    }
-
-    static Function getFunction(String name, IMatch match, ITarget target, Map<String, IExpression> parameters) throws Exception {
-        Class<? extends Function> clazz = sFunctions.get(name);
-        Constructor<? extends Function> constructor = clazz.getDeclaredConstructor(IMatch.class, ITarget.class, Map.class);
-        return constructor.newInstance(match, target, parameters);
+    public static Function getFunction(String name, IMatch match, ITarget target, Map<String, IExpression> parameters) {
+        try {
+            String[] parts = name.split("_");
+            StringBuilder clazzName = new StringBuilder("expression.function.");
+            for (String part : parts) {
+                // Capitalize first character
+                clazzName.append(part.substring(0, 1).toUpperCase() + part.substring(1));
+            }
+            Class<?> clazz = Class.forName(clazzName.toString());
+            Constructor<?> constructor = clazz.getDeclaredConstructor(IMatch.class, ITarget.class, Map.class);
+            return (Function) constructor.newInstance(match, target, parameters);
+        } catch (Exception e) {
+            match.error(String.format("couldn't load function \"%s\"", name));
+            return null;
+        }
     }
 }

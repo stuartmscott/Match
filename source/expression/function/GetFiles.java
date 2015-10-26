@@ -33,10 +33,6 @@ public class GetFiles extends Function {
     static final String DIRECTORY = "directory";
     static final String PATTERN = "pattern";
 
-    static {
-        register(GetFiles.class, "get-files");
-    }
-
     private IExpression mDirectory;
     private IExpression mPattern;
 

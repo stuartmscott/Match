@@ -13,37 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package main;
+package frontend;
 
-public interface IMatch {
-
-    /**
-     * Gets the property for the given key from this build.
-     */
-    String getProperty(String key);
+public interface ILexer {
 
     /**
-     * Sets the property for this build.
+     * Moves the Lexer to the next Token.
      */
-    void setProperty(String key, String value);
+    void move();
 
     /**
-     * Prints the message to the console.
+     * Checks that the current token matches the given category.
      */
-    void print(String message);
+    boolean currentIs(Category category);
 
     /**
-     * Prints the warning to the console.
+     * Asserts the current token matches the given category.
+     *
+     * @return the Token's value.
      */
-    void warn(String message);
+    String match(Category category);
 
     /**
-     * Aborts the build and prints the message to the console.
+     * Returns the current token.
      */
-    void error(String message);
+    Token getCurrent();
 
     /**
-     * Aborts the build and prints the exception to the console.
+     * Returns the category of the current token.
      */
-    void error(Exception exception);
+    Category getCurrentCategory();
+
+    /**
+     * Returns the value of the current token.
+     */
+    String getCurrentValue();
 }

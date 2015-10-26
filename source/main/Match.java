@@ -15,7 +15,15 @@
  */
 package main;
 
+import frontend.Category;
+import frontend.Lexem;
+import frontend.Lexer;
+import frontend.Parser;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +31,20 @@ import java.util.Map;
 
 public class Match implements IMatch {
 
-    private static final String MATCH = "match";
+    public static final String MATCH = "match";
+    public static final List<Lexem> LEXEMS = new ArrayList<Lexem>();
+    static {
+        LEXEMS.add(new Lexem(Category.NEWLINE, "\n"));
+        LEXEMS.add(new Lexem(Category.WHITESPACE, "\\s"));
+        LEXEMS.add(new Lexem(Category.ASSIGN, "="));
+        LEXEMS.add(new Lexem(Category.COMMENT, "#.*\n"));
+        LEXEMS.add(new Lexem(Category.ORB, "\\("));
+        LEXEMS.add(new Lexem(Category.CRB, "\\)"));
+        LEXEMS.add(new Lexem(Category.OSB, "\\["));
+        LEXEMS.add(new Lexem(Category.CSB, "\\]"));
+        LEXEMS.add(new Lexem(Category.STRING_LITERAL, "\".*\""));
+        LEXEMS.add(new Lexem(Category.IDENTIFIER, "[a-z][_a-zA-Z0-9]*"));
+    }
 
     private File mRoot;
 
@@ -43,13 +64,27 @@ public class Match implements IMatch {
     /**
      * {inheritDoc}
      */
+    @Override
     public String getProperty(String key) {
-        return mProperties.get(key);
+        String property = null;
+        do {
+            // Gets the property for the given key.
+            property = mProperties.get(key);
+            if (property != null) {
+                return property;
+            }
+            // If the property is null then wait.
+            try {
+                wait();
+            } catch (InterruptedException e) {}
+        } while (property == null);
+        return property;
     }
 
     /**
      * {inheritDoc}
      */
+    @Override
     public void setProperty(String key, String value) {
         mProperties.put(key, value);
         // Notify everyone who may have been waiting on this.
@@ -71,9 +106,21 @@ public class Match implements IMatch {
 
     void light() {
         loadFiles(mRoot);
-        System.out.println(mAllFiles);
-        System.out.println(mMatchFiles);
+        System.out.println("All files: " + mAllFiles);
+        System.out.println("Match files: " + mMatchFiles);
         List<ITarget> targets = new ArrayList<ITarget>();
+        for (File match : mMatchFiles) {
+            String filename = match.getName();
+            InputStream input = null;
+            try {
+                input = new FileInputStream(match);
+            } catch (FileNotFoundException e) {
+                error(e);
+            }
+            Lexer lexer = new Lexer(this, LEXEMS, filename, input);
+            Parser parser = new Parser(this, lexer);
+            targets.addAll(parser.parse());
+        }
         // Create a thread for each target, but only start a thread if the number of targets that
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
         for (ITarget target : targets) {
@@ -87,16 +134,36 @@ public class Match implements IMatch {
         // Could maybe be done by a target - it just gets built last.
     }
 
-    public static void print(String message, Object... varargs) {
-        System.out.println(String.format(message, varargs));
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void print(String message) {
+        System.out.println(message);
     }
 
-    public static void warn(String message, Object... varargs) {
-        System.err.println(String.format(message, varargs));
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void warn(String message) {
+        System.err.println(message);
     }
 
-    public static void error(String message, Object... varargs) {
-        throw new RuntimeException(String.format(message, varargs));
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void error(String message) {
+        throw new RuntimeException(message);
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void error(Exception exception) {
+        throw new RuntimeException(exception);
     }
 
     public static void main(String args[]) {

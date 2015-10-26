@@ -44,7 +44,7 @@ public class SetTest {
         parameters.put(FOO, literal);
         IFunction function = new Set(match, target, parameters);
         Assert.assertEquals("Wrong function resolution", BAR, function.resolve());
-        Mockito.verify(target, Mockito.times(1)).setProperty(FOO, BAR);
+        Mockito.verify(match, Mockito.times(1)).setProperty(FOO, BAR);
     }
 
 }

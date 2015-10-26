@@ -13,24 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package main;
+package frontend;
 
-import org.junit.runners.Suite;
-import org.junit.runner.RunWith;
+public class Lexem {
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    expression.function.FunctionTest.class,
-    expression.function.GetFilesTest.class,
-    expression.function.GetTest.class,
-    expression.function.SetTest.class,
-    expression.ExpressionListTest.class,
-    expression.LiteralTest.class,
-    frontend.LexerTest.class,
-    frontend.ParserTest.class,
-    main.MatchTest.class,
-    main.TargetTest.class
-})
-public class AllTests {
-    //nothing
+    public Category mCategory;
+    public String mRegex;
+
+    public Lexem(Category category, String regex) {
+        this.mCategory = category;
+        this.mRegex = regex;
+    }
+
+    public String toString() {
+        return mCategory + " : " + mRegex;
+    }
 }

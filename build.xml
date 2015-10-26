@@ -54,10 +54,12 @@
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
         </jar>
+        <jar destfile="${jar.directory}/${ant.project.name}Test.jar" basedir="${classes.tests.directory}"/>
     </target>
 
     <target name="run" depends="jar">
         <java fork="true" classname="${main-class}">
+            <arg line="./sample/"/>
             <classpath>
                 <path refid="classpath"/>
                 <path refid="application"/>
@@ -66,19 +68,13 @@
     </target>
 
     <target name="test" depends="jar">
-        <junit fork="yes" outputtoformatters="true" showoutput="true" >
+        <junit fork="yes" showoutput="true" >
             <classpath>
                 <path refid="classpath"/>
                 <path refid="application"/>
             </classpath>
             <test name="main.AllTests"/>
-            <!--
-            <batchtest fork="yes" filtertrace="false">
-                <fileset dir="${source.tests.directory}" includes="**/*Test.java"/>
-                <fileset dir="${classes.tests.directory}" includes="**/*Test.class"/>
-            </batchtest>
-            -->
-            <formatter type="brief" usefile="false"/>
+            <formatter type="plain" usefile="false"/>
         </junit>
     </target>
 

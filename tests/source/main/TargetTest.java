@@ -15,12 +15,23 @@
  */
 package main;
 
+import expression.function.IFunction;
+import main.IMatch;
+import main.ITarget;
+
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class TargetTest {
 
     @Test
-    public void loadFiles() {
+    public void build() {
+        IMatch match = Mockito.mock(IMatch.class);
+        IFunction function = Mockito.mock(IFunction.class);
+        ITarget target = new Target(match);
+        target.setFunction(function);
+        target.build();
+        Mockito.verify(function, Mockito.times(1)).resolve();
     }
 
 }

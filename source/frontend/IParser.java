@@ -13,37 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package main;
+package frontend;
 
+import expression.IExpression;
 import expression.function.IFunction;
+import main.ITarget;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class Target implements ITarget {
-
-    private List<String> mInputs = new ArrayList<String>();
-    private List<String> mOutputs = new ArrayList<String>();
-
-    private IMatch mMatch;
-    private IFunction mFunction;
-
-    public Target(IMatch match) {
-        mMatch = match;
-    }
+public interface IParser {
 
     /**
-     * {inheritDoc}
+     * Parses the files in the Lexer.
+     *
+     * @return the List of Targets declared in the match files.
      */
-    public void setFunction(IFunction function) {
-        mFunction = function;
-    }
+    List<ITarget> parse();
 
     /**
-     * {inheritDoc}
+     * Matches a function.
+     *
+     * &lt;identifier&gt;&lt;parameters&gt;
      */
-    public void build() {
-        mFunction.resolve();
-        // TODO put this target's input and output files in the database
-    }
+    IFunction matchFunction();
+
+    /**
+     * Matches parameters to a function.
+     *
+     * "(" &lt;expression&gt;* ")"
+     */
+    Map<String, IExpression> matchParameters();
+
+    /**
+     * Matches an expression.
+     *
+     * &lt;function&gt;
+     * "[" &lt;expression&gt;+ "]"
+     * &lt;literal&gt;
+     */
+    IExpression matchExpression();
 }
