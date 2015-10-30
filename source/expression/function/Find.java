@@ -15,7 +15,6 @@
  */
 package expression.function;
 
-import expression.ExpressionList;
 import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
@@ -28,15 +27,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class GetFiles extends Function {
-
-    static final String DIRECTORY = "directory";
-    static final String PATTERN = "pattern";
+public class Find extends Function {
 
     private IExpression mDirectory;
     private IExpression mPattern;
+    private List<String> mFiles = new ArrayList<String>();
 
-    public GetFiles(IMatch match, ITarget target, Map<String, IExpression> parameters) {
+    public Find(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
         if (hasParameter(DIRECTORY)) {
             mDirectory = getParameter(DIRECTORY);
@@ -50,25 +47,35 @@ public class GetFiles extends Function {
      * {@inheritDoc}
      */
     @Override
-    public String resolve() {
+    public void setUp() {
         File directory = new File(mDirectory.resolve());
         String pattern = mPattern == null ? ".*" : mPattern.resolve();
-        List<IExpression> list = new ArrayList<IExpression>();
-        scanFiles(directory.getAbsolutePath().length(), directory, list, Pattern.compile(pattern));
-        return new ExpressionList(mMatch, mTarget, list).resolve();
+        scanFiles(directory.getAbsolutePath().length(), directory, mFiles, Pattern.compile(pattern));
     }
 
-    private void scanFiles(int pathLength, File directory, List<IExpression> list, Pattern pattern) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> resolveList() {
+        List<String> files = new ArrayList<String>();
+        for (String file : mFiles) {
+            mMatch.awaitFile(file);
+            files.add(new Literal(mMatch, mTarget, file).resolve());
+        }
+        return files;
+    }
+
+    private static void scanFiles(int pathLength, File directory, List<String> files, Pattern pattern) {
         for (File file : directory.listFiles()) {
             if (file.isFile()) {
                 String fullname = String.format(".%s", file.getAbsolutePath().substring(pathLength));
                 if (pattern.matcher(fullname).matches()) {
-                    list.add(new Literal(mMatch, mTarget, fullname));
+                    files.add(fullname);
                 }
             } else {
-                scanFiles(pathLength, file, list, pattern);
+                scanFiles(pathLength, file, files, pattern);
             }
         }
     }
-
 }

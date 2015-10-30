@@ -25,6 +25,10 @@ public class Lexem {
         this.mRegex = regex;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
         return mCategory + " : " + mRegex;
     }

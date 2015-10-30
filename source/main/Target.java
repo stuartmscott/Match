@@ -19,6 +19,8 @@ import expression.function.IFunction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Target implements ITarget {
 
@@ -35,6 +37,7 @@ public class Target implements ITarget {
     /**
      * {inheritDoc}
      */
+    @Override
     public void setFunction(IFunction function) {
         mFunction = function;
     }
@@ -42,8 +45,26 @@ public class Target implements ITarget {
     /**
      * {inheritDoc}
      */
+    @Override
+    public void setUp() {
+        mFunction.setUp();
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
     public void build() {
         mFunction.resolve();
         // TODO put this target's input and output files in the database
     }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void tearDown() {
+        mFunction.tearDown();
+    }
+
 }

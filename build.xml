@@ -74,7 +74,7 @@
                 <path refid="application"/>
             </classpath>
             <test name="main.AllTests"/>
-            <formatter type="plain" usefile="false"/>
+            <formatter type="brief" usefile="false"/>
         </junit>
     </target>
 

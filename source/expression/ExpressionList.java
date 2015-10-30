@@ -17,12 +17,12 @@ package expression;
 
 import main.IMatch;
 import main.ITarget;
+import main.Utilities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExpressionList extends Expression {
-
-    public static final String SEPARATOR = ";";
 
     private List<IExpression> mElements;
 
@@ -31,17 +31,23 @@ public class ExpressionList extends Expression {
         mElements = elements;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String resolve() {
-        StringBuilder values = new StringBuilder();
-        boolean first = true;
+        return Utilities.join(" ", resolveList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> resolveList() {
+        List<String> values = new ArrayList<String>();
         for (IExpression element : mElements) {
-            if (first) {
-                first = false;
-            } else {
-                values.append(SEPARATOR);
-            }
-            values.append(element.resolve());
+            values.addAll(element.resolveList());
         }
-        return values.toString();
+        return values;
     }
 }

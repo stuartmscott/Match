@@ -20,11 +20,13 @@ import org.junit.runner.RunWith;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    expression.function.FindTest.class,
     expression.function.FunctionTest.class,
-    expression.function.GetFilesTest.class,
+    expression.function.GetFileTest.class,
     expression.function.GetTest.class,
+    expression.function.JavaJarTest.class,
+    expression.function.SetFileTest.class,
     expression.function.SetTest.class,
-    expression.ExpressionListTest.class,
     expression.LiteralTest.class,
     frontend.LexerTest.class,
     frontend.ParserTest.class,

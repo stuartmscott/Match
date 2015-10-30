@@ -18,10 +18,17 @@ package expression;
 import main.IMatch;
 import main.ITarget;
 
+import java.util.List;
+
 public interface IExpression {
 
     /**
      * Resolves the expression to a string.
      */
     String resolve();
+
+    /**
+     * Resolves the expression to a list of strings.
+     */
+    List<String> resolveList();
 }

@@ -20,12 +20,22 @@ import expression.IExpression;
 public interface IFunction extends IExpression {
 
     /**
-     * Returns true if a parameter of the given key was passed to this function.
+     * Sets up the environment
+     */
+    void setUp();
+
+    /**
+     * Tears down the environment
+     */
+    void tearDown();
+
+    /**
+     * Returns true iff the parameter map has the given key.
      */
     boolean hasParameter(String key);
 
     /**
-     * Gets the parameter for the given key.
+     * Returns the parameter for the given key.
      */
     IExpression getParameter(String key);
 }

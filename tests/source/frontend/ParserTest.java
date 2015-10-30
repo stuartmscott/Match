@@ -119,7 +119,7 @@ public class ParserTest {
         Assert.assertEquals("Incorrect parameter", "foobar", parameter.resolve());
         parameter = parameters.get("values");
         Assert.assertNotNull("Expected parameter", parameter);
-        Assert.assertEquals("Incorrect values", "bar;far", parameter.resolve());
+        Assert.assertEquals("Incorrect values", "bar far", parameter.resolve());
     }
 
     @Test

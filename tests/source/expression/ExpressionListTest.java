@@ -31,7 +31,7 @@ public class ExpressionListTest {
 
     private static final String FOO = "foo";
     private static final String BAR = "bar";
-    private static final String EXPECTED = "foo;bar";
+    private static final String EXPECTED = "foo bar";
 
     @Test
     public void list() {
