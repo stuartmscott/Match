@@ -23,37 +23,22 @@ import main.Match;
 
 import java.util.Map;
 
-public class Set extends Function {
+public class GetFile extends Get {
 
     static {
-        register(Set.class, "set");
+        register(GetFile.class, "get-file");
     }
-
-    private static final String VALUE = "value";
 
     private String mKey;
-    private String mValue;
 
-    public Set(IMatch match, ITarget target, Map<String, IExpression> parameters) {
-        super(match, target);
-        IExpression key = getParameter(parameters, NAME);
-        IExpression value = getParameter(parameters, VALUE);
+    public GetFile(IMatch match, ITarget target, Map<String, IExpression> parameters) {
+        super(match, target, parameters);
+        String parameterName = parameters.containsKey(NAME) ? NAME : ANONYMOUS;
+        IExpression key = getParameter(parameters, parameterName);
         if (!(key instanceof Literal)) {
-            Match.error("Set function expects a String key");
-        }
-        if (!(value instanceof Literal)) {
-            Match.error("Set function expects a String value");
+            Match.error("GetFile expects a String key");
         }
         mKey = key.resolve();
-        mValue = value.resolve();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setUp() {
-        mMatch.setProperty(mKey, mValue);
     }
 
     /**
@@ -61,6 +46,8 @@ public class Set extends Function {
      */
     @Override
     public String resolve() {
-        return mValue;
+        String file = mTarget.getProperty(mKey);
+        mMatch.awaitFile(file);
+        return file;
     }
 }

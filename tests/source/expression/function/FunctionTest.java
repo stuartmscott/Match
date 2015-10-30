@@ -42,10 +42,7 @@ public class FunctionTest {
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         Literal literal = new Literal(match, target, BAR);
         parameters.put(FOO, literal);
-        IFunction function = new FunctionImpl(match, target, parameters);
-        Assert.assertTrue("Expected foo", function.hasParameter(FOO));
-        Assert.assertFalse("Unexpected blah", function.hasParameter(BLAH));
-        Assert.assertEquals("Wrong parameter", literal, function.getParameter(FOO));
+        Assert.assertEquals("Wrong parameter", literal, Function.getParameter(parameters, FOO));
     }
 
     @Test
@@ -55,13 +52,14 @@ public class FunctionTest {
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         IFunction function = Function.getFunction(BLAH, match, target, parameters);
         Assert.assertNotNull("Expected to get function", function);
+        function.setUp();
         Assert.assertEquals("Wrong function resolution", FOO, function.resolve());
     }
 
     private static class FunctionImpl extends Function {
 
         public FunctionImpl(IMatch match, ITarget target, Map<String, IExpression> parameters) {
-            super(match, target, parameters);
+            super(match, target);
         }
 
         public String resolve() {

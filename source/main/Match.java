@@ -17,9 +17,10 @@ package main;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 public class Match implements IMatch {
 
@@ -27,12 +28,12 @@ public class Match implements IMatch {
 
     private File mRoot;
 
-    // TODO needs to be synchronized
-    private Map<String, String> mProperties = new HashMap<String, String>();
+    private Map<String, String> mProperties = new ConcurrentHashMap<String, String>();
+    private Map<String, CountDownLatch> mFiles = new ConcurrentHashMap<String, CountDownLatch>();
     private final List<File> mMatchFiles = new ArrayList<File>();
     private final List<File> mAllFiles = new ArrayList<File>();
 
-    Match(File root) {
+    public Match(File root) {
         mRoot = root;
     }
 
@@ -43,17 +44,57 @@ public class Match implements IMatch {
     /**
      * {inheritDoc}
      */
+    @Override
     public String getProperty(String key) {
-        return mProperties.get(key);
+        String value = mProperties.get(key);
+        if (value == null) {
+            error("%s was not set", key);
+        }
+        return value;
     }
 
     /**
      * {inheritDoc}
      */
+    @Override
     public void setProperty(String key, String value) {
         mProperties.put(key, value);
-        // Notify everyone who may have been waiting on this.
-        notifyAll();
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void addFile(String file) {
+        mFiles.put(file, new CountDownLatch(1));
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void provideFile(String file) {
+        CountDownLatch latch = mFiles.get(file);
+        if (latch == null) {
+            error("provideFile called before addFile for %s", file);
+        }
+        latch.countDown();
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void awaitFile(String file) {
+        CountDownLatch latch = mFiles.get(file);
+        if (latch == null) {
+            error("no targets provided %s", file);
+        }
+        try {
+            latch.await();
+        } catch(InterruptedException e) {
+            error("target interrupted");
+        }
     }
 
     private void loadFiles(File directory) {
@@ -71,14 +112,18 @@ public class Match implements IMatch {
 
     void light() {
         loadFiles(mRoot);
-        System.out.println(mAllFiles);
-        System.out.println(mMatchFiles);
         List<ITarget> targets = new ArrayList<ITarget>();
-        // Create a thread for each target, but only start a thread if the number of targets that
-        // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
+        for (ITarget target : targets) {
+            target.setUp();
+        }
         for (ITarget target : targets) {
             target.build();
         }
+        for (ITarget target : targets) {
+            target.tearDown();
+        }
+        // Create a thread for each target, but only start a thread if the number of targets that
+        // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
         // Look at the output files of a target and all the files under the output directory,
         // delete files that were created in the last build but is no longer made by any targets.
         // This means all targets have to know their output files even if they dont need to build.

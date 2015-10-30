@@ -18,13 +18,13 @@ package main;
 import expression.function.IFunction;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Target implements ITarget {
 
-    private Map<String, String> mProperties = new HashMap<String, String>();
+    private Map<String, String> mProperties = new ConcurrentHashMap<String, String>();
     private List<String> mInputs = new ArrayList<String>();
     private List<String> mOutputs = new ArrayList<String>();
 
@@ -38,6 +38,7 @@ public class Target implements ITarget {
     /**
      * {inheritDoc}
      */
+    @Override
     public void setFunction(IFunction function) {
         mFunction = function;
     }
@@ -45,41 +46,47 @@ public class Target implements ITarget {
     /**
      * {inheritDoc}
      */
+    @Override
     public String getProperty(String key) {
-        String property = null;
-        do {
-            // Gets the property for the given key from this target.
-            property = mProperties.get(key);
-            if (property != null) {
-                return property;
-            }
-            // The property is not in the Target, try looking in the match.
-            property = mMatch.getProperty(key);
-            if (property != null) {
-                return property;
-            }
-            // If the property is still null then wait.
-            try {
-                mMatch.wait();
-            } catch (InterruptedException e) {}
-        } while (property == null);
-        return property;
+        // Gets the property for the given key from this target.
+        String property = mProperties.get(key);
+        if (property != null) {
+            return property;
+        }
+        // The property is not in the Target, try looking in the match.
+        return mMatch.getProperty(key);
     }
 
     /**
      * {inheritDoc}
      */
+    @Override
     public void setProperty(String key, String value) {
         mProperties.put(key, value);
-        // Notify everyone who may have been waiting on this.
-        mMatch.notifyAll();
     }
 
     /**
      * {inheritDoc}
      */
+    @Override
+    public void setUp() {
+        mFunction.setUp();
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
     public void build() {
         mFunction.resolve();
         // TODO put this target's input and output files in the database
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void tearDown() {
+        mFunction.tearDown();
     }
 }

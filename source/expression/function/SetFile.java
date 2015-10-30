@@ -21,12 +21,13 @@ import main.IMatch;
 import main.ITarget;
 import main.Match;
 
+import java.io.File;
 import java.util.Map;
 
-public class Set extends Function {
+public class SetFile extends Set {
 
     static {
-        register(Set.class, "set");
+        register(SetFile.class, "set-file");
     }
 
     private static final String VALUE = "value";
@@ -34,18 +35,22 @@ public class Set extends Function {
     private String mKey;
     private String mValue;
 
-    public Set(IMatch match, ITarget target, Map<String, IExpression> parameters) {
-        super(match, target);
+    public SetFile(IMatch match, ITarget target, Map<String, IExpression> parameters) {
+        super(match, target, parameters);
         IExpression key = getParameter(parameters, NAME);
         IExpression value = getParameter(parameters, VALUE);
         if (!(key instanceof Literal)) {
-            Match.error("Set function expects a String key");
+            Match.error("SetFile expects a String key");
         }
         if (!(value instanceof Literal)) {
-            Match.error("Set function expects a String value");
+            Match.error("SetFile expects a String value");
         }
         mKey = key.resolve();
         mValue = value.resolve();
+        File file = new File(mValue);
+        if (!file.exists()) {
+            Match.error("File %s does not exist");
+        }
     }
 
     /**
@@ -53,7 +58,9 @@ public class Set extends Function {
      */
     @Override
     public void setUp() {
-        mMatch.setProperty(mKey, mValue);
+        mTarget.setProperty(mKey, mValue);
+        mMatch.addFile(mValue);
+        mMatch.provideFile(mValue);
     }
 
     /**

@@ -27,6 +27,4 @@ public abstract class Expression implements IExpression {
         mMatch = match;
         mTarget = target;
     }
-
-    public abstract String resolve();
 }

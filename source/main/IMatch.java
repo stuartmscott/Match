@@ -26,4 +26,21 @@ public interface IMatch {
      * Sets the property for this build.
      */
     void setProperty(String key, String value);
+
+    /**
+     * Adds the given file to the target's output file.
+     */
+    void addFile(String file);
+
+    /**
+     * Called when a file is ready to be used by other target.
+     *
+     * This will allow all targets that are awaiting this file to continue.
+     */
+    void provideFile(String file);
+
+    /**
+     * Waits until the given file has been created.
+     */
+    void awaitFile(String file);
 }

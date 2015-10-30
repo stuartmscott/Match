@@ -81,6 +81,7 @@ public class GetFilesTest {
             parameters.put(values[i], new Literal(match, target, values[++i]));
         }
         IFunction function = new GetFiles(match, target, parameters);
+        function.setUp();
         String[] actual = function.resolve().split(ExpressionList.SEPARATOR);
         Assert.assertEquals("Wrong number of files", expected.size(), actual.length);
         for (String file : actual) {

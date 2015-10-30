@@ -30,24 +30,38 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.Matchers;
 
-public class SetTest {
+public class SetFileTest {
 
-    private static final String BAR = "bar";
     private static final String FOO = "foo";
+    private static final String BAR = "bar";
     private static final String NAME = "name";
     private static final String VALUE = "value";
 
     @Test
-    public void set() {
-        IMatch match = Mockito.mock(IMatch.class);
+    public void setFile() {
+        Match match = new Match(null);
         ITarget target = Mockito.mock(ITarget.class);
+        setFile(match, target);
+        IFunction function = getFunction(match, target);
+        function.setUp();
+        Mockito.verify(target, Mockito.times(1)).setProperty(FOO, BAR);
+        Mockito.verify(match, Mockito.times(1)).addFile(BAR);
+        Mockito.verify(match, Mockito.times(1)).provideFile(BAR);
+        Assert.assertEquals("Wrong function resolution", BAR, function.resolve());
+    }
+
+    private IFunction getFunction(IMatch match, ITarget target) {
+        Map<String, IExpression> parameters = new HashMap<String, IExpression>();
+        parameters.put(NAME, new Literal(match, target, BAR));
+        return new GetFile(match, target, parameters);
+    }
+
+    static void setFile(IMatch match, ITarget target) {
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         parameters.put(NAME, new Literal(match, target, FOO));
         parameters.put(VALUE, new Literal(match, target, BAR));
-        IFunction function = new Set(match, target, parameters);
+        IFunction function = new SetFile(match, target, parameters);
         function.setUp();
-        Assert.assertEquals("Wrong function resolution", BAR, function.resolve());
-        Mockito.verify(match, Mockito.times(1)).setProperty(FOO, BAR);
+        function.resolve();
     }
-
 }

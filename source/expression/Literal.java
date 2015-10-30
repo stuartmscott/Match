@@ -27,6 +27,10 @@ public class Literal extends Expression {
         mValue = value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String resolve() {
         return mValue;
     }

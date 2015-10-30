@@ -35,7 +35,17 @@ public interface ITarget {
     void setProperty(String key, String value);
 
     /**
-     * Does the steps necessary to build this target.
+     * Set up the environment to build this target.
+     */
+    void setUp();
+
+    /**
+     * Build this target.
      */
     void build();
+
+    /**
+     * Tear down anything that was temporary.
+     */
+    void tearDown();
 }

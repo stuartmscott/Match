@@ -16,8 +16,10 @@
 package expression.function;
 
 import expression.IExpression;
+import expression.Literal;
 import main.IMatch;
 import main.ITarget;
+import main.Match;
 
 import java.util.Map;
 
@@ -27,11 +29,23 @@ public class Get extends Function {
         register(Get.class, "get");
     }
 
+    private String mKey;
+
     public Get(IMatch match, ITarget target, Map<String, IExpression> parameters) {
-        super(match, target, parameters);
+        super(match, target);
+        String parameterName = parameters.containsKey(NAME) ? NAME : ANONYMOUS;
+        IExpression key = getParameter(parameters, parameterName);
+        if (!(key instanceof Literal)) {
+            Match.error("Get function expects a String key");
+        }
+        mKey = key.resolve();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String resolve() {
-        return mTarget.getProperty(getParameter(ANONYMOUS).resolve());
+        return mTarget.getProperty(mKey);
     }
 }

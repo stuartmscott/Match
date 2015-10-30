@@ -28,33 +28,23 @@ import java.util.Map;
 public abstract class Function extends Expression implements IFunction {
 
     public static final String ANONYMOUS = "_";
+    public static final String NAME = "name";
 
     private static Map<String, Class<? extends Function>> sFunctions = new HashMap<String, Class<? extends Function>>();
 
-    private Map<String, IExpression> mParameters = new HashMap<String, IExpression>();
-
-    public Function(IMatch match, ITarget target, Map<String, IExpression> parameters) {
+    public Function(IMatch match, ITarget target) {
         super(match, target);
-        mParameters = parameters;
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
-    public boolean hasParameter(String key) {
-        return mParameters.containsKey(key);
-    }
+    public void setUp() {}
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
-    public IExpression getParameter(String key) {
-        IExpression parameter =  mParameters.get(key);
-        if (parameter == null) {
-            Match.error("missing parameter %s", key);
-        }
-        return parameter;
-    }
+    public void tearDown() {}
 
     static void register(Class<? extends Function> clazz, String name) {
         sFunctions.put(name, clazz);
@@ -65,4 +55,16 @@ public abstract class Function extends Expression implements IFunction {
         Constructor<? extends Function> constructor = clazz.getDeclaredConstructor(IMatch.class, ITarget.class, Map.class);
         return constructor.newInstance(match, target, parameters);
     }
+
+    /**
+     * Gets the parameter for the given key.
+     */
+    static IExpression getParameter(Map<String, IExpression> parameters, String key) {
+        IExpression parameter =  parameters.get(key);
+        if (parameter == null) {
+            Match.error("missing parameter %s", key);
+        }
+        return parameter;
+    }
+
 }
