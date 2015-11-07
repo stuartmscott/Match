@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -34,42 +35,35 @@ public class FunctionTest {
     private static final String FOO = "foo";
     private static final String BAR = "bar";
     private static final String BLAH = "blah";
+    private static final String FAKE = "function_fake";
+
+    private IMatch mMatch;
+    private ITarget mTarget;
+    private Map<String, IExpression> mParameters;
+
+    @Before
+    public void setUp() {
+        mMatch = Mockito.mock(IMatch.class);
+        mTarget = Mockito.mock(ITarget.class);
+        mParameters = new HashMap<String, IExpression>();
+    }
 
     @Test
     public void parameters() {
-        IMatch match = Mockito.mock(IMatch.class);
-        ITarget target = Mockito.mock(ITarget.class);
-        Map<String, IExpression> parameters = new HashMap<String, IExpression>();
-        Literal literal = new Literal(match, target, BAR);
-        parameters.put(FOO, literal);
-        IFunction function = new FunctionImpl(match, target, parameters);
+        Literal literal = new Literal(mMatch, mTarget, BAR);
+        mParameters.put(FOO, literal);
+        IFunction function = new FunctionFake(mMatch, mTarget, mParameters);
         Assert.assertTrue("Expected foo", function.hasParameter(FOO));
         Assert.assertFalse("Unexpected blah", function.hasParameter(BLAH));
         Assert.assertEquals("Wrong parameter", literal, function.getParameter(FOO));
     }
 
     @Test
-    public void getFunction() throws Exception {
-        IMatch match = Mockito.mock(IMatch.class);
-        ITarget target = Mockito.mock(ITarget.class);
-        Map<String, IExpression> parameters = new HashMap<String, IExpression>();
-        IFunction function = Function.getFunction(BLAH, match, target, parameters);
+    public void getFunction() {
+        IFunction function = Function.getFunction(FAKE, mMatch, mTarget, mParameters);
         Assert.assertNotNull("Expected to get function", function);
-        Assert.assertEquals("Wrong function resolution", FOO, function.resolve());
-    }
-
-    private static class FunctionImpl extends Function {
-
-        public FunctionImpl(IMatch match, ITarget target, Map<String, IExpression> parameters) {
-            super(match, target, parameters);
-        }
-
-        public String resolve() {
-            return FOO;
-        }
-    }
-
-    static {
-        Function.register(FunctionImpl.class, BLAH);
+        Assert.assertEquals("Wrong function resolution", FOO + BAR, function.resolve());
+        Mockito.verify(mMatch, Mockito.never()).error(Mockito.anyString());
+        Mockito.verify(mMatch, Mockito.never()).error(Mockito.<Exception>anyObject());
     }
 }

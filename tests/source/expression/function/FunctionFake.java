@@ -18,25 +18,21 @@ package expression.function;
 import expression.IExpression;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
 
 import java.util.Map;
 
-public class Set extends Function {
+public class FunctionFake extends Function {
 
-    private String mKey;
+    private String resolution = "foobar";
 
-    public Set(IMatch match, ITarget target, Map<String, IExpression> parameters) {
+    public FunctionFake(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        if (parameters.size() != 1) {
-            mMatch.error("Set needs a key and value to set\nset(foo = \"bar\")");
+        if (parameters.containsKey(ANONYMOUS)) {
+            resolution = getParameter(ANONYMOUS).resolve();
         }
-        mKey = parameters.keySet().iterator().next();
     }
 
     public String resolve() {
-        String value = getParameter(mKey).resolve();
-        mMatch.setProperty(mKey, value);
-        return value;
+        return resolution;
     }
 }

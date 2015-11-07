@@ -25,16 +25,6 @@ public interface ITarget {
     void setFunction(IFunction function);
 
     /**
-     * Gets the property for the given key from this target, or match.
-     */
-    String getProperty(String key);
-
-    /**
-     * Sets the property for this target.
-     */
-    void setProperty(String key, String value);
-
-    /**
      * Does the steps necessary to build this target.
      */
     void build();

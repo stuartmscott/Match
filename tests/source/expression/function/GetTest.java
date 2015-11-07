@@ -38,7 +38,7 @@ public class GetTest {
     public void get() {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
-        Mockito.when(target.getProperty(FOO)).thenReturn(BAR);
+        Mockito.when(match.getProperty(FOO)).thenReturn(BAR);
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         Literal literal = new Literal(match, target, FOO);
         parameters.put(Function.ANONYMOUS, literal);
