@@ -31,6 +31,10 @@ public class ExpressionList extends Expression {
         mElements = elements;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String resolve() {
         StringBuilder values = new StringBuilder();
         boolean first = true;

@@ -23,10 +23,18 @@ import main.Match;
 
 import java.util.Map;
 
-public class Get extends Function {
+public class GetFile extends Get {
 
-    public Get(IMatch match, ITarget target, Map<String, IExpression> parameters) {
+    private String mKey;
+
+    public GetFile(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
+        String parameterName = parameters.containsKey(NAME) ? NAME : ANONYMOUS;
+        IExpression key = getParameter(parameterName);
+        if (!(key instanceof Literal)) {
+            mMatch.error("GetFile expects a String key");
+        }
+        mKey = key.resolve();
     }
 
     /**
@@ -34,6 +42,8 @@ public class Get extends Function {
      */
     @Override
     public String resolve() {
-        return mMatch.getProperty(getParameter(ANONYMOUS).resolve());
+        String file = mMatch.getProperty(mKey);
+        mMatch.awaitFile(file);
+        return file;
     }
 }

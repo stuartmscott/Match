@@ -18,14 +18,59 @@ package main;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 public class MatchTest {
 
+    private static final String FOO = "foo";
+    private static final String BAR = "bar";
+
     @Test
-    public void loadFiles() throws IOException {
+    public void properties() throws Exception {
+        Match match = new Match(null);
+        try {
+            String property = match.getProperty(FOO);
+            Assert.fail("Match should fail if property is not set");
+        } catch (Exception e) {}
+        match.setProperty(FOO, BAR);
+        Assert.assertEquals("Wrong property", BAR, match.getProperty(FOO));
+    }
+
+    @Test
+    public void files() throws Exception {
+        Match match = new Match(null);
+        File file = File.createTempFile(FOO, BAR);
+        String fileName = file.getAbsolutePath();
+        match.addFile(fileName);
+        Worker worker = new Worker(match, fileName);
+        worker.start();
+        worker.await();
+        Assert.assertFalse("Worker should not have ended", worker.mEnded);
+        match.provideFile(fileName);
+        worker.join();
+        Assert.assertTrue("Worker should have ended", worker.mEnded);
+    }
+
+    @Test
+    public void files_noAdd() throws Exception {
+        Match match = new Match(null);
+        try {
+            // Provide a file that wasn't added
+            match.provideFile(FOO);
+            Assert.fail("Match should fail if file wasn't added");
+        } catch (Exception e) {}
+        try {
+            // Await on a file that wasn't added
+            match.awaitFile(FOO);
+            Assert.fail("Match should fail if file wasn't added");
+        } catch (Exception e) {}
+    }
+
+    @Test
+    public void loadFiles() throws Exception {
         File root = createFileStructure();
         Match match = new Match(root);
         match.light();
@@ -62,6 +107,28 @@ public class MatchTest {
             } else {
                 child.delete();
             }
+        }
+    }
+
+    private static class Worker extends Thread {
+        private Match mMatch;
+        private String mFileName;
+        private CountDownLatch mLatch = new CountDownLatch(1);
+        private volatile boolean mEnded = false;
+        Worker(Match match, String fileName) {
+            mMatch = match;
+            mFileName = fileName;
+        }
+        @Override
+        public void run() {
+            mLatch.countDown();
+            mMatch.awaitFile(mFileName);
+            mEnded = true;
+        }
+        void await() {
+            try {
+                mLatch.await();
+            } catch (InterruptedException e) {}
         }
     }
 }

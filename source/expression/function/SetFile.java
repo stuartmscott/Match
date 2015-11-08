@@ -21,25 +21,30 @@ import main.IMatch;
 import main.ITarget;
 import main.Match;
 
+import java.io.File;
 import java.util.Map;
 
-public class Set extends Function {
+public class SetFile extends Set {
 
     private String mKey;
     private String mValue;
 
-    public Set(IMatch match, ITarget target, Map<String, IExpression> parameters) {
+    public SetFile(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
         IExpression key = getParameter(NAME);
         IExpression value = getParameter(VALUE);
         if (!(key instanceof Literal)) {
-            mMatch.error("Set function expects a String key");
+            mMatch.error("SetFile expects a String key");
         }
         if (!(value instanceof Literal)) {
-            mMatch.error("Set function expects a String value");
+            mMatch.error("SetFile expects a String value");
         }
         mKey = key.resolve();
         mValue = value.resolve();
+        File file = new File(mValue);
+        if (!file.exists()) {
+            mMatch.error(String.format("File %s does not exist", file.getAbsolutePath()));
+        }
     }
 
     /**
@@ -48,6 +53,8 @@ public class Set extends Function {
     @Override
     public void setUp() {
         mMatch.setProperty(mKey, mValue);
+        mMatch.addFile(mValue);
+        mMatch.provideFile(mValue);
     }
 
     /**

@@ -35,10 +35,11 @@ public class GetFiles extends Function {
 
     private IExpression mDirectory;
     private IExpression mPattern;
+    private List<String> mFiles = new ArrayList<String>();
 
     public GetFiles(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        if (hasParameter(DIRECTORY)) {
+        if (parameters.containsKey(DIRECTORY)) {
             mDirectory = getParameter(DIRECTORY);
             mPattern = getParameter(PATTERN);
         } else {
@@ -50,25 +51,35 @@ public class GetFiles extends Function {
      * {@inheritDoc}
      */
     @Override
-    public String resolve() {
+    public void setUp() {
         File directory = new File(mDirectory.resolve());
         String pattern = mPattern == null ? ".*" : mPattern.resolve();
+        scanFiles(directory.getAbsolutePath().length(), directory, mFiles, Pattern.compile(pattern));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String resolve() {
         List<IExpression> list = new ArrayList<IExpression>();
-        scanFiles(directory.getAbsolutePath().length(), directory, list, Pattern.compile(pattern));
+        for (String file : mFiles) {
+            mMatch.awaitFile(file);
+            list.add(new Literal(mMatch, mTarget, file));
+        }
         return new ExpressionList(mMatch, mTarget, list).resolve();
     }
 
-    private void scanFiles(int pathLength, File directory, List<IExpression> list, Pattern pattern) {
+    private static void scanFiles(int pathLength, File directory, List<String> files, Pattern pattern) {
         for (File file : directory.listFiles()) {
             if (file.isFile()) {
                 String fullname = String.format(".%s", file.getAbsolutePath().substring(pathLength));
                 if (pattern.matcher(fullname).matches()) {
-                    list.add(new Literal(mMatch, mTarget, fullname));
+                    files.add(fullname);
                 }
             } else {
-                scanFiles(pathLength, file, list, pattern);
+                scanFiles(pathLength, file, files, pattern);
             }
         }
     }
-
 }

@@ -53,17 +53,17 @@ public class FunctionTest {
         Literal literal = new Literal(mMatch, mTarget, BAR);
         mParameters.put(FOO, literal);
         IFunction function = new FunctionFake(mMatch, mTarget, mParameters);
-        Assert.assertTrue("Expected foo", function.hasParameter(FOO));
-        Assert.assertFalse("Unexpected blah", function.hasParameter(BLAH));
-        Assert.assertEquals("Wrong parameter", literal, function.getParameter(FOO));
+        Assert.assertEquals("Wrong parameter", BAR, function.getParameter(FOO).resolve());
     }
 
     @Test
     public void getFunction() {
         IFunction function = Function.getFunction(FAKE, mMatch, mTarget, mParameters);
+        function.setUp();
         Assert.assertNotNull("Expected to get function", function);
         Assert.assertEquals("Wrong function resolution", FOO + BAR, function.resolve());
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.anyString());
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.<Exception>anyObject());
     }
+
 }

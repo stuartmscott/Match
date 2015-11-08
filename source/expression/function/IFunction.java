@@ -20,9 +20,14 @@ import expression.IExpression;
 public interface IFunction extends IExpression {
 
     /**
-     * Returns true if a parameter of the given key was passed to this function.
+     * Used by the function to set up for the build.
      */
-    boolean hasParameter(String key);
+    void setUp();
+
+    /**
+     * Used by the function to clear up after the build.
+     */
+    void tearDown();
 
     /**
      * Gets the parameter for the given key.

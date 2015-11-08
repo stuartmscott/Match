@@ -28,6 +28,8 @@ import java.util.Map;
 public abstract class Function extends Expression implements IFunction {
 
     public static final String ANONYMOUS = "_";
+    public static final String NAME = "name";
+    public static final String VALUE = "value";
 
     private Map<String, IExpression> mParameters = new HashMap<String, IExpression>();
 
@@ -37,14 +39,17 @@ public abstract class Function extends Expression implements IFunction {
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
-    public boolean hasParameter(String key) {
-        return mParameters.containsKey(key);
-    }
+    public void setUp() {}
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
+     */
+    public void tearDown() {}
+
+    /**
+     * {@inheritDoc}
      */
     public IExpression getParameter(String key) {
         IExpression parameter =  mParameters.get(key);
@@ -70,4 +75,5 @@ public abstract class Function extends Expression implements IFunction {
             return null;
         }
     }
+
 }
