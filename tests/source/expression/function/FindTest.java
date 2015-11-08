@@ -16,7 +16,6 @@
 package expression.function;
 
 import expression.Expression;
-import expression.ExpressionList;
 import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
@@ -28,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,7 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class GetFilesTest {
+public class FindTest {
 
     private static final String FOO = "foo";
     private static final String BAR = ".*/bar";
@@ -70,7 +70,7 @@ public class GetFilesTest {
 
     @Test
     public void resolveNamed() {
-        resolve(FILESB, GetFiles.DIRECTORY, mRoot.getAbsolutePath(), GetFiles.PATTERN, BAR);
+        resolve(FILESB, Find.DIRECTORY, mRoot.getAbsolutePath(), Find.PATTERN, BAR);
     }
 
     private void resolve(Set<String> expected, String... values) {
@@ -80,9 +80,10 @@ public class GetFilesTest {
         for (int i = 0; i < values.length; i++) {
             parameters.put(values[i], new Literal(match, target, values[++i]));
         }
-        IFunction function = new GetFiles(match, target, parameters);
-        String[] actual = function.resolve().split(ExpressionList.SEPARATOR);
-        Assert.assertEquals("Wrong number of files", expected.size(), actual.length);
+        IFunction function = new Find(match, target, parameters);
+        function.setUp();
+        List<String> actual = function.resolveList();
+        Assert.assertEquals("Wrong number of files", expected.size(), actual.size());
         for (String file : actual) {
             Assert.assertTrue(String.format("%s not found", file), expected.contains(file));
         }

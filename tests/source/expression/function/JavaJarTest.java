@@ -29,22 +29,23 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class GetTest {
+public class JavaJarTest {
 
-    private static final String FOO = "foo";
-    private static final String BAR = "bar";
+    private static final String COMMAND = "mkdir -p {build/java/classes/FooBar,build/java/jar} && javac  FooBar -d build/java/classes/FooBar && cd build/java/classes/FooBar && jar cfm build/java/jar/FooBar.jar build/java/classes/FooBar/MANIFEST.MF build/java/classes/FooBar";
+    private static final String FOOBAR = "FooBar";
+    private static final String JAR = "build/java/jar/FooBar.jar";
 
     @Test
-    public void get() {
+    public void javaJar() {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
-        Mockito.when(match.getProperty(FOO)).thenReturn(BAR);
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
-        Literal literal = new Literal(match, target, FOO);
-        parameters.put(Function.ANONYMOUS, literal);
-        IFunction function = new Get(match, target, parameters);
+        parameters.put(Function.NAME, new Literal(match, target, FOOBAR));
+        parameters.put(Function.SOURCE, new Literal(match, target, FOOBAR));
+        IFunction function = new JavaJar(match, target, parameters);
         function.setUp();
-        Assert.assertEquals("Wrong resolution", BAR, function.resolve());
+        Assert.assertEquals("Wrong resolution", JAR, function.resolve());
+        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(COMMAND));
     }
 
 }

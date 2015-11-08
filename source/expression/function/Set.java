@@ -16,6 +16,7 @@
 package expression.function;
 
 import expression.IExpression;
+import expression.Literal;
 import main.IMatch;
 import main.ITarget;
 import main.Match;
@@ -25,18 +26,35 @@ import java.util.Map;
 public class Set extends Function {
 
     private String mKey;
+    private String mValue;
 
     public Set(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        if (parameters.size() != 1) {
-            mMatch.error("Set needs a key and value to set\nset(foo = \"bar\")");
+        IExpression key = getParameter(NAME);
+        IExpression value = getParameter(VALUE);
+        if (!(key instanceof Literal)) {
+            mMatch.error("Set function expects a String key");
         }
-        mKey = parameters.keySet().iterator().next();
+        if (!(value instanceof Literal)) {
+            mMatch.error("Set function expects a String value");
+        }
+        mKey = key.resolve();
+        mValue = value.resolve();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setUp() {
+        mMatch.setProperty(mKey, mValue);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String resolve() {
-        String value = getParameter(mKey).resolve();
-        mMatch.setProperty(mKey, value);
-        return value;
+        return mValue;
     }
 }

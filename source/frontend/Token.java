@@ -33,6 +33,10 @@ public class Token {
         mValue = value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
         return mCategory + " : " + mValue;
     }
