@@ -22,10 +22,13 @@ import main.IMatch;
 import main.ITarget;
 import main.Match;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.Matchers;
@@ -37,23 +40,36 @@ public class GetFileTest {
     private static final String NAME = "name";
     private static final String VALUE = "value";
 
+    private File mFile = null;
+    private String mFilename;
+
+    @After
+    public void tearDown() {
+        if (mFile != null) {
+            mFile.delete();
+            mFile = null;
+        }
+    }
+
     @Test
     public void get() {
-        Match match = new Match(null);
+        IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
-        SetFileTest.setFile(match, target);
+        mFile = SetFileTest.setFile(match, target);
+        mFilename = mFile.getAbsolutePath();
+        Mockito.when(match.getProperty(FOO)).thenReturn(mFilename);
         IFunction function = getFunction(match, target);
         function.setUp();
-        Mockito.verify(match, Mockito.times(1)).setProperty(FOO, BAR);
-        Mockito.verify(match, Mockito.times(1)).addFile(BAR);
-        Mockito.verify(match, Mockito.times(1)).provideFile(BAR);
-        Assert.assertEquals("Wrong function resolution", BAR, function.resolve());
+        Assert.assertEquals("Wrong function resolution", mFilename, function.resolve());
+        Mockito.verify(match, Mockito.times(1)).setProperty(FOO, mFilename);
+        Mockito.verify(match, Mockito.times(1)).addFile(mFilename);
+        Mockito.verify(match, Mockito.times(1)).provideFile(mFilename);
     }
 
     private IFunction getFunction(IMatch match, ITarget target) {
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         parameters.put(NAME, new Literal(match, target, FOO));
-        parameters.put(VALUE, new Literal(match, target, BAR));
-        return new SetFile(match, target, parameters);
+        parameters.put(VALUE, new Literal(match, target, mFilename));
+        return new GetFile(match, target, parameters);
     }
 }

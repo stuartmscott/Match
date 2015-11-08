@@ -28,7 +28,13 @@ import java.util.Map;
 public abstract class Function extends Expression implements IFunction {
 
     public static final String ANONYMOUS = "_";
+    public static final String CLASS_OUTPUT = "build/java/classes";
+    public static final String DIRECTORY = "directory";
+    public static final String JAR_OUTPUT = "build/java/jar";
+    public static final String LIBRARY = "library";
     public static final String NAME = "name";
+    public static final String PATTERN = "pattern";
+    public static final String SOURCE = "source";
     public static final String VALUE = "value";
 
     private Map<String, IExpression> mParameters = new HashMap<String, IExpression>();
@@ -46,11 +52,30 @@ public abstract class Function extends Expression implements IFunction {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public String resolve() {
+        mMatch.error("Function does not resolve to a single String");
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void tearDown() {}
 
     /**
      * {@inheritDoc}
      */
+    @Override
+    public boolean hasParameter(String key) {
+        return mParameters.containsKey(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public IExpression getParameter(String key) {
         IExpression parameter =  mParameters.get(key);
         if (parameter == null) {

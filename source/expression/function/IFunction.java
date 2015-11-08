@@ -20,7 +20,7 @@ import expression.IExpression;
 public interface IFunction extends IExpression {
 
     /**
-     * Used by the function to set up for the build.
+     * Sets up the environment
      */
     void setUp();
 
@@ -30,7 +30,12 @@ public interface IFunction extends IExpression {
     void tearDown();
 
     /**
-     * Gets the parameter for the given key.
+     * Returns true iff the parameter map has the given key.
+     */
+    boolean hasParameter(String key);
+
+    /**
+     * Returns the parameter for the given key.
      */
     IExpression getParameter(String key);
 }

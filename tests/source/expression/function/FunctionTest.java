@@ -61,6 +61,7 @@ public class FunctionTest {
         IFunction function = Function.getFunction(FAKE, mMatch, mTarget, mParameters);
         function.setUp();
         Assert.assertNotNull("Expected to get function", function);
+        function.setUp();
         Assert.assertEquals("Wrong function resolution", FOO + BAR, function.resolve());
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.anyString());
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.<Exception>anyObject());

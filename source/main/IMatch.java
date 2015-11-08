@@ -63,4 +63,9 @@ public interface IMatch {
      * Waits until the given file has been created.
      */
     void awaitFile(String file);
+
+    /**
+     * Runs the given command.
+     */
+    void runCommand(String command);
 }

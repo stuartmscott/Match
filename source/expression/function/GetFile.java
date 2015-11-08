@@ -29,7 +29,7 @@ public class GetFile extends Get {
 
     public GetFile(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        String parameterName = parameters.containsKey(NAME) ? NAME : ANONYMOUS;
+        String parameterName = hasParameter(NAME) ? NAME : ANONYMOUS;
         IExpression key = getParameter(parameterName);
         if (!(key instanceof Literal)) {
             mMatch.error("GetFile expects a String key");

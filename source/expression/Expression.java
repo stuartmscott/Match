@@ -17,6 +17,9 @@ package expression;
 
 import main.IMatch;
 import main.ITarget;
+import main.Utilities;
+
+import java.util.List;
 
 public abstract class Expression implements IExpression {
 
@@ -27,4 +30,13 @@ public abstract class Expression implements IExpression {
         mMatch = match;
         mTarget = target;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> resolveList() {
+        return Utilities.newList(resolve());
+    }
+
 }

@@ -18,6 +18,8 @@ package expression;
 import main.IMatch;
 import main.ITarget;
 
+import java.util.List;
+
 public class Literal extends Expression {
 
     private String mValue;

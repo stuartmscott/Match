@@ -25,8 +25,16 @@ import java.util.Map;
 
 public class Get extends Function {
 
+    private String mKey;
+
     public Get(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
+        String parameterName = hasParameter(NAME) ? NAME : ANONYMOUS;
+        IExpression key = getParameter(parameterName);
+        if (!(key instanceof Literal)) {
+            mMatch.error("Get function expects a String key");
+        }
+        mKey = key.resolve();
     }
 
     /**
@@ -34,6 +42,6 @@ public class Get extends Function {
      */
     @Override
     public String resolve() {
-        return mMatch.getProperty(getParameter(ANONYMOUS).resolve());
+        return mMatch.getProperty(mKey);
     }
 }

@@ -141,8 +141,6 @@ public class Match implements IMatch {
 
     void light() {
         loadFiles(mRoot);
-        System.out.println("All files: " + mAllFiles);
-        System.out.println("Match files: " + mMatchFiles);
         List<ITarget> targets = new ArrayList<ITarget>();
         for (File match : mMatchFiles) {
             String filename = match.getName();
@@ -175,6 +173,14 @@ public class Match implements IMatch {
         // This is difficult for java compiles because you cannot know beforehand, given source
         // files, which classes will get generated because of inner/anonymous classes.
         // Could maybe be done by a target - it just gets built last.
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void runCommand(String command) {
+        System.out.println(command);
     }
 
     /**
