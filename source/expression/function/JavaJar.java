@@ -19,19 +19,17 @@ import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
 import main.Utilities;
 
 import java.util.Map;
 
 public class JavaJar extends Function {
 
-    private static final String MANIFEST_VERSION = "Manifest-Version: 1.0";
-    private static final String MANIFEST_MAIN_CLASS = "Main-Class: %s";
-    private static final String MANIFEST_CLASS_PATH = "Class-Path: %s";
-    private static final String ECHO_COMMAND = "echo %s";
+    private static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\n%s\" > %s"; 
     private static final String COMMAND = "mkdir -p %s && javac %s %s -d %s && cd %s && jar cfm %s %s %s";
 
+    private IExpression mSource;
+    private IExpression mMainClass;
     private String mName;
     private String mManifest;
     private String mIntermediate;
@@ -44,6 +42,8 @@ public class JavaJar extends Function {
             mMatch.error("JavaJar function expects a String name");
         }
         mName = name.resolve();
+        mSource = getParameter(SOURCE);
+        mMainClass = getParameter(MAIN_CLASS);
         mOutput = String.format("%s/%s.jar", JAR_OUTPUT, mName);
         mIntermediate = String.format("%s/%s", CLASS_OUTPUT, mName);
         mManifest = String.format("%s/MANIFEST.MF", mIntermediate, mName);
@@ -53,10 +53,11 @@ public class JavaJar extends Function {
      * {@inheritDoc}
      */
     @Override
-    public void setUp() {
+    public void configure() {
         mMatch.addFile(mManifest);
         mMatch.addFile(mOutput);
         mMatch.setProperty(mName, mOutput);
+        mSource.configure();
     }
 
     /**
@@ -65,12 +66,17 @@ public class JavaJar extends Function {
     @Override
     public String resolve() {
         String directories = String.format("{%s,%s}", mIntermediate, JAR_OUTPUT);
-        String classpath = "";
+        String libraries = "";
+        String javacClasspath = "";
+        String jarClasspath = "";
         if (hasParameter(LIBRARY)) {
-            classpath = String.format("-cp %s", Utilities.join(":", getParameter(LIBRARY).resolveList()));
+            libraries = Utilities.join(":", getParameter(LIBRARY).resolveList());
+            javacClasspath = String.format("-cp %s", libraries);
+            jarClasspath = String.format("Class-Path: %s\n", libraries);
         }
-        String files = Utilities.join(" ", getParameter(SOURCE).resolveList());
-        mMatch.runCommand(String.format(COMMAND, directories, classpath, files, mIntermediate, mIntermediate, mOutput, mManifest, mIntermediate));
+        String files = Utilities.join(" ", mSource.resolveList());
+        mMatch.runCommand(String.format(ECHO_COMMAND, mMainClass.resolve(), jarClasspath, mManifest));
+        mMatch.runCommand(String.format(COMMAND, directories, javacClasspath, files, mIntermediate, mIntermediate, mOutput, mManifest, mIntermediate));
         mMatch.provideFile(mOutput);
         return mOutput;
     }

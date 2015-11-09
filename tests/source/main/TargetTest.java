@@ -28,7 +28,7 @@ public class TargetTest {
     public void build() {
         IMatch match = Mockito.mock(IMatch.class);
         IFunction function = Mockito.mock(IFunction.class);
-        ITarget target = new Target(match);
+        ITarget target = new Target(match, "/tmp/match");
         target.setFunction(function);
         target.build();
         Mockito.verify(function, Mockito.times(1)).resolve();

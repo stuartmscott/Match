@@ -15,28 +15,22 @@
  */
 package expression.function;
 
-import expression.Expression;
 import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.Matchers;
 
 public class GetFileTest {
 
     private static final String FOO = "foo";
-    private static final String BAR = "bar";
     private static final String NAME = "name";
     private static final String VALUE = "value";
 
@@ -59,7 +53,7 @@ public class GetFileTest {
         mFilename = mFile.getAbsolutePath();
         Mockito.when(match.getProperty(FOO)).thenReturn(mFilename);
         IFunction function = getFunction(match, target);
-        function.setUp();
+        function.configure();
         Assert.assertEquals("Wrong function resolution", mFilename, function.resolve());
         Mockito.verify(match, Mockito.times(1)).setProperty(FOO, mFilename);
         Mockito.verify(match, Mockito.times(1)).addFile(mFilename);

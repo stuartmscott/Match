@@ -19,8 +19,6 @@ import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.util.Map;
 
 public class GetFile extends Get {

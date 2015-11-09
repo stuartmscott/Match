@@ -17,22 +17,23 @@ package main;
 
 import expression.function.IFunction;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class Target implements ITarget {
 
-    private Map<String, String> mProperties = new ConcurrentHashMap<String, String>();
-    private List<String> mInputs = new ArrayList<String>();
-    private List<String> mOutputs = new ArrayList<String>();
-
     private IMatch mMatch;
+    private String mFile;
     private IFunction mFunction;
 
-    public Target(IMatch match) {
+    public Target(IMatch match, String file) {
         mMatch = match;
+        mFile = file;
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public String getFile() {
+        return mFile;
     }
 
     /**
@@ -47,8 +48,8 @@ public class Target implements ITarget {
      * {inheritDoc}
      */
     @Override
-    public void setUp() {
-        mFunction.setUp();
+    public void configure() {
+        mFunction.configure();
     }
 
     /**
@@ -60,11 +61,4 @@ public class Target implements ITarget {
         // TODO put this target's input and output files in the database
     }
 
-    /**
-     * {inheritDoc}
-     */
-    @Override
-    public void tearDown() {
-        mFunction.tearDown();
-    }
 }

@@ -19,8 +19,6 @@ import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.io.File;
 import java.util.Map;
 
@@ -51,7 +49,7 @@ public class SetFile extends Set {
      * {@inheritDoc}
      */
     @Override
-    public void setUp() {
+    public void configure() {
         mMatch.setProperty(mKey, mValue);
         mMatch.addFile(mValue);
         mMatch.provideFile(mValue);

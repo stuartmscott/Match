@@ -17,6 +17,7 @@ package main;
 
 import main.Echo;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class EchoTest {
@@ -24,28 +25,29 @@ public class EchoTest {
     @Test
     public void testEmpty() {
         Echo e = new Echo();
-        Assert.equals("Empty Echo", "", e.in(new String[0]));
+        Assert.assertEquals("Empty Echo", "", e.in(new String[0]));
+        Assert.assertEquals("Empty Echo", "", e.in(new String[] {""}));
     }
 
     @Test
     public void testOne() {
         Echo e = new Echo();
         String[] s = new String[] {"blah"};
-        Assert.equals("One Echo", "blah", e.in(s));
+        Assert.assertEquals("One Echo", "blah", e.in(s));
     }
 
     @Test
     public void testTwo() {
         Echo e = new Echo();
         String[] s = new String[] {"foo", "bar"};
-        Assert.equals("Two Echoes", "foo bar", e.in(s));
+        Assert.assertEquals("Two Echoes", "foo bar", e.in(s));
     }
 
     @Test
     public void testMultiple() {
         Echo e = new Echo();
         String[] s = new String[] {"foo", "bar", "foobar", "blah"};
-        Assert.equals("Multiple Echoes", "foo bar foobar blah", e.in(s));
+        Assert.assertEquals("Multiple Echoes", "foo bar foobar blah", e.in(s));
     }
 
 }

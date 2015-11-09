@@ -17,12 +17,8 @@ package frontend;
 
 import expression.function.FunctionFake;
 import expression.function.IFunction;
-import expression.function.Get;
 import expression.IExpression;
 import main.IMatch;
-import main.ITarget;
-
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;

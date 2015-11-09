@@ -15,13 +15,10 @@
  */
 package expression.function;
 
-import expression.Expression;
 import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +40,7 @@ public class GetTest {
         Literal literal = new Literal(match, target, FOO);
         parameters.put(Function.ANONYMOUS, literal);
         IFunction function = new Get(match, target, parameters);
-        function.setUp();
+        function.configure();
         Assert.assertEquals("Wrong resolution", BAR, function.resolve());
     }
 

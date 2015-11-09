@@ -24,7 +24,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Find extends Function {
@@ -35,7 +34,7 @@ public class Find extends Function {
 
     public Find(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        if (parameters.containsKey(DIRECTORY)) {
+        if (hasParameter(DIRECTORY)) {
             mDirectory = getParameter(DIRECTORY);
             mPattern = getParameter(PATTERN);
         } else {
@@ -47,10 +46,13 @@ public class Find extends Function {
      * {@inheritDoc}
      */
     @Override
-    public void setUp() {
-        File directory = new File(mDirectory.resolve());
+    public void configure() {
+        String match = mTarget.getFile();
+        int index = match.lastIndexOf('/');
+        File root = new File(match.substring(0, index));
+        File directory = new File(root, mDirectory.resolve());
         String pattern = mPattern == null ? ".*" : mPattern.resolve();
-        scanFiles(directory.getAbsolutePath().length(), directory, mFiles, Pattern.compile(pattern));
+        scanFiles(directory, mFiles, Pattern.compile(pattern));
     }
 
     /**
@@ -66,15 +68,15 @@ public class Find extends Function {
         return files;
     }
 
-    private static void scanFiles(int pathLength, File directory, List<String> files, Pattern pattern) {
+    private static void scanFiles(File directory, List<String> files, Pattern pattern) {
         for (File file : directory.listFiles()) {
             if (file.isFile()) {
-                String fullname = String.format(".%s", file.getAbsolutePath().substring(pathLength));
+                String fullname = file.getAbsolutePath();
                 if (pattern.matcher(fullname).matches()) {
                     files.add(fullname);
                 }
             } else {
-                scanFiles(pathLength, file, files, pattern);
+                scanFiles(file, files, pattern);
             }
         }
     }

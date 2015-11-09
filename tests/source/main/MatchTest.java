@@ -17,7 +17,6 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Assert;
@@ -32,7 +31,7 @@ public class MatchTest {
     public void properties() throws Exception {
         Match match = new Match(null);
         try {
-            String property = match.getProperty(FOO);
+            match.getProperty(FOO);
             Assert.fail("Match should fail if property is not set");
         } catch (Exception e) {}
         match.setProperty(FOO, BAR);

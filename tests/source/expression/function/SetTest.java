@@ -15,20 +15,16 @@
  */
 package expression.function;
 
-import expression.Expression;
 import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.Matchers;
 
 public class SetTest {
 
@@ -45,7 +41,7 @@ public class SetTest {
         parameters.put(NAME, new Literal(match, target, FOO));
         parameters.put(VALUE, new Literal(match, target, BAR));
         IFunction function = new Set(match, target, parameters);
-        function.setUp();
+        function.configure();
         Assert.assertEquals("Wrong function resolution", BAR, function.resolve());
         Mockito.verify(match, Mockito.times(1)).setProperty(FOO, BAR);
     }

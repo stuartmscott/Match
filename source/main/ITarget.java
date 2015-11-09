@@ -20,6 +20,11 @@ import expression.function.IFunction;
 public interface ITarget {
 
     /**
+     * @return the match file
+     */
+    String getFile();
+
+    /**
      * Sets the function that will build this target.
      */
     void setFunction(IFunction function);
@@ -27,15 +32,11 @@ public interface ITarget {
     /**
      * Set up the environment to build this target.
      */
-    void setUp();
+    void configure();
 
     /**
      * Build this target.
      */
     void build();
 
-    /**
-     * Tear down anything that was temporary.
-     */
-    void tearDown();
 }

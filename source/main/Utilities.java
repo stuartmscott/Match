@@ -16,13 +16,14 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public final class Utilities {
 
     private Utilities() {}
 
-    public static <T> String join(String separator, List<T> values) {
+    public static <T> String join(String separator, Collection<T> values) {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (T value : values) {
