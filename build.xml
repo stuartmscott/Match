@@ -19,9 +19,9 @@
     <property name="source.tests.directory" value="tests/source"/>
     <property name="libraries.directory" value="libraries"/>
     <property name="build.directory"  value="build"/>
-    <property name="classes.directory" value="${build.directory}/classes"/>
-    <property name="classes.tests.directory"  value="${build.directory}/tests/classes"/>
-    <property name="jar.directory" value="${build.directory}/jar"/>
+    <property name="classes.directory" value="${build.directory}/java/classes/Match"/>
+    <property name="classes.tests.directory"  value="${build.directory}/java/classes/MatchTest"/>
+    <property name="jar.directory" value="${build.directory}/java/jar"/>
     <property name="main-class" value="main.Match"/>
 
     <path id="classpath">

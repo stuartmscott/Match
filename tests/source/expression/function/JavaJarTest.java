@@ -28,7 +28,10 @@ import org.mockito.Mockito;
 
 public class JavaJarTest {
 
-    private static final String COMMAND = "mkdir -p {build/java/classes/FooBar,build/java/jar} && javac  FooBar -d build/java/classes/FooBar && cd build/java/classes/FooBar && jar cfm build/java/jar/FooBar.jar build/java/classes/FooBar/MANIFEST.MF build/java/classes/FooBar";
+    private static final String MKDIR_COMMAND = "mkdir -p {build/java/classes/FooBar,build/java/jar}";
+    private static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: FooBar\n\" > build/java/classes/FooBar/MANIFEST.MF";
+    private static final String JAVAC_COMMAND = "javac  FooBar -d build/java/classes/FooBar";
+    private static final String JAR_COMMAND = "jar cfm build/java/jar/FooBar.jar build/java/classes/FooBar/MANIFEST.MF -C build/java/classes/FooBar .";
     private static final String FOOBAR = "FooBar";
     private static final String JAR = "build/java/jar/FooBar.jar";
 
@@ -43,7 +46,10 @@ public class JavaJarTest {
         IFunction function = new JavaJar(match, target, parameters);
         function.configure();
         Assert.assertEquals("Wrong resolution", JAR, function.resolve());
-        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(COMMAND));
+        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_COMMAND));
+        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(ECHO_COMMAND));
+        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(JAVAC_COMMAND));
+        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(JAR_COMMAND));
     }
 
 }

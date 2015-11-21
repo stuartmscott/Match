@@ -28,7 +28,8 @@ import expression.Literal;
 public class JavaJunit extends Function {
 
     private static final String RESULT_OUTPUT = "build/results";
-    private static final String COMMAND = "mkdir -p %s && java %s org.junit.runner.JUnitCore %s > %s";
+    private static final String MKDIR_COMMAND = "mkdir -p %s";
+    private static final String RUN_COMMAND = "java %s org.junit.runner.JUnitCore %s > %s";
 
     private String mName;
     private String mMainClass;
@@ -73,7 +74,8 @@ public class JavaJunit extends Function {
         libraries.add(mMatch.getProperty("hamcrest"));
         libraries.add(mMatch.getProperty("mockito"));
         String classpath = String.format("-cp %s", Utilities.join(":", libraries));
-        mMatch.runCommand(String.format(COMMAND, RESULT_OUTPUT, classpath, mMainClass, mOutput));
+        mMatch.runCommand(String.format(MKDIR_COMMAND, RESULT_OUTPUT));
+        mMatch.runCommand(String.format(RUN_COMMAND, classpath, mMainClass, mOutput));
         mMatch.provideFile(mOutput);
         return mOutput;
     }

@@ -15,20 +15,22 @@
  */
 package main;
 
-import frontend.Category;
-import frontend.Lexem;
-import frontend.Lexer;
-import frontend.Parser;
-
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+
+import frontend.Category;
+import frontend.Lexem;
+import frontend.Lexer;
+import frontend.Parser;
 
 public class Match implements IMatch {
 
@@ -53,6 +55,7 @@ public class Match implements IMatch {
     private Map<String, CountDownLatch> mFiles = new ConcurrentHashMap<String, CountDownLatch>();
     private final List<File> mMatchFiles = new ArrayList<File>();
     private final List<File> mAllFiles = new ArrayList<File>();
+    private boolean mVerbose = false;
 
     public Match(File root) {
         mRoot = root;
@@ -183,6 +186,31 @@ public class Match implements IMatch {
     @Override
     public void runCommand(String command) {
         System.out.println(command);
+        try {
+            Process process = Runtime.getRuntime().exec(new String[] {"/bin/bash", "-c", command});
+            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            boolean success = process.waitFor() == 0;
+            String line = "";
+            boolean loop = true;
+            while (loop) {
+                loop = false;
+                if ((line = input.readLine()) != null) {
+                    if (mVerbose) {
+                        System.out.println(line);
+                    }
+                    loop = true;
+                }
+                if ((line = error.readLine()) != null) {
+                    if (!success) {
+                        System.err.println(line);
+                    }
+                    loop = true;
+                }
+            }
+        } catch (Exception e) {
+            error(e);
+        }
     }
 
     /**

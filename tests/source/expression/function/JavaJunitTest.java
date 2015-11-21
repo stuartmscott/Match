@@ -32,7 +32,8 @@ import org.mockito.Mockito;
 
 public class JavaJunitTest {
 
-    private static final String COMMAND = "mkdir -p build/results && java -cp build/java/jar/FooBar.jar:build/java/jar/FooBarTest.jar:libraries/junit.jar:libraries/hamcrest.jar:libraries/mockito.jar org.junit.runner.JUnitCore main.AllTests > build/results/FooBarTestResult";
+    private static final String MKDIR_COMMAND = "mkdir -p build/results";
+    private static final String RUN_COMMAND = "java -cp build/java/jar/FooBar.jar:build/java/jar/FooBarTest.jar:libraries/junit.jar:libraries/hamcrest.jar:libraries/mockito.jar org.junit.runner.JUnitCore main.AllTests > build/results/FooBarTestResult";
     private static final String FOOBAR = "FooBar";
     private static final String FOOBAR_MAIN_CLASS = "main.AllTests";
     private static final String FOOBAR_RESULT = "FooBarTestResult";
@@ -58,7 +59,8 @@ public class JavaJunitTest {
         IFunction function = new JavaJunit(match, target, parameters);
         function.configure();
         Assert.assertEquals("Wrong resolution", OUTPUT, function.resolve());
-        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(COMMAND));
+        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_COMMAND));
+        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(RUN_COMMAND));
     }
 
 }
