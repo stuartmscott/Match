@@ -42,9 +42,18 @@ public class Lexer implements ILexer {
         mInput = input;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getFilename() {
+        return mFilename;
+    }
+
     private void error(String message) {
         mMatch.error(String.format("%s:%d %s", mFilename, mLineNumber, message));
     }
+
     /**
      * {@inheritDoc}
      */
@@ -101,7 +110,7 @@ public class Lexer implements ILexer {
                 return leftover;
             }
         }
-        return new Token(mFilename, mLineNumber, Category.EOF);
+        return new Token(mLineNumber, Category.EOF);
     }
 
     /**
@@ -154,7 +163,7 @@ public class Lexer implements ILexer {
     private Token getToken(String value) {
         for (Lexem lexem : mLexems) {
             if (value.matches(lexem.mRegex)) {
-                return new Token(mFilename, mLineNumber, lexem.mCategory, value);
+                return new Token(mLineNumber, lexem.mCategory, value);
             }
         }
         return null;

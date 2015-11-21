@@ -15,12 +15,14 @@
  */
 package expression;
 
-import main.IMatch;
-import main.ITarget;
-
 import java.util.List;
 
 public interface IExpression {
+
+    /**
+     * Sets up the environment.
+     */
+    void configure();
 
     /**
      * Resolves the expression to a string.

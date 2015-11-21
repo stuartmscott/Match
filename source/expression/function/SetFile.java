@@ -19,8 +19,6 @@ import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.io.File;
 import java.util.Map;
 
@@ -43,7 +41,7 @@ public class SetFile extends Set {
         mValue = value.resolve();
         File file = new File(mValue);
         if (!file.exists()) {
-            mMatch.error(String.format("File %s does not exist", file));
+            mMatch.error(String.format("File %s does not exist", file.getAbsolutePath()));
         }
     }
 
@@ -51,7 +49,7 @@ public class SetFile extends Set {
      * {@inheritDoc}
      */
     @Override
-    public void setUp() {
+    public void configure() {
         mMatch.setProperty(mKey, mValue);
         mMatch.addFile(mValue);
         mMatch.provideFile(mValue);

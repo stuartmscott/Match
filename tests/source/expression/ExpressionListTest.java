@@ -15,11 +15,8 @@
  */
 package expression;
 
-import expression.function.IFunction;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.util.ArrayList;
 import java.util.List;
 

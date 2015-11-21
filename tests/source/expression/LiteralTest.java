@@ -17,11 +17,6 @@ package expression;
 
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;

@@ -143,27 +143,29 @@ public class Match implements IMatch {
         loadFiles(mRoot);
         List<ITarget> targets = new ArrayList<ITarget>();
         for (File match : mMatchFiles) {
-            String filename = match.getName();
+            String file = match.getAbsolutePath();
             InputStream input = null;
             try {
                 input = new FileInputStream(match);
             } catch (FileNotFoundException e) {
                 error(e);
             }
-            Lexer lexer = new Lexer(this, LEXEMS, filename, input);
+            Lexer lexer = new Lexer(this, LEXEMS, file, input);
             Parser parser = new Parser(this, lexer);
             targets.addAll(parser.parse());
         }
         // Create a thread for each target, but only start a thread if the number of targets that
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
+        for (File file : mAllFiles) {
+            String full = file.getAbsolutePath();
+            addFile(full);
+            provideFile(full);
+        }
         for (ITarget target : targets) {
-            target.setUp();
+            target.configure();
         }
         for (ITarget target : targets) {
             target.build();
-        }
-        for (ITarget target : targets) {
-            target.tearDown();
         }
         // Create a thread for each target, but only start a thread if the number of targets that
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.

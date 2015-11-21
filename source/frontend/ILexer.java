@@ -18,6 +18,11 @@ package frontend;
 public interface ILexer {
 
     /**
+     * Gets the filename being parsed.
+     */
+    String getFilename();
+
+    /**
      * Moves the Lexer to the next Token.
      */
     void move();

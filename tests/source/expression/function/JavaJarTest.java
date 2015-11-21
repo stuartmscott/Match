@@ -15,13 +15,10 @@
  */
 package expression.function;
 
-import expression.Expression;
 import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,8 +39,9 @@ public class JavaJarTest {
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         parameters.put(Function.NAME, new Literal(match, target, FOOBAR));
         parameters.put(Function.SOURCE, new Literal(match, target, FOOBAR));
+        parameters.put(Function.MAIN_CLASS, new Literal(match, target, FOOBAR));
         IFunction function = new JavaJar(match, target, parameters);
-        function.setUp();
+        function.configure();
         Assert.assertEquals("Wrong resolution", JAR, function.resolve());
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(COMMAND));
     }

@@ -35,6 +35,12 @@ public abstract class Expression implements IExpression {
      * {@inheritDoc}
      */
     @Override
+    public void configure() {}
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<String> resolveList() {
         return Utilities.newList(resolve());
     }

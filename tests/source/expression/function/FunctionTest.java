@@ -15,13 +15,10 @@
  */
 package expression.function;
 
-import expression.Expression;
 import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +31,6 @@ public class FunctionTest {
 
     private static final String FOO = "foo";
     private static final String BAR = "bar";
-    private static final String BLAH = "blah";
     private static final String FAKE = "function_fake";
 
     private IMatch mMatch;
@@ -53,16 +49,15 @@ public class FunctionTest {
         Literal literal = new Literal(mMatch, mTarget, BAR);
         mParameters.put(FOO, literal);
         IFunction function = new FunctionFake(mMatch, mTarget, mParameters);
-        Assert.assertTrue("Expected foo", function.hasParameter(FOO));
-        Assert.assertFalse("Unexpected blah", function.hasParameter(BLAH));
-        Assert.assertEquals("Wrong parameter", literal, function.getParameter(FOO));
+        Assert.assertEquals("Wrong parameter", BAR, function.getParameter(FOO).resolve());
     }
 
     @Test
     public void getFunction() {
         IFunction function = Function.getFunction(FAKE, mMatch, mTarget, mParameters);
+        function.configure();
         Assert.assertNotNull("Expected to get function", function);
-        function.setUp();
+        function.configure();
         Assert.assertEquals("Wrong function resolution", FOO + BAR, function.resolve());
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.anyString());
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.<Exception>anyObject());

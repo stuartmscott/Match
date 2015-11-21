@@ -1,3 +1,5 @@
+# !/bin/bash
+#
 # Copyright 2015 Stuart Scott
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,24 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-java_jar(
-  name = "Echo"
-  source = get_files("source"))
-
-java_jar(
-  name = "EchoTest"
-  source = get_files("tests/source")
-  library = [
-    "Echo"
-    "junit"
-  ])
-
-java_junit(
-  name = "EchoTestResult"
-  test_jar = "EchoTest"
-  target_jar = "Echo"
-  main_class = "main.AllTests")
-
-java_run(
-  jar = "Echo"
-  input = "Hello, World")
+ant test && java -jar build/jar/Match.jar sample/

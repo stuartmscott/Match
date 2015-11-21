@@ -15,13 +15,10 @@
  */
 package expression.function;
 
-import expression.Expression;
 import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -31,7 +28,6 @@ import org.junit.Assert;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.Matchers;
 
 public class SetFileTest {
 
@@ -73,7 +69,7 @@ public class SetFileTest {
         parameters.put(NAME, new Literal(match, target, FOO));
         parameters.put(VALUE, new Literal(match, target, file.getAbsolutePath()));
         IFunction function = new SetFile(match, target, parameters);
-        function.setUp();
+        function.configure();
         function.resolve();
         return file;
     }

@@ -17,17 +17,15 @@ package frontend;
 
 public class Token {
 
-    public String mFile;
     public int mLine;
     public Category mCategory;
     public String mValue;
 
-    public Token(String file, int line, Category category) {
-        this(file, line, category, "");
+    public Token(int line, Category category) {
+        this(line, category, "");
     }
 
-    public Token(String file, int line, Category category, String value) {
-        mFile = file;
+    public Token(int line, Category category, String value) {
         mLine = line;
         mCategory = category;
         mValue = value;

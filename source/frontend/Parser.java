@@ -22,7 +22,6 @@ import expression.function.Function;
 import expression.function.IFunction;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
 import main.Target;
 
 import java.util.ArrayList;
@@ -34,11 +33,13 @@ public class Parser implements IParser {
 
     private ILexer mLexer;
     private IMatch mMatch;
+    private String mFile;
     private ITarget mTarget;
 
     public Parser(IMatch match, ILexer lexer) {
         mMatch = match;
         mLexer = lexer;
+        mFile = lexer.getFilename();
     }
 
     /**
@@ -49,7 +50,7 @@ public class Parser implements IParser {
         List<ITarget> targets = new ArrayList<ITarget>();
         mLexer.move();
         while (!mLexer.currentIs(Category.EOF)) {
-            mTarget = new Target(mMatch);
+            mTarget = new Target(mMatch, mFile);
             mTarget.setFunction(matchFunction());
             targets.add(mTarget);
         }

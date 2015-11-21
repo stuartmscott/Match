@@ -15,12 +15,10 @@
  */
 package expression.function;
 
-import expression.Expression;
 import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
 import main.MatchTest;
 
 import java.io.File;
@@ -39,23 +37,22 @@ import org.mockito.Mockito;
 
 public class FindTest {
 
-    private static final String FOO = "foo";
     private static final String BAR = ".*/bar";
-    private static final Set<String> FILESA = new HashSet<String>();
-    private static final Set<String> FILESB = new HashSet<String>();
-    static {
-        FILESA.add("./a/b");
-        FILESA.add("./c/d/e");
-        FILESA.add("./c/d/f");
-        FILESA.add("./bar");
-        FILESB.add("./bar");
-    }
+    private final Set<String> filesA = new HashSet<String>();
+    private final Set<String> filesB = new HashSet<String>();
 
     private File mRoot;
+    private String mRootPath;
 
     @Before
     public void setUp() throws IOException {
         mRoot = MatchTest.createFileStructure();
+        mRootPath = mRoot.getAbsolutePath();
+        filesA.add(String.format("%s/a/b", mRootPath));
+        filesA.add(String.format("%s/c/d/e", mRootPath));
+        filesA.add(String.format("%s/c/d/f", mRootPath));
+        filesA.add(String.format("%s/bar", mRootPath));
+        filesB.add(String.format("%s/bar", mRootPath));
     }
 
     @After
@@ -65,23 +62,24 @@ public class FindTest {
 
     @Test
     public void resolveAnonymous() {
-        resolve(FILESA, Function.ANONYMOUS, mRoot.getAbsolutePath());
+        resolve(filesA, Function.ANONYMOUS, "");
     }
 
     @Test
     public void resolveNamed() {
-        resolve(FILESB, Find.DIRECTORY, mRoot.getAbsolutePath(), Find.PATTERN, BAR);
+        resolve(filesB, Find.DIRECTORY, "", Find.PATTERN, BAR);
     }
 
     private void resolve(Set<String> expected, String... values) {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
+        Mockito.when(target.getFile()).thenReturn(String.format("%s/match", mRootPath));
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         for (int i = 0; i < values.length; i++) {
             parameters.put(values[i], new Literal(match, target, values[++i]));
         }
         IFunction function = new Find(match, target, parameters);
-        function.setUp();
+        function.configure();
         List<String> actual = function.resolveList();
         Assert.assertEquals("Wrong number of files", expected.size(), actual.size());
         for (String file : actual) {

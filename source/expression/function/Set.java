@@ -19,8 +19,6 @@ import expression.IExpression;
 import expression.Literal;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.util.Map;
 
 public class Set extends Function {
@@ -46,7 +44,7 @@ public class Set extends Function {
      * {@inheritDoc}
      */
     @Override
-    public void setUp() {
+    public void configure() {
         mMatch.setProperty(mKey, mValue);
     }
 

@@ -20,16 +20,6 @@ import expression.IExpression;
 public interface IFunction extends IExpression {
 
     /**
-     * Sets up the environment
-     */
-    void setUp();
-
-    /**
-     * Tears down the environment
-     */
-    void tearDown();
-
-    /**
      * Returns true iff the parameter map has the given key.
      */
     boolean hasParameter(String key);

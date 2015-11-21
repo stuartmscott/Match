@@ -19,8 +19,6 @@ import expression.Expression;
 import expression.IExpression;
 import main.IMatch;
 import main.ITarget;
-import main.Match;
-
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +30,7 @@ public abstract class Function extends Expression implements IFunction {
     public static final String DIRECTORY = "directory";
     public static final String JAR_OUTPUT = "build/java/jar";
     public static final String LIBRARY = "library";
+    public static final String MAIN_CLASS = "main_class";
     public static final String NAME = "name";
     public static final String PATTERN = "pattern";
     public static final String SOURCE = "source";
@@ -48,22 +47,10 @@ public abstract class Function extends Expression implements IFunction {
      * {@inheritDoc}
      */
     @Override
-    public void setUp() {}
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public String resolve() {
         mMatch.error("Function does not resolve to a single String");
         return null;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void tearDown() {}
 
     /**
      * {@inheritDoc}
