@@ -21,12 +21,16 @@ import main.IMatch;
 import main.ITarget;
 import main.Utilities;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class JavaJar extends Function {
 
-    private static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\n%s\" > %s"; 
-    private static final String COMMAND = "mkdir -p %s && javac %s %s -d %s && cd %s && jar cfm %s %s %s";
+    private static final String MKDIR_COMMAND = "mkdir -p %s";
+    private static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\n%s\" > %s";
+    private static final String JAVAC_COMMAND = "javac %s %s -d %s";
+    private static final String JAR_COMMAND = "jar cfm %s %s -C %s .";
 
     private IExpression mSource;
     private IExpression mMainClass;
@@ -46,7 +50,7 @@ public class JavaJar extends Function {
         mMainClass = getParameter(MAIN_CLASS);
         mOutput = String.format("%s/%s.jar", JAR_OUTPUT, mName);
         mIntermediate = String.format("%s/%s", CLASS_OUTPUT, mName);
-        mManifest = String.format("%s/MANIFEST.MF", mIntermediate, mName);
+        mManifest = String.format("%s/MANIFEST.MF", mIntermediate);
     }
 
     /**
@@ -66,17 +70,21 @@ public class JavaJar extends Function {
     @Override
     public String resolve() {
         String directories = String.format("{%s,%s}", mIntermediate, JAR_OUTPUT);
-        String libraries = "";
+        List<String> libraries = new ArrayList<>();
         String javacClasspath = "";
         String jarClasspath = "";
         if (hasParameter(LIBRARY)) {
-            libraries = Utilities.join(":", getParameter(LIBRARY).resolveList());
-            javacClasspath = String.format("-cp %s", libraries);
-            jarClasspath = String.format("Class-Path: %s\n", libraries);
+            for (String library : getParameter(LIBRARY).resolveList()) {
+                libraries.add(mMatch.getProperty(library));
+            }
+            javacClasspath = String.format("-cp %s", Utilities.join(":", libraries));
+            jarClasspath = String.format("Class-Path: %s\n", Utilities.join(":", libraries));
         }
         String files = Utilities.join(" ", mSource.resolveList());
+        mMatch.runCommand(String.format(MKDIR_COMMAND, directories));
         mMatch.runCommand(String.format(ECHO_COMMAND, mMainClass.resolve(), jarClasspath, mManifest));
-        mMatch.runCommand(String.format(COMMAND, directories, javacClasspath, files, mIntermediate, mIntermediate, mOutput, mManifest, mIntermediate));
+        mMatch.runCommand(String.format(JAVAC_COMMAND, javacClasspath, files, mIntermediate));
+        mMatch.runCommand(String.format(JAR_COMMAND, mOutput, mManifest, mIntermediate));
         mMatch.provideFile(mOutput);
         return mOutput;
     }
