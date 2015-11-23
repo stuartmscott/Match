@@ -33,7 +33,8 @@ import org.junit.runner.RunWith;
     frontend.LexerTest.class,
     frontend.ParserTest.class,
     main.MatchTest.class,
-    main.TargetTest.class
+    main.TargetTest.class,
+    main.UtilitiesTest.class
 })
 public class AllTests {
     //nothing

@@ -55,10 +55,27 @@ public class Match implements IMatch {
     private Map<String, CountDownLatch> mFiles = new ConcurrentHashMap<String, CountDownLatch>();
     private final List<File> mMatchFiles = new ArrayList<File>();
     private final List<File> mAllFiles = new ArrayList<File>();
+    private boolean mQuiet = false;
     private boolean mVerbose = false;
 
     public Match(File root) {
         mRoot = root;
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void setQuiet(boolean quiet) {
+        mQuiet = quiet;
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void setVerbose(boolean verbose) {
+        mVerbose = verbose;
     }
 
     List<File> getAllFiles() {
@@ -143,7 +160,10 @@ public class Match implements IMatch {
     }
 
     void light() {
+        long start = System.currentTimeMillis();
+        print("Scanning");
         loadFiles(mRoot);
+        print("Parsing");
         List<ITarget> targets = new ArrayList<ITarget>();
         for (File match : mMatchFiles) {
             String file = match.getAbsolutePath();
@@ -157,6 +177,7 @@ public class Match implements IMatch {
             Parser parser = new Parser(this, lexer);
             targets.addAll(parser.parse());
         }
+        print("Configuring");
         // Create a thread for each target, but only start a thread if the number of targets that
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
         for (File file : mAllFiles) {
@@ -167,9 +188,23 @@ public class Match implements IMatch {
         for (ITarget target : targets) {
             target.configure();
         }
+        print("Building");
         for (ITarget target : targets) {
             target.build();
         }
+        long delta = (System.currentTimeMillis() - start) / 1000;
+        long hours = delta / 3600;
+        long minutes = (delta % 3600) / 60;
+        long seconds = (delta % 60);
+        String message = null;
+        if (hours > 0) {
+            message = String.format("Done %dh:%02dm:%02ds", hours, minutes, seconds);
+        } else if (minutes > 0) {
+            message = String.format("Done %dm:%02ds", minutes, seconds);
+        } else {
+            message = String.format("Done %ds", seconds);
+        }
+        print(message);
         // Create a thread for each target, but only start a thread if the number of targets that
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
         // Look at the output files of a target and all the files under the output directory,
@@ -185,7 +220,6 @@ public class Match implements IMatch {
      */
     @Override
     public void runCommand(String command) {
-        System.out.println(command);
         try {
             Process process = Runtime.getRuntime().exec(new String[] {"/bin/bash", "-c", command});
             BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -197,7 +231,7 @@ public class Match implements IMatch {
                 loop = false;
                 if ((line = input.readLine()) != null) {
                     if (mVerbose) {
-                        System.out.println(line);
+                        print(line);
                     }
                     loop = true;
                 }
@@ -218,7 +252,9 @@ public class Match implements IMatch {
      */
     @Override
     public void print(String message) {
-        System.out.println(message);
+        if (!mQuiet) {
+            System.out.println(message);
+        }
     }
 
     /**
