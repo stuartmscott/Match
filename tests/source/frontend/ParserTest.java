@@ -15,83 +15,81 @@
  */
 package frontend;
 
-import expression.function.FunctionFake;
-import expression.function.IFunction;
-import expression.IExpression;
-import main.IMatch;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
+
+import main.IMatch;
+import main.ITarget;
+import main.Match;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import expression.IExpression;
+import expression.function.FunctionFake;
+import expression.function.IFunction;
+
 public class ParserTest {
 
     private IMatch mMatch;
-    private ILexer mLexer;
-    private IParser mParser;
 
     @Before
     public void setUp() {
         mMatch = Mockito.mock(IMatch.class);
-        mLexer = Mockito.mock(ILexer.class);
-        mParser = new Parser(mMatch, mLexer);
     }
 
     @Test
     public void parse() {
-        //List<ITarget> targets = mParser.parse();
-        //Assert.assertEquals("Incorrect number of targets", 2, targets.size());
+        String input = "function_fake(name = \"Target1\") function_fake(name = \"Target2\")";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        Lexer lexer = new Lexer(mMatch, Match.LEXEMS, Match.MATCH, in);
+        Parser parser = new Parser(mMatch, lexer);
+        List<ITarget> targets = parser.parse();
+        Assert.assertEquals("Incorrect number of targets", 2, targets.size());
     }
 
     @Test
     public void matchFunction() {
-        Mockito.when(mLexer.match(Category.IDENTIFIER)).thenReturn("function_fake");
-        Mockito.when(mLexer.match(Category.ORB)).thenReturn("(");
-        Mockito.when(mLexer.currentIs(Category.CRB)).thenReturn(true);
-        Mockito.when(mLexer.match(Category.CRB)).thenReturn(")");
-        IFunction function = mParser.matchFunction();
+        String input = "function_fake()";
+        Lexer lexer = LexerTest.createLexer(mMatch, input);
+        Parser parser = new Parser(mMatch, lexer);
+        IFunction function = parser.matchFunction();
         Assert.assertNotNull("Couldn't load function", function);
         Assert.assertEquals("Wrong class", FunctionFake.class, function.getClass());
-        Mockito.verify(mLexer, Mockito.times(3)).match(Mockito.<Category>anyObject());
-        Mockito.verify(mLexer, Mockito.times(1)).currentIs(Category.CRB);
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.anyString());
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.<Exception>anyObject());
     }
 
     @Test
     public void matchFunction_doesntExist() {
-        Mockito.when(mLexer.match(Category.IDENTIFIER)).thenReturn("missing_fake");
-        Mockito.when(mLexer.match(Category.ORB)).thenReturn("(");
-        Mockito.when(mLexer.currentIs(Category.CRB)).thenReturn(true);
-        Mockito.when(mLexer.match(Category.CRB)).thenReturn(")");
-        IFunction function = mParser.matchFunction();
+        String input = "missing_fake()";
+        Lexer lexer = LexerTest.createLexer(mMatch, input);
+        Parser parser = new Parser(mMatch, lexer);
+        IFunction function = parser.matchFunction();
         Assert.assertNull("Function shouldn't exist", function);
         Mockito.verify(mMatch, Mockito.times(1)).error("couldn't load function \"missing_fake\"");
     }
 
     @Test
     public void matchParameters_empty() {
-        Mockito.when(mLexer.match(Category.ORB)).thenReturn("(");
-        Mockito.when(mLexer.currentIs(Category.CRB)).thenReturn(true);
-        Mockito.when(mLexer.match(Category.CRB)).thenReturn(")");
-        Map<String, IExpression> parameters = mParser.matchParameters();
+        String input = "()";
+        Lexer lexer = LexerTest.createLexer(mMatch, input);
+        Parser parser = new Parser(mMatch, lexer);
+        Map<String, IExpression> parameters = parser.matchParameters();
         Assert.assertNotNull("Expected parameter map", parameters);
         Assert.assertEquals("Expected no parameters", 0, parameters.size());
     }
 
     @Test
     public void matchParameters_single() {
-        Mockito.when(mLexer.match(Category.ORB)).thenReturn("(");
-        Mockito.when(mLexer.currentIs(Category.CRB)).thenReturn(false).thenReturn(true).thenReturn(true);
-        Mockito.when(mLexer.currentIs(Category.IDENTIFIER)).thenReturn(true);
-        Mockito.when(mLexer.match(Category.IDENTIFIER)).thenReturn("name");
-        Mockito.when(mLexer.match(Category.ASSIGN)).thenReturn("=");
-        Mockito.when(mLexer.getCurrentCategory()).thenReturn(Category.STRING_LITERAL);
-        Mockito.when(mLexer.match(Category.STRING_LITERAL)).thenReturn("\"Blah\"");
-        Mockito.when(mLexer.match(Category.CRB)).thenReturn(")");
-        Map<String, IExpression> parameters = mParser.matchParameters();
+        String input = "(name = \"Blah\")";
+        Lexer lexer = LexerTest.createLexer(mMatch, input);
+        Parser parser = new Parser(mMatch, lexer);
+        Map<String, IExpression> parameters = parser.matchParameters();
         Assert.assertNotNull("Expected parameter map", parameters);
         Assert.assertEquals("Expected one parameters", 1, parameters.size());
         IExpression parameter = parameters.get("name");
@@ -119,15 +117,24 @@ public class ParserTest {
     }
 
     @Test
-    public void matchExpression_function() {
-    }
-
-    @Test
     public void matchExpression_list() {
+        String input = "[\"Blah\" function_fake()]"; 
+        Lexer lexer = LexerTest.createLexer(mMatch, input);
+        Parser parser = new Parser(mMatch, lexer);
+        IExpression expression = parser.matchExpression();
+        List<String> list = expression.resolveList();
+        Assert.assertEquals("Incorrect list size", 2, list.size());
+        Assert.assertEquals("Incorrect list element", "Blah", list.get(0));
+        Assert.assertEquals("Incorrect list element", "foobar", list.get(1));
     }
 
     @Test
     public void matchExpression_literal() {
+        String input = "\"Blah\""; 
+        Lexer lexer = LexerTest.createLexer(mMatch, input);
+        Parser parser = new Parser(mMatch, lexer);
+        IExpression expression = parser.matchExpression();
+        Assert.assertEquals("Incorrect list element", "Blah", expression.resolve());
     }
 
 }

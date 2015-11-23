@@ -29,7 +29,7 @@ public class MatchTest {
 
     @Test
     public void properties() throws Exception {
-        Match match = new Match(null);
+        Match match = createMatch(null);
         try {
             match.getProperty(FOO);
             Assert.fail("Match should fail if property is not set");
@@ -40,7 +40,7 @@ public class MatchTest {
 
     @Test
     public void files() throws Exception {
-        Match match = new Match(null);
+        Match match = createMatch(null);
         File file = File.createTempFile(FOO, BAR);
         String fileName = file.getAbsolutePath();
         match.addFile(fileName);
@@ -55,7 +55,7 @@ public class MatchTest {
 
     @Test
     public void files_noAdd() throws Exception {
-        Match match = new Match(null);
+        Match match = createMatch(null);
         try {
             // Provide a file that wasn't added
             match.provideFile(FOO);
@@ -71,9 +71,15 @@ public class MatchTest {
     @Test
     public void loadFiles() throws Exception {
         File root = createFileStructure();
-        Match match = new Match(root);
+        Match match = createMatch(root);
         match.light();
         Assert.assertEquals("Wrong number of files", 4, match.getAllFiles().size());
+    }
+
+    private Match createMatch(File root) {
+        Match match = new Match(root);
+        match.setQuiet(true);
+        return match;
     }
 
     public static File createFileStructure() throws IOException {

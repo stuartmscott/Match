@@ -68,4 +68,14 @@ public interface IMatch {
      * Runs the given command.
      */
     void runCommand(String command);
+
+    /**
+     * Sets whether the build runs silently.
+     */
+    void setQuiet(boolean quiet);
+
+    /**
+     * Sets whether the build prints verbosely.
+     */
+    void setVerbose(boolean verbose);
 }
