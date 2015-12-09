@@ -28,12 +28,12 @@ import org.mockito.Mockito;
 
 public class JavaJarTest {
 
-    private static final String MKDIR_COMMAND = "mkdir -p {build/java/classes/FooBar,build/java/jar}";
-    private static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: FooBar\n\" > build/java/classes/FooBar/MANIFEST.MF";
-    private static final String JAVAC_COMMAND = "javac  FooBar -d build/java/classes/FooBar";
-    private static final String JAR_COMMAND = "jar cfm build/java/jar/FooBar.jar build/java/classes/FooBar/MANIFEST.MF -C build/java/classes/FooBar .";
+    private static final String MKDIR_COMMAND = "mkdir -p {out/java/classes/FooBar,out/java/jar}";
+    private static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: FooBar\n\" > out/java/classes/FooBar/MANIFEST.MF";
+    private static final String JAVAC_COMMAND = "javac  FooBar -d out/java/classes/FooBar";
+    private static final String JAR_COMMAND = "jar cfm out/java/jar/FooBar.jar out/java/classes/FooBar/MANIFEST.MF -C out/java/classes/FooBar .";
     private static final String FOOBAR = "FooBar";
-    private static final String JAR = "build/java/jar/FooBar.jar";
+    private static final String JAR = "out/java/jar/FooBar.jar";
 
     @Test
     public void javaJar() {

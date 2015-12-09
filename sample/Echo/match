@@ -49,8 +49,3 @@ java_junit(
     ]
     main_class = "main.EchoTest"
 )
-
-# java_run(
-#     jar = "Echo"
-#     input = "Hello, World"
-# )

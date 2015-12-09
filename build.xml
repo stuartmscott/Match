@@ -18,10 +18,10 @@
     <property name="source.directory" value="source"/>
     <property name="source.tests.directory" value="tests/source"/>
     <property name="libraries.directory" value="libraries"/>
-    <property name="build.directory"  value="build"/>
-    <property name="classes.directory" value="${build.directory}/java/classes/Match"/>
-    <property name="classes.tests.directory"  value="${build.directory}/java/classes/MatchTest"/>
-    <property name="jar.directory" value="${build.directory}/java/jar"/>
+    <property name="out.directory"  value="out"/>
+    <property name="classes.directory" value="${out.directory}/java/classes/Match"/>
+    <property name="classes.tests.directory"  value="${out.directory}/java/classes/MatchTest"/>
+    <property name="jar.directory" value="${out.directory}/java/jar"/>
     <property name="main-class" value="main.Match"/>
 
     <path id="classpath">
@@ -33,7 +33,7 @@
     <path id="application" location="${jar.directory}/${ant.project.name}.jar"/>
 
     <target name="clean">
-        <delete dir="${build.directory}"/>
+        <delete dir="${out.directory}"/>
     </target>
 
     <target name="compile">

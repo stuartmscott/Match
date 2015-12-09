@@ -26,9 +26,9 @@ import java.util.Map;
 public abstract class Function extends Expression implements IFunction {
 
     public static final String ANONYMOUS = "_";
-    public static final String CLASS_OUTPUT = "build/java/classes";
+    public static final String CLASS_OUTPUT = "out/java/classes";
     public static final String DIRECTORY = "directory";
-    public static final String JAR_OUTPUT = "build/java/jar";
+    public static final String JAR_OUTPUT = "out/java/jar";
     public static final String LIBRARY = "library";
     public static final String MAIN_CLASS = "main_class";
     public static final String NAME = "name";
@@ -84,7 +84,7 @@ public abstract class Function extends Expression implements IFunction {
             Constructor<?> constructor = clazz.getDeclaredConstructor(IMatch.class, ITarget.class, Map.class);
             return (Function) constructor.newInstance(match, target, parameters);
         } catch (Exception e) {
-            match.error(String.format("couldn't load function \"%s\"", name));
+            match.error(new Exception(String.format("couldn't load function \"%s\"", name), e));
             return null;
         }
     }
