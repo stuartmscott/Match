@@ -27,7 +27,7 @@ import expression.Literal;
 
 public class JavaJunit extends Function {
 
-    private static final String RESULT_OUTPUT = "build/results";
+    private static final String RESULT_OUTPUT = "out/results";
     private static final String MKDIR_COMMAND = "mkdir -p %s";
     private static final String RUN_COMMAND = "java %s org.junit.runner.JUnitCore %s > %s";
 

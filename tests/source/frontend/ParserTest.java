@@ -71,7 +71,7 @@ public class ParserTest {
         Parser parser = new Parser(mMatch, lexer);
         IFunction function = parser.matchFunction();
         Assert.assertNull("Function shouldn't exist", function);
-        Mockito.verify(mMatch, Mockito.times(1)).error("couldn't load function \"missing_fake\"");
+        Mockito.verify(mMatch, Mockito.times(1)).error(Mockito.<Exception>anyObject());
     }
 
     @Test

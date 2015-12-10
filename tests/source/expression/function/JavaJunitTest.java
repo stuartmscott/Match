@@ -32,13 +32,13 @@ import org.mockito.Mockito;
 
 public class JavaJunitTest {
 
-    private static final String MKDIR_COMMAND = "mkdir -p build/results";
-    private static final String RUN_COMMAND = "java -cp build/java/jar/FooBar.jar:build/java/jar/FooBarTest.jar:libraries/junit.jar:libraries/hamcrest.jar:libraries/mockito.jar org.junit.runner.JUnitCore main.AllTests > build/results/FooBarTestResult";
+    private static final String MKDIR_COMMAND = "mkdir -p out/results";
+    private static final String RUN_COMMAND = "java -cp out/java/jar/FooBar.jar:out/java/jar/FooBarTest.jar:libraries/junit.jar:libraries/hamcrest.jar:libraries/mockito.jar org.junit.runner.JUnitCore main.AllTests > out/results/FooBarTestResult";
     private static final String FOOBAR = "FooBar";
     private static final String FOOBAR_MAIN_CLASS = "main.AllTests";
     private static final String FOOBAR_RESULT = "FooBarTestResult";
     private static final String FOOBAR_TEST = "FooBarTest";
-    private static final String OUTPUT = "build/results/FooBarTestResult";
+    private static final String OUTPUT = "out/results/FooBarTestResult";
 
     @Test
     public void javaJar() {
@@ -46,8 +46,8 @@ public class JavaJunitTest {
         Mockito.when(match.getProperty("junit")).thenReturn("libraries/junit.jar");
         Mockito.when(match.getProperty("hamcrest")).thenReturn("libraries/hamcrest.jar");
         Mockito.when(match.getProperty("mockito")).thenReturn("libraries/mockito.jar");
-        Mockito.when(match.getProperty("FooBar")).thenReturn("build/java/jar/FooBar.jar");
-        Mockito.when(match.getProperty("FooBarTest")).thenReturn("build/java/jar/FooBarTest.jar");
+        Mockito.when(match.getProperty("FooBar")).thenReturn("out/java/jar/FooBar.jar");
+        Mockito.when(match.getProperty("FooBarTest")).thenReturn("out/java/jar/FooBarTest.jar");
         ITarget target = Mockito.mock(ITarget.class);
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         parameters.put(Function.NAME, new Literal(match, target, FOOBAR_RESULT));
