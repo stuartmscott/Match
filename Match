@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ant test && java -jar build/java/jar/Match.jar sample/
+ant test && java -jar out/java/jar/Match.jar sample/

@@ -12,28 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(
+Set(
     name = "junit"
     value = "libraries/junit-4.12.jar"
 )
-set(
+
+Set(
     name = "hamcrest"
     value = "libraries/hamcrest-core-1.3.jar"
 )
-set(
+
+Set(
     name = "mockito"
     value = "libraries/mockito-all-1.10.19.jar"
 )
 
-java_jar(
+JavaJar(
     name = "Match"
-    source = find("source")
+    source = Find("source")
     main_class = "main.Match"
 )
 
-java_jar(
+JavaJar(
     name = "MatchTest"
-    source = find("tests/source")
+    source = Find("tests/source")
     main_class = "main.AllTests"
     library = [
         "Match"
@@ -43,7 +45,7 @@ java_jar(
     ]
 )
 
-java_junit(
+JavaJUnit(
     name = "MatchTestResult"
     library = [
         "MatchTest"

@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
     expression.function.GetFileTest.class,
     expression.function.GetTest.class,
     expression.function.JavaJarTest.class,
-    expression.function.JavaJunitTest.class,
+    expression.function.JavaJUnitTest.class,
     expression.function.SetFileTest.class,
     expression.function.SetTest.class,
     expression.ExpressionListTest.class,

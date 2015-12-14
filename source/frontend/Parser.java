@@ -62,7 +62,7 @@ public class Parser implements IParser {
      */
     @Override
     public IFunction matchFunction() {
-        String name = mLexer.match(Category.IDENTIFIER);
+        String name = mLexer.match(Category.UPPER_CASE);
         return Function.getFunction(name, mMatch, mTarget, matchParameters());
     }
 
@@ -74,8 +74,8 @@ public class Parser implements IParser {
         Map<String, IExpression> expressions = new HashMap<String, IExpression>();
         mLexer.match(Category.ORB);
         while (!mLexer.currentIs(Category.CRB)) {
-            if (mLexer.currentIs(Category.IDENTIFIER)) {
-                String name = mLexer.match(Category.IDENTIFIER);
+            if (mLexer.currentIs(Category.LOWER_CASE)) {
+                String name = mLexer.match(Category.LOWER_CASE);
                 mLexer.match(Category.ASSIGN);
                 expressions.put(name, matchExpression());
             } else {
@@ -94,7 +94,7 @@ public class Parser implements IParser {
     @Override
     public IExpression matchExpression() {
         switch (mLexer.getCurrentCategory()) {
-            case IDENTIFIER:
+            case UPPER_CASE:
                 return matchFunction();
             case OSB:
                 List<IExpression> expressions = new ArrayList<IExpression>();

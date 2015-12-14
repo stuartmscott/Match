@@ -52,7 +52,7 @@ public class LexerTest {
     public void lex_whitespace() {
         Lexer lexer = createLexer(mMatch, "          \t   myIdentifier");
         // Expect whitespace to be skipped
-        Assert.assertEquals("Expected identifier", Category.IDENTIFIER, lexer.getCurrentCategory());
+        Assert.assertEquals("Expected identifier", Category.LOWER_CASE, lexer.getCurrentCategory());
         lexer.move();
         Assert.assertEquals("Expected EOF", Category.EOF, lexer.getCurrentCategory());
     }
@@ -61,7 +61,7 @@ public class LexerTest {
     public void lex_comment() {
         Lexer lexer = createLexer(mMatch, "# Test Comment\n myIdentifier");
         // Expect comments to be skipped
-        Assert.assertEquals("Expected identifier", Category.IDENTIFIER, lexer.getCurrentCategory());
+        Assert.assertEquals("Expected identifier", Category.LOWER_CASE, lexer.getCurrentCategory());
         lexer.move();
         Assert.assertEquals("Expected EOF", Category.EOF, lexer.getCurrentCategory());
     }
@@ -91,7 +91,7 @@ public class LexerTest {
     @Test
     public void lex_identifier() {
         Lexer lexer = createLexer(mMatch, "myIdentifier");
-        Assert.assertEquals("Expected identifier", Category.IDENTIFIER, lexer.getCurrentCategory());
+        Assert.assertEquals("Expected identifier", Category.LOWER_CASE, lexer.getCurrentCategory());
         lexer.move();
         Assert.assertEquals("Expected EOF", Category.EOF, lexer.getCurrentCategory());
     }
@@ -99,7 +99,7 @@ public class LexerTest {
     @Test
     public void lex_match() {
         Lexer lexer = createLexer(mMatch, "myIdentifier");
-        Assert.assertEquals("Expected identifier", "myIdentifier", lexer.match(Category.IDENTIFIER));
+        Assert.assertEquals("Expected identifier", "myIdentifier", lexer.match(Category.LOWER_CASE));
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.anyString());
     }
 
@@ -107,28 +107,28 @@ public class LexerTest {
     public void lex_noMatch() {
         Lexer lexer = createLexer(mMatch, "myIdentifier");
         lexer.match(Category.COMMENT);
-        Mockito.verify(mMatch).error(Mockito.eq("match:1 unexpected \"COMMENT\", found \"IDENTIFIER (myIdentifier)\""));
+        Mockito.verify(mMatch).error(Mockito.eq("match:1 unexpected \"COMMENT\", found \"LOWER_CASE (myIdentifier)\""));
     }
 
     @Test
     public void lex() {
-        String input = "function_fake(name = \"Blah\" foo = function_fake() values = [ function_fake(\"bar\") \"far\"])"; 
+        String input = "FunctionFake(name = \"Blah\" foo = FunctionFake() values = [ FunctionFake(\"bar\") \"far\"])"; 
         Lexer lexer = LexerTest.createLexer(mMatch, input);
         Category[] categories = new Category[] {
-            Category.IDENTIFIER,
+            Category.UPPER_CASE,
             Category.ORB,
-            Category.IDENTIFIER,
+            Category.LOWER_CASE,
             Category.ASSIGN,
             Category.STRING_LITERAL,
-            Category.IDENTIFIER,
+            Category.LOWER_CASE,
             Category.ASSIGN,
-            Category.IDENTIFIER,
+            Category.UPPER_CASE,
             Category.ORB,
             Category.CRB,
-            Category.IDENTIFIER,
+            Category.LOWER_CASE,
             Category.ASSIGN,
             Category.OSB,
-            Category.IDENTIFIER,
+            Category.UPPER_CASE,
             Category.ORB,
             Category.STRING_LITERAL,
             Category.CRB,
@@ -137,20 +137,20 @@ public class LexerTest {
             Category.CRB
         };
         String[] values = new String[] {
-            "function_fake",
+            "FunctionFake",
             "(",
             "name",
             "=",
             "\"Blah\"",
             "foo",
             "=",
-            "function_fake",
+            "FunctionFake",
             "(",
             ")",
             "values",
             "=",
             "[",
-            "function_fake",
+            "FunctionFake",
             "(",
             "\"bar\"",
             ")",

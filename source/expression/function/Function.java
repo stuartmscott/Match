@@ -74,13 +74,7 @@ public abstract class Function extends Expression implements IFunction {
 
     public static Function getFunction(String name, IMatch match, ITarget target, Map<String, IExpression> parameters) {
         try {
-            String[] parts = name.split("_");
-            StringBuilder clazzName = new StringBuilder("expression.function.");
-            for (String part : parts) {
-                // Capitalize first character
-                clazzName.append(part.substring(0, 1).toUpperCase() + part.substring(1));
-            }
-            Class<?> clazz = Class.forName(clazzName.toString());
+            Class<?> clazz = Class.forName(String.format("expression.function.%s", name));
             Constructor<?> constructor = clazz.getDeclaredConstructor(IMatch.class, ITarget.class, Map.class);
             return (Function) constructor.newInstance(match, target, parameters);
         } catch (Exception e) {
