@@ -31,7 +31,7 @@ public class FunctionTest {
 
     private static final String FOO = "foo";
     private static final String BAR = "bar";
-    private static final String FAKE = "function_fake";
+    private static final String FAKE = "FunctionFake";
 
     private IMatch mMatch;
     private ITarget mTarget;

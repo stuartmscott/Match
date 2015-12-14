@@ -25,7 +25,7 @@ import main.Utilities;
 import expression.IExpression;
 import expression.Literal;
 
-public class JavaJunit extends Function {
+public class JavaJUnit extends Function {
 
     private static final String RESULT_OUTPUT = "out/results";
     private static final String MKDIR_COMMAND = "mkdir -p %s";
@@ -35,7 +35,7 @@ public class JavaJunit extends Function {
     private String mMainClass;
     private String mOutput;
 
-    public JavaJunit(IMatch match, ITarget target, Map<String, IExpression> parameters) {
+    public JavaJUnit(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
         IExpression name = getParameter(NAME);
         IExpression mainClass = getParameter(MAIN_CLASS);

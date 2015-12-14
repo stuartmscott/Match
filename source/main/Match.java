@@ -46,7 +46,8 @@ public class Match implements IMatch {
         LEXEMS.add(new Lexem(Category.OSB, "\\["));
         LEXEMS.add(new Lexem(Category.CSB, "\\]"));
         LEXEMS.add(new Lexem(Category.STRING_LITERAL, "\".*\""));
-        LEXEMS.add(new Lexem(Category.IDENTIFIER, "[a-z][_a-zA-Z0-9]*"));
+        LEXEMS.add(new Lexem(Category.UPPER_CASE, "[A-Z][_a-zA-Z0-9]*"));
+        LEXEMS.add(new Lexem(Category.LOWER_CASE, "[a-z][_a-zA-Z0-9]*"));
     }
 
     private File mRoot;

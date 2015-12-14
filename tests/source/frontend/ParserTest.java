@@ -44,7 +44,7 @@ public class ParserTest {
 
     @Test
     public void parse() {
-        String input = "function_fake(name = \"Target1\") function_fake(name = \"Target2\")";
+        String input = "FunctionFake(name = \"Target1\") FunctionFake(name = \"Target2\")";
         InputStream in = new ByteArrayInputStream(input.getBytes());
         Lexer lexer = new Lexer(mMatch, Match.LEXEMS, Match.MATCH, in);
         Parser parser = new Parser(mMatch, lexer);
@@ -54,7 +54,7 @@ public class ParserTest {
 
     @Test
     public void matchFunction() {
-        String input = "function_fake()";
+        String input = "FunctionFake()";
         Lexer lexer = LexerTest.createLexer(mMatch, input);
         Parser parser = new Parser(mMatch, lexer);
         IFunction function = parser.matchFunction();
@@ -66,7 +66,7 @@ public class ParserTest {
 
     @Test
     public void matchFunction_doesntExist() {
-        String input = "missing_fake()";
+        String input = "MissingFake()";
         Lexer lexer = LexerTest.createLexer(mMatch, input);
         Parser parser = new Parser(mMatch, lexer);
         IFunction function = parser.matchFunction();
@@ -99,7 +99,7 @@ public class ParserTest {
 
     @Test
     public void matchParameters_multiple() {
-        String input = "(name = \"Blah\" foo = function_fake() values = [ function_fake(\"bar\") \"far\"])"; 
+        String input = "(name = \"Blah\" foo = FunctionFake() values = [ FunctionFake(\"bar\") \"far\"])"; 
         Lexer lexer = LexerTest.createLexer(mMatch, input);
         Parser parser = new Parser(mMatch, lexer);
         Map<String, IExpression> parameters = parser.matchParameters();
@@ -118,7 +118,7 @@ public class ParserTest {
 
     @Test
     public void matchExpression_list() {
-        String input = "[\"Blah\" function_fake()]"; 
+        String input = "[\"Blah\" FunctionFake()]"; 
         Lexer lexer = LexerTest.createLexer(mMatch, input);
         Parser parser = new Parser(mMatch, lexer);
         IExpression expression = parser.matchExpression();

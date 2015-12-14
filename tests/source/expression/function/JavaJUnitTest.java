@@ -30,7 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class JavaJunitTest {
+public class JavaJUnitTest {
 
     private static final String MKDIR_COMMAND = "mkdir -p out/results";
     private static final String RUN_COMMAND = "java -cp out/java/jar/FooBar.jar:out/java/jar/FooBarTest.jar:libraries/junit.jar:libraries/hamcrest.jar:libraries/mockito.jar org.junit.runner.JUnitCore main.AllTests > out/results/FooBarTestResult";
@@ -41,7 +41,7 @@ public class JavaJunitTest {
     private static final String OUTPUT = "out/results/FooBarTestResult";
 
     @Test
-    public void javaJar() {
+    public void javaJUnit() {
         IMatch match = Mockito.mock(IMatch.class);
         Mockito.when(match.getProperty("junit")).thenReturn("libraries/junit.jar");
         Mockito.when(match.getProperty("hamcrest")).thenReturn("libraries/hamcrest.jar");
@@ -56,7 +56,7 @@ public class JavaJunitTest {
         elements.add(new Literal(match, target, FOOBAR_TEST));
 		parameters.put(Function.LIBRARY, new ExpressionList(match, target, elements));
         parameters.put(Function.MAIN_CLASS, new Literal(match, target, FOOBAR_MAIN_CLASS));
-        IFunction function = new JavaJunit(match, target, parameters);
+        IFunction function = new JavaJUnit(match, target, parameters);
         function.configure();
         Assert.assertEquals("Wrong resolution", OUTPUT, function.resolve());
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_COMMAND));
