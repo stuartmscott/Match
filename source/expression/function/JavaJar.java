@@ -21,6 +21,7 @@ import main.IMatch;
 import main.ITarget;
 import main.Utilities;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,9 @@ public class JavaJar extends Function {
         String jarClasspath = "";
         if (hasParameter(LIBRARY)) {
             for (String library : getParameter(LIBRARY).resolveList()) {
-                libraries.add(mMatch.getProperty(library));
+                String path = mMatch.getProperty(library);
+                mMatch.awaitFile(path);
+                libraries.add(path);
             }
             javacClasspath = String.format("-cp %s", Utilities.join(":", libraries));
             jarClasspath = String.format("Class-Path: %s\n", Utilities.join(":", libraries));

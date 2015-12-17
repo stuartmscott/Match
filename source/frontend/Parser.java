@@ -24,6 +24,7 @@ import main.IMatch;
 import main.ITarget;
 import main.Target;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,13 +34,13 @@ public class Parser implements IParser {
 
     private ILexer mLexer;
     private IMatch mMatch;
-    private String mFile;
+    private File mFile;
     private ITarget mTarget;
 
     public Parser(IMatch match, ILexer lexer) {
         mMatch = match;
         mLexer = lexer;
-        mFile = lexer.getFilename();
+        mFile = lexer.getFile();
     }
 
     /**

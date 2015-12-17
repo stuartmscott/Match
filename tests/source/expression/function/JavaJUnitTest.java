@@ -21,6 +21,7 @@ import expression.Literal;
 import main.IMatch;
 import main.ITarget;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,22 +33,23 @@ import org.mockito.Mockito;
 
 public class JavaJUnitTest {
 
-    private static final String MKDIR_COMMAND = "mkdir -p out/results";
-    private static final String RUN_COMMAND = "java -cp out/java/jar/FooBar.jar:out/java/jar/FooBarTest.jar:libraries/junit.jar:libraries/hamcrest.jar:libraries/mockito.jar org.junit.runner.JUnitCore main.AllTests > out/results/FooBarTestResult";
+    private static final String RESULTS_OUT = "./out/results";
+    private static final String MKDIR_COMMAND = String.format("mkdir -p %s", RESULTS_OUT);
+    private static final String RUN_COMMAND = String.format("java -cp X:X:X:X:X org.junit.runner.JUnitCore main.AllTests | tee %s/FooBarTestResult", RESULTS_OUT);
     private static final String FOOBAR = "FooBar";
     private static final String FOOBAR_MAIN_CLASS = "main.AllTests";
     private static final String FOOBAR_RESULT = "FooBarTestResult";
     private static final String FOOBAR_TEST = "FooBarTest";
-    private static final String OUTPUT = "out/results/FooBarTestResult";
+    private static final String OUTPUT = String.format("%s/FooBarTestResult", RESULTS_OUT);
 
     @Test
     public void javaJUnit() {
         IMatch match = Mockito.mock(IMatch.class);
-        Mockito.when(match.getProperty("junit")).thenReturn("libraries/junit.jar");
-        Mockito.when(match.getProperty("hamcrest")).thenReturn("libraries/hamcrest.jar");
-        Mockito.when(match.getProperty("mockito")).thenReturn("libraries/mockito.jar");
-        Mockito.when(match.getProperty("FooBar")).thenReturn("out/java/jar/FooBar.jar");
-        Mockito.when(match.getProperty("FooBarTest")).thenReturn("out/java/jar/FooBarTest.jar");
+        Mockito.when(match.getProperty("junit")).thenReturn("X");
+        Mockito.when(match.getProperty("hamcrest")).thenReturn("X");
+        Mockito.when(match.getProperty("mockito")).thenReturn("X");
+        Mockito.when(match.getProperty("FooBar")).thenReturn("X");
+        Mockito.when(match.getProperty("FooBarTest")).thenReturn("X");
         ITarget target = Mockito.mock(ITarget.class);
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         parameters.put(Function.NAME, new Literal(match, target, FOOBAR_RESULT));

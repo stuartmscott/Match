@@ -17,13 +17,15 @@ package main;
 
 import expression.function.IFunction;
 
+import java.io.File;
+
 public class Target implements ITarget {
 
     private IMatch mMatch;
-    private String mFile;
+    private File mFile;
     private IFunction mFunction;
 
-    public Target(IMatch match, String file) {
+    public Target(IMatch match, File file) {
         mMatch = match;
         mFile = file;
     }
@@ -32,7 +34,7 @@ public class Target implements ITarget {
      * {inheritDoc}
      */
     @Override
-    public String getFile() {
+    public File getFile() {
         return mFile;
     }
 
@@ -60,5 +62,4 @@ public class Target implements ITarget {
         mFunction.resolve();
         // TODO put this target's input and output files in the database
     }
-
 }

@@ -47,12 +47,12 @@ public class Find extends Function {
      */
     @Override
     public void configure() {
-        String match = mTarget.getFile();
-        int index = match.lastIndexOf('/');
-        File root = new File(match.substring(0, index));
+        int index = new File(".").getAbsolutePath().length() - 1;
+        File root = mTarget.getFile().getParentFile();
         File directory = new File(root, mDirectory.resolve());
+        String path = directory.getAbsolutePath().substring(index);
         String pattern = mPattern == null ? ".*" : mPattern.resolve();
-        scanFiles(directory, mFiles, Pattern.compile(pattern));
+        scanFiles(directory, path, mFiles, Pattern.compile(pattern));
     }
 
     /**
@@ -68,15 +68,15 @@ public class Find extends Function {
         return files;
     }
 
-    private static void scanFiles(File directory, List<String> files, Pattern pattern) {
+    private static void scanFiles(File directory, String path, List<String> files, Pattern pattern) {
         for (File file : directory.listFiles()) {
+            String fullname = String.format("%s/%s", path, file.getName());
             if (file.isFile()) {
-                String fullname = file.getAbsolutePath();
                 if (pattern.matcher(fullname).matches()) {
                     files.add(fullname);
                 }
             } else {
-                scanFiles(file, files, pattern);
+                scanFiles(file, fullname, files, pattern);
             }
         }
     }

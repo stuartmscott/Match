@@ -17,6 +17,9 @@ package frontend;
 
 import main.IMatch;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.List;
@@ -24,6 +27,7 @@ import java.util.List;
 public class Lexer implements ILexer {
 
     public IMatch mMatch;
+    public File mFile;
     public String mFilename;
     public int mLineNumber = 1;
     public List<Lexem> mLexems;
@@ -35,11 +39,24 @@ public class Lexer implements ILexer {
     public String mNextValue;
     public Token mCurrentToken;
 
-    public Lexer(IMatch match, List<Lexem> lexems, String filename, InputStream input) {
+    public Lexer(IMatch match, List<Lexem> lexems, File file) {
         mMatch = match;
         mLexems = lexems;
-        mFilename = filename;
-        mInput = input;
+        mFile = file;
+        mFilename = file.getAbsolutePath();
+        try {
+            mInput = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            mMatch.error(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public File getFile() {
+        return mFile;
     }
 
     /**

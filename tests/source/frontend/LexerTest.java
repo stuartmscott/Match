@@ -18,8 +18,10 @@ package frontend;
 import main.IMatch;
 import main.Match;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -107,7 +109,8 @@ public class LexerTest {
     public void lex_noMatch() {
         Lexer lexer = createLexer(mMatch, "myIdentifier");
         lexer.match(Category.COMMENT);
-        Mockito.verify(mMatch).error(Mockito.eq("match:1 unexpected \"COMMENT\", found \"LOWER_CASE (myIdentifier)\""));
+        String filename = lexer.getFilename();
+        Mockito.verify(mMatch).error(Mockito.eq(String.format("%s:1 unexpected \"COMMENT\", found \"LOWER_CASE (myIdentifier)\"", filename)));
     }
 
     @Test
@@ -165,8 +168,16 @@ public class LexerTest {
     }
 
     static Lexer createLexer(IMatch match, String input) {
-        InputStream in = new ByteArrayInputStream(input.getBytes());
-        Lexer lexer = new Lexer(match, Match.LEXEMS, Match.MATCH, in);
+        File file = null;
+        try {
+            file = File.createTempFile("match", ".tmp");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            writer.write(input);
+            writer.close();
+        } catch (IOException e) {
+            Assert.fail("Error while writing temp file " + e.getMessage());
+        }
+        Lexer lexer = new Lexer(match, Match.LEXEMS, file);
         lexer.move();
         return lexer;
     }

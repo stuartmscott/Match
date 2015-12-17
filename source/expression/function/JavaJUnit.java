@@ -15,9 +15,12 @@
  */
 package expression.function;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import main.IMatch;
 import main.ITarget;
@@ -27,9 +30,9 @@ import expression.Literal;
 
 public class JavaJUnit extends Function {
 
-    private static final String RESULT_OUTPUT = "out/results";
+    private static final String RESULT_OUTPUT = "./out/results";
     private static final String MKDIR_COMMAND = "mkdir -p %s";
-    private static final String RUN_COMMAND = "java %s org.junit.runner.JUnitCore %s > %s";
+    private static final String RUN_COMMAND = "java %s org.junit.runner.JUnitCore %s | tee %s";
 
     private String mName;
     private String mMainClass;
@@ -65,14 +68,18 @@ public class JavaJUnit extends Function {
     @Override
     public String resolve() {
         List<String> libraries = new ArrayList<>();
+        Set<String> libs = new HashSet<>();
+        libs.add("junit");
+        libs.add("hamcrest");
+        libs.add("mockito");
         if (hasParameter(LIBRARY)) {
             for (String library : getParameter(LIBRARY).resolveList()) {
-                libraries.add(mMatch.getProperty(library));
+                libs.add(library);
             }
         }
-        libraries.add(mMatch.getProperty("junit"));
-        libraries.add(mMatch.getProperty("hamcrest"));
-        libraries.add(mMatch.getProperty("mockito"));
+        for (String library : libs) {
+            libraries.add(mMatch.getProperty(library));
+        }
         String classpath = String.format("-cp %s", Utilities.join(":", libraries));
         mMatch.runCommand(String.format(MKDIR_COMMAND, RESULT_OUTPUT));
         mMatch.runCommand(String.format(RUN_COMMAND, classpath, mMainClass, mOutput));
