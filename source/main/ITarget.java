@@ -17,12 +17,14 @@ package main;
 
 import expression.function.IFunction;
 
+import java.io.File;
+
 public interface ITarget {
 
     /**
      * @return the match file
      */
-    String getFile();
+    File getFile();
 
     /**
      * Sets the function that will build this target.

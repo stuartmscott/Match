@@ -28,14 +28,14 @@ public interface IMatch {
     void setProperty(String key, String value);
 
     /**
-     * Prints the message to the console.
-     */
-    void print(String message);
-
-    /**
      * Prints the warning to the console.
      */
     void warn(String message);
+
+    /**
+     * Prints the message to the console.
+     */
+    void println(String message);
 
     /**
      * Aborts the build and prints the message to the console.
@@ -68,14 +68,4 @@ public interface IMatch {
      * Runs the given command.
      */
     void runCommand(String command);
-
-    /**
-     * Sets whether the build runs silently.
-     */
-    void setQuiet(boolean quiet);
-
-    /**
-     * Sets whether the build prints verbosely.
-     */
-    void setVerbose(boolean verbose);
 }

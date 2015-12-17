@@ -15,7 +15,14 @@
  */
 package frontend;
 
+import java.io.File;
+
 public interface ILexer {
+
+    /**
+     * Gets the file being parsed.
+     */
+    File getFile();
 
     /**
      * Gets the filename being parsed.

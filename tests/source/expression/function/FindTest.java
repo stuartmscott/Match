@@ -47,7 +47,7 @@ public class FindTest {
     @Before
     public void setUp() throws IOException {
         mRoot = MatchTest.createFileStructure();
-        mRootPath = mRoot.getAbsolutePath();
+        mRootPath = mRoot.toString();
         filesA.add(String.format("%s/a/b", mRootPath));
         filesA.add(String.format("%s/c/d/e", mRootPath));
         filesA.add(String.format("%s/c/d/f", mRootPath));
@@ -73,7 +73,7 @@ public class FindTest {
     private void resolve(Set<String> expected, String... values) {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
-        Mockito.when(target.getFile()).thenReturn(String.format("%s/match", mRootPath));
+        Mockito.when(target.getFile()).thenReturn(new File(mRoot, "match"));
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         for (int i = 0; i < values.length; i++) {
             parameters.put(values[i], new Literal(match, target, values[++i]));

@@ -25,7 +25,7 @@
     <property name="main-class" value="main.Match"/>
 
     <path id="classpath">
-        <fileset dir="${libraries.directory}" includes="**/*.jar"/>
+        <fileset dir="${libraries.directory}" includes="**/*.jar" excludes="**/Match*"/>
         <pathelement location="${classes.directory}" />
         <pathelement location="${classes.tests.directory}" />
     </path>

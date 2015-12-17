@@ -19,13 +19,27 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 public class MatchTest {
 
     private static final String FOO = "foo";
     private static final String BAR = "bar";
+
+    private File mRoot;
+
+    @Before
+    public void setUp() throws IOException {
+        mRoot = createFileStructure();
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        deleteFileStructure(mRoot);
+    }
 
     @Test
     public void properties() throws Exception {
@@ -70,21 +84,19 @@ public class MatchTest {
 
     @Test
     public void loadFiles() throws Exception {
-        File root = createFileStructure();
-        Match match = createMatch(root);
+        Match match = createMatch(mRoot);
         match.light();
         Assert.assertEquals("Wrong number of files", 4, match.getAllFiles().size());
     }
 
     private Match createMatch(File root) {
         Match match = new Match(root);
-        match.setQuiet(true);
+        match.mQuiet = true;
         return match;
     }
 
     public static File createFileStructure() throws IOException {
-        File root = File.createTempFile("temp", Long.toString(System.currentTimeMillis())); 
-        root.delete();
+        File root = new File("temp" + Long.toString(System.currentTimeMillis()));
         root.mkdirs();
         Assert.assertTrue("Root doesn't exist", root.exists());
         Assert.assertTrue("Root isn't a directory", root.isDirectory());
@@ -113,6 +125,7 @@ public class MatchTest {
                 child.delete();
             }
         }
+        directory.delete();
     }
 
     private static class Worker extends Thread {

@@ -19,16 +19,19 @@ import expression.Expression;
 import expression.IExpression;
 import main.IMatch;
 import main.ITarget;
+
+import java.io.File;
 import java.lang.reflect.Constructor;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Function extends Expression implements IFunction {
 
     public static final String ANONYMOUS = "_";
-    public static final String CLASS_OUTPUT = "out/java/classes";
+    public static final String CLASS_OUTPUT = "./out/java/classes";
     public static final String DIRECTORY = "directory";
-    public static final String JAR_OUTPUT = "out/java/jar";
+    public static final String JAR_OUTPUT = "./out/java/jar";
     public static final String LIBRARY = "library";
     public static final String MAIN_CLASS = "main_class";
     public static final String NAME = "name";
@@ -82,5 +85,4 @@ public abstract class Function extends Expression implements IFunction {
             return null;
         }
     }
-
 }

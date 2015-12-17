@@ -17,8 +17,6 @@ package main;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -51,32 +49,14 @@ public class Match implements IMatch {
     }
 
     private File mRoot;
-
     private Map<String, String> mProperties = new ConcurrentHashMap<String, String>();
     private Map<String, CountDownLatch> mFiles = new ConcurrentHashMap<String, CountDownLatch>();
     private final List<File> mMatchFiles = new ArrayList<File>();
     private final List<File> mAllFiles = new ArrayList<File>();
-    private boolean mQuiet = false;
-    private boolean mVerbose = false;
+    public boolean mQuiet = false;
 
     public Match(File root) {
         mRoot = root;
-    }
-
-    /**
-     * {inheritDoc}
-     */
-    @Override
-    public void setQuiet(boolean quiet) {
-        mQuiet = quiet;
-    }
-
-    /**
-     * {inheritDoc}
-     */
-    @Override
-    public void setVerbose(boolean verbose) {
-        mVerbose = verbose;
     }
 
     List<File> getAllFiles() {
@@ -88,18 +68,10 @@ public class Match implements IMatch {
      */
     @Override
     public String getProperty(String key) {
-        String property = null;
-        do {
-            // Gets the property for the given key.
-            property = mProperties.get(key);
-            if (property != null) {
-                return property;
-            }
-            // If the property is null then wait.
-            try {
-                wait();
-            } catch (InterruptedException e) {}
-        } while (property == null);
+        String property = mProperties.get(key);
+        if (property == null) {
+            error(String.format("no targets set property %s", key));
+        }
         return property;
     }
 
@@ -147,51 +119,67 @@ public class Match implements IMatch {
         }
     }
 
-    private void loadFiles(File directory) {
-        for (File child : directory.listFiles()) {
-            if (child.isDirectory()) {
-                loadFiles(child);
-            } else {
-                mAllFiles.add(child);
-                if (child.getName().equals(MATCH)) {
-                    mMatchFiles.add(child);
+    private void scanRoot(File root) {
+        for (File child : root.listFiles()) {
+            String name = child.getName();
+            if (!name.matches("\\..*") && !name.equals("out")) {
+                if (child.isDirectory()) {
+                    loadFiles(child);
+                } else {
+                    addScannedFile(child);
                 }
             }
         }
     }
 
+    private void loadFiles(File directory) {
+        for (File child : directory.listFiles()) {
+            if (child.isDirectory()) {
+                loadFiles(child);
+            } else {
+                addScannedFile(child);
+            }
+        }
+    }
+
+    private void addScannedFile(File file) {
+        mAllFiles.add(file);
+        if (file.getName().equals(MATCH)) {
+            mMatchFiles.add(file);
+        }
+    }
+
     void light() {
         long start = System.currentTimeMillis();
-        print("Scanning");
-        loadFiles(mRoot);
-        print("Parsing");
+        println("Scanning");
+        scanRoot(mRoot);
+        println("Parsing");
         List<ITarget> targets = new ArrayList<ITarget>();
         for (File match : mMatchFiles) {
-            String file = match.getAbsolutePath();
-            InputStream input = null;
-            try {
-                input = new FileInputStream(match);
-            } catch (FileNotFoundException e) {
-                error(e);
-            }
-            Lexer lexer = new Lexer(this, LEXEMS, file, input);
+            Lexer lexer = new Lexer(this, LEXEMS, match);
             Parser parser = new Parser(this, lexer);
             targets.addAll(parser.parse());
         }
-        print("Configuring");
+        println("Configuring");
         // Create a thread for each target, but only start a thread if the number of targets that
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
         for (File file : mAllFiles) {
-            String full = file.getAbsolutePath();
+            String full = file.toString();
             addFile(full);
             provideFile(full);
         }
         for (ITarget target : targets) {
             target.configure();
         }
-        print("Building");
+        println("Building");
+        CountDownLatch latch = new CountDownLatch(targets.size());
         for (ITarget target : targets) {
-            target.build();
+            new BuildThread(target, latch).start();
+        }
+        try {
+            latch.await();
+        } catch(InterruptedException e) {
+            error("build interrupted");
         }
         long delta = (System.currentTimeMillis() - start) / 1000;
         long hours = delta / 3600;
@@ -205,7 +193,7 @@ public class Match implements IMatch {
         } else {
             message = String.format("Done %ds", seconds);
         }
-        print(message);
+        println(message);
         // Create a thread for each target, but only start a thread if the number of targets that
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
         // Look at the output files of a target and all the files under the output directory,
@@ -225,23 +213,24 @@ public class Match implements IMatch {
             Process process = Runtime.getRuntime().exec(new String[] {"/bin/bash", "-c", command});
             BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            boolean success = process.waitFor() == 0;
+            int result = process.waitFor();
             String line = "";
             boolean loop = true;
             while (loop) {
                 loop = false;
                 if ((line = input.readLine()) != null) {
-                    if (mVerbose) {
-                        print(line);
-                    }
+                    println(line);
                     loop = true;
                 }
                 if ((line = error.readLine()) != null) {
-                    if (!success) {
-                        System.err.println(line);
+                    if (result != 0) {
+                        println(String.format("error: %s", line));
                     }
                     loop = true;
                 }
+            }
+            if (result != 0) {
+                error("error: " + command);
             }
         } catch (Exception e) {
             error(e);
@@ -252,18 +241,18 @@ public class Match implements IMatch {
      * {inheritDoc}
      */
     @Override
-    public void print(String message) {
-        if (!mQuiet) {
-            System.out.println(message);
-        }
+    public void warn(String message) {
+        println(String.format("warning: %s", message));
     }
 
     /**
      * {inheritDoc}
      */
     @Override
-    public void warn(String message) {
-        System.err.println(message);
+    public synchronized void println(String message) {
+        if (!mQuiet) {
+            System.out.println(message);
+        }
     }
 
     /**
@@ -288,4 +277,23 @@ public class Match implements IMatch {
         match.light();
     }
 
+    public static class BuildThread extends Thread {
+
+        private final ITarget mTarget;
+        private final CountDownLatch mLatch;
+
+        private BuildThread(ITarget target, CountDownLatch latch) {
+            mTarget = target;
+            mLatch = latch;
+        }
+
+        @Override
+        public void run() {
+            try {
+                mTarget.build();
+            } finally {
+                mLatch.countDown();
+            }
+        }
+    }
 }

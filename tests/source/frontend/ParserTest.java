@@ -15,8 +15,10 @@
  */
 package frontend;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -44,9 +46,16 @@ public class ParserTest {
 
     @Test
     public void parse() {
-        String input = "FunctionFake(name = \"Target1\") FunctionFake(name = \"Target2\")";
-        InputStream in = new ByteArrayInputStream(input.getBytes());
-        Lexer lexer = new Lexer(mMatch, Match.LEXEMS, Match.MATCH, in);
+        File file = null;
+        try {
+            file = File.createTempFile("match", ".tmp");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            writer.write("FunctionFake(name = \"Target1\") FunctionFake(name = \"Target2\")");
+            writer.close();
+        } catch (IOException e) {
+            Assert.fail("Error while writing temp file " + e.getMessage());
+        }
+        Lexer lexer = new Lexer(mMatch, Match.LEXEMS, file);
         Parser parser = new Parser(mMatch, lexer);
         List<ITarget> targets = parser.parse();
         Assert.assertEquals("Incorrect number of targets", 2, targets.size());

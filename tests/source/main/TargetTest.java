@@ -19,6 +19,8 @@ import expression.function.IFunction;
 import main.IMatch;
 import main.ITarget;
 
+import java.io.File;
+
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -28,7 +30,7 @@ public class TargetTest {
     public void build() {
         IMatch match = Mockito.mock(IMatch.class);
         IFunction function = Mockito.mock(IFunction.class);
-        ITarget target = new Target(match, "/tmp/match");
+        ITarget target = new Target(match, new File("/tmp/match"));
         target.setFunction(function);
         target.build();
         Mockito.verify(function, Mockito.times(1)).resolve();
