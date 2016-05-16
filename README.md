@@ -1,4 +1,6 @@
-# Match
+
+![Match](./docs/header/Match.png)
+
 A lightweight, fast and extensible build system.
 
 Match hides away the heavy lifting in Java, leaving the build files simple, intuitive, and easy to maintain.
