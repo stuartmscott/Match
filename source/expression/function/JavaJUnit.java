@@ -78,7 +78,9 @@ public class JavaJUnit extends Function {
             }
         }
         for (String library : libs) {
-            libraries.add(mMatch.getProperty(library));
+            String path = mMatch.getProperty(library);
+            mMatch.awaitFile(path);
+            libraries.add(path);
         }
         String classpath = String.format("-cp %s", Utilities.join(":", libraries));
         mMatch.runCommand(String.format(MKDIR_COMMAND, RESULT_OUTPUT));
