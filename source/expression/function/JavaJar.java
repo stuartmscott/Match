@@ -23,21 +23,29 @@ import main.Utilities;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 public class JavaJar extends Function {
 
     private static final String MKDIR_COMMAND = "mkdir -p %s";
+    private static final String PROTO = "proto";
+    private static final String PROTOC_COMMAND = "protoc --java_out=%s %s";
     private static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\n%s\" > %s";
     private static final String JAVAC_COMMAND = "javac %s %s -d %s";
     private static final String JAR_COMMAND = "jar cfm %s %s -C %s .";
 
     private IExpression mSource;
+    private IExpression mProtoSource;
     private IExpression mMainClass;
     private String mName;
     private String mManifest;
-    private String mIntermediate;
+    private String mIntermediateClasses;
+    private String mIntermediateProtos;
     private String mOutput;
 
     public JavaJar(IMatch match, ITarget target, Map<String, IExpression> parameters) {
@@ -48,10 +56,14 @@ public class JavaJar extends Function {
         }
         mName = name.resolve();
         mSource = getParameter(SOURCE);
-        mMainClass = getParameter(MAIN_CLASS);
         mOutput = String.format("%s/%s.jar", JAR_OUTPUT, mName);
-        mIntermediate = String.format("%s/%s", CLASS_OUTPUT, mName);
-        mManifest = String.format("%s/MANIFEST.MF", mIntermediate);
+        mIntermediateClasses = String.format("%s/%s", CLASS_OUTPUT, mName);
+        if (hasParameter(PROTO)) {
+            mProtoSource = getParameter(PROTO);
+            mIntermediateProtos = String.format("%s/%s", PROTO_OUTPUT, mName);
+        }
+        mManifest = String.format("%s/MANIFEST.MF", mIntermediateClasses);
+        mMainClass = getParameter(MAIN_CLASS);
     }
 
     /**
@@ -63,6 +75,9 @@ public class JavaJar extends Function {
         mMatch.addFile(mOutput);
         mMatch.setProperty(mName, mOutput);
         mSource.configure();
+        if (mProtoSource != null) {
+            mProtoSource.configure();
+        }
     }
 
     /**
@@ -70,7 +85,6 @@ public class JavaJar extends Function {
      */
     @Override
     public String resolve() {
-        String directories = String.format("{%s,%s}", mIntermediate, JAR_OUTPUT);
         List<String> libraries = new ArrayList<>();
         String javacClasspath = "";
         String jarClasspath = "";
@@ -83,11 +97,27 @@ public class JavaJar extends Function {
             javacClasspath = String.format("-cp %s", Utilities.join(":", libraries));
             jarClasspath = String.format("Class-Path: %s\n", Utilities.join(":", libraries));
         }
-        String files = Utilities.join(" ", mSource.resolveList());
-        mMatch.runCommand(String.format(MKDIR_COMMAND, directories));
+        mMatch.runCommand(String.format(MKDIR_COMMAND, mIntermediateClasses));
+        mMatch.runCommand(String.format(MKDIR_COMMAND, JAR_OUTPUT));
         mMatch.runCommand(String.format(ECHO_COMMAND, mMainClass.resolve(), jarClasspath, mManifest));
-        mMatch.runCommand(String.format(JAVAC_COMMAND, javacClasspath, files, mIntermediate));
-        mMatch.runCommand(String.format(JAR_COMMAND, mOutput, mManifest, mIntermediate));
+        Set<String> sources = new HashSet<>();
+        sources.addAll(mSource.resolveList());
+        // Compile protos
+        if (mProtoSource != null) {
+            mMatch.runCommand(String.format(MKDIR_COMMAND, mIntermediateProtos));
+            mMatch.runCommand(String.format(PROTOC_COMMAND, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+            // Find all java files generated
+            int index = new File(".").getAbsolutePath().length() - 1;// Top of Tree (ToT)
+            File directory = new File(mIntermediateProtos);
+            String path = directory.getAbsolutePath().substring(index);// Path relative to ToT
+            List<String> generated = new ArrayList<>();
+            Find.scanFiles(directory, path, generated, Pattern.compile(".*.java"));
+            sources.addAll(generated);
+        }
+        // Compile java
+        mMatch.runCommand(String.format(JAVAC_COMMAND, javacClasspath, Utilities.join(" ", sources), mIntermediateClasses));
+        // Package jar
+        mMatch.runCommand(String.format(JAR_COMMAND, mOutput, mManifest, mIntermediateClasses));
         mMatch.provideFile(mOutput);
         return mOutput;
     }

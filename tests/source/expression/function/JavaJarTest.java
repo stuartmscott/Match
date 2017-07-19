@@ -34,7 +34,8 @@ public class JavaJarTest {
     private static final String JARS_OUT = "./out/java/jar";
     private static final String JAR_OUT = "./out/java/jar/FooBar.jar";
     private static final String MANIFEST_OUT = "./out/java/classes/FooBar/MANIFEST.MF";
-    private static final String MKDIR_COMMAND = String.format("mkdir -p {%s,%s}", CLASSES_OUT, JARS_OUT);
+    private static final String MKDIR_CLASSES_OUT_COMMAND = String.format("mkdir -p %s", CLASSES_OUT);
+    private static final String MKDIR_JAR_OUT_COMMAND = String.format("mkdir -p %s", JARS_OUT);
     private static final String ECHO_COMMAND = String.format("echo \"Manifest-Version: 1.0\nMain-Class: FooBar\n\" > %s", MANIFEST_OUT);
     private static final String JAVAC_COMMAND = String.format("javac  FooBar -d %s", CLASSES_OUT);
     private static final String JAR_COMMAND = String.format("jar cfm %s %s -C %s .", JAR_OUT, MANIFEST_OUT, CLASSES_OUT);
@@ -51,7 +52,8 @@ public class JavaJarTest {
         IFunction function = new JavaJar(match, target, parameters);
         function.configure();
         Assert.assertEquals("Wrong resolution", JAR_OUT, function.resolve());
-        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_COMMAND));
+        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_CLASSES_OUT_COMMAND));
+        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_JAR_OUT_COMMAND));
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(ECHO_COMMAND));
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(JAVAC_COMMAND));
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(JAR_COMMAND));

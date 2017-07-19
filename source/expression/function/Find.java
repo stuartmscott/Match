@@ -68,7 +68,7 @@ public class Find extends Function {
         return files;
     }
 
-    private static void scanFiles(File directory, String path, List<String> files, Pattern pattern) {
+    public static void scanFiles(File directory, String path, List<String> files, Pattern pattern) {
         for (File file : directory.listFiles()) {
             String fullname = String.format("%s/%s", path, file.getName());
             if (file.isFile()) {
