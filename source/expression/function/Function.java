@@ -29,16 +29,17 @@ import java.util.Map;
 public abstract class Function extends Expression implements IFunction {
 
     public static final String ANONYMOUS = "_";
-    public static final String CLASS_OUTPUT = "./out/java/classes";
+    public static final String CLASS_OUTPUT = "out/java/classes/";
     public static final String DIRECTORY = "directory";
-    public static final String JAR_OUTPUT = "./out/java/jar";
+    public static final String JAR_OUTPUT = "out/java/jar/";
     public static final String LIBRARY = "library";
     public static final String MAIN_CLASS = "main_class";
     public static final String NAME = "name";
     public static final String PATTERN = "pattern";
-    public static final String PROTO_OUTPUT = "./out/java/proto";
+    public static final String PROTO_OUTPUT = "out/java/proto/";
     public static final String SOURCE = "source";
     public static final String VALUE = "value";
+    public static final String ZIP_OUTPUT = "out/zip/";
 
     private Map<String, IExpression> mParameters = new HashMap<String, IExpression>();
 

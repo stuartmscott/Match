@@ -37,9 +37,13 @@ import org.mockito.Mockito;
 
 public class FindTest {
 
-    private static final String BAR = ".*/bar";
+    private static final String C = "c";
+    private static final String C_D_E = "c/d/e";
+    private static final String BAR = ".*bar";
     private final Set<String> filesA = new HashSet<String>();
     private final Set<String> filesB = new HashSet<String>();
+    private final Set<String> filesC = new HashSet<String>();
+    private final Set<String> filesD = new HashSet<String>();
 
     private File mRoot;
     private String mRootPath;
@@ -48,11 +52,14 @@ public class FindTest {
     public void setUp() throws IOException {
         mRoot = MatchTest.createFileStructure();
         mRootPath = mRoot.toString();
-        filesA.add(String.format("%s/a/b", mRootPath));
-        filesA.add(String.format("%s/c/d/e", mRootPath));
-        filesA.add(String.format("%s/c/d/f", mRootPath));
-        filesA.add(String.format("%s/bar", mRootPath));
-        filesB.add(String.format("%s/bar", mRootPath));
+        filesA.add("a/b");
+        filesA.add("c/d/e");
+        filesA.add("c/d/f");
+        filesA.add("bar");
+        filesB.add("bar");
+        filesC.add("c/d/e");
+        filesC.add("c/d/f");
+        filesD.add("c/d/e");
     }
 
     @After
@@ -66,8 +73,18 @@ public class FindTest {
     }
 
     @Test
-    public void resolveNamed() {
+    public void resolvePattern() {
         resolve(filesB, Find.DIRECTORY, "", Find.PATTERN, BAR);
+    }
+
+    @Test
+    public void resolveNamed() {
+        resolve(filesC, Find.ANONYMOUS, C);
+    }
+
+    @Test
+    public void resolveNamedPattern() {
+        resolve(filesD, Find.DIRECTORY, C, Find.PATTERN, C_D_E);
     }
 
     private void resolve(Set<String> expected, String... values) {

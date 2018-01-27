@@ -88,6 +88,9 @@ public class Match implements IMatch {
      */
     @Override
     public void addFile(String file) {
+        if (file.startsWith("./")) {
+            throw new RuntimeException("RAWR");
+        }
         mFiles.put(file, new CountDownLatch(1));
     }
 
@@ -165,6 +168,9 @@ public class Match implements IMatch {
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
         for (File file : mAllFiles) {
             String full = file.toString();
+            if (full.startsWith("./")) {
+                full = full.substring(2);
+            }
             addFile(full);
             provideFile(full);
         }

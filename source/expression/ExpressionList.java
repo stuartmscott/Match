@@ -20,15 +20,30 @@ import main.ITarget;
 import main.Utilities;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ExpressionList extends Expression {
 
     private List<IExpression> mElements;
 
+    public ExpressionList(IMatch match, ITarget target, IExpression element) {
+        this(match, target, Collections.singletonList(element));
+    }
+
     public ExpressionList(IMatch match, ITarget target, List<IExpression> elements) {
         super(match, target);
         mElements = elements;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void configure() {
+        for (IExpression element : mElements) {
+            element.configure();
+        }
     }
 
     /**
@@ -49,5 +64,13 @@ public class ExpressionList extends Expression {
             values.addAll(element.resolveList());
         }
         return values;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return resolveList().toString();
     }
 }

@@ -45,4 +45,12 @@ public abstract class Expression implements IExpression {
         return Utilities.newList(resolve());
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return resolve();
+    }
+
 }

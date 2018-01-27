@@ -22,15 +22,17 @@ import main.ITarget;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class Find extends Function {
 
     private IExpression mDirectory;
     private IExpression mPattern;
-    private List<String> mFiles = new ArrayList<String>();
+    private Set<String> mFiles = new HashSet();
 
     public Find(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
@@ -47,12 +49,20 @@ public class Find extends Function {
      */
     @Override
     public void configure() {
-        int index = new File(".").getAbsolutePath().length() - 1;
         File root = mTarget.getFile().getParentFile();
-        File directory = new File(root, mDirectory.resolve());
-        String path = directory.getAbsolutePath().substring(index);
+        String dir = mDirectory.resolve();
+        File directory = null;
+        String path = "";
+        if (dir == null || dir.isEmpty()) {
+            directory = root;
+        } else {
+            directory = new File(root, dir);
+            int index = root.getAbsolutePath().length() + 1;
+            path = directory.getAbsolutePath().substring(index) + "/";
+        }
         String pattern = mPattern == null ? ".*" : mPattern.resolve();
         scanFiles(directory, path, mFiles, Pattern.compile(pattern));
+        // System.out.println(mFiles);
     }
 
     /**
@@ -63,20 +73,23 @@ public class Find extends Function {
         List<String> files = new ArrayList<String>();
         for (String file : mFiles) {
             mMatch.awaitFile(file);
-            files.add(new Literal(mMatch, mTarget, file).resolve());
+            files.add(file);
+            //files.add(new Literal(mMatch, mTarget, file).resolve());
         }
         return files;
     }
 
-    public static void scanFiles(File directory, String path, List<String> files, Pattern pattern) {
+    public static void scanFiles(File directory, String path, Set<String> files, Pattern pattern) {
         for (File file : directory.listFiles()) {
-            String fullname = String.format("%s/%s", path, file.getName());
+            String filename = file.getName();
+            String fullname = path + filename;
             if (file.isFile()) {
-                if (pattern.matcher(fullname).matches()) {
+                if (pattern.matcher(filename).matches()
+                        || pattern.matcher(fullname).matches()) {
                     files.add(fullname);
                 }
             } else {
-                scanFiles(file, fullname, files, pattern);
+                scanFiles(file, fullname + "/", files, pattern);
             }
         }
     }

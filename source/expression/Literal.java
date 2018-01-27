@@ -34,4 +34,12 @@ public class Literal extends Expression {
     public String resolve() {
         return mValue;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return resolve();
+    }
 }

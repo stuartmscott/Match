@@ -14,17 +14,17 @@
 
 Set(
     name = "junit"
-    value = "./libraries/junit-4.12.jar"
+    value = "libraries/junit-4.12.jar"
 )
 
 Set(
     name = "hamcrest"
-    value = "./libraries/hamcrest-core-1.3.jar"
+    value = "libraries/hamcrest-core-1.3.jar"
 )
 
 Set(
     name = "mockito"
-    value = "./libraries/mockito-all-1.10.19.jar"
+    value = "libraries/mockito-all-1.10.19.jar"
 )
 
 JavaJar(

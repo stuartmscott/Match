@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
     expression.function.JavaJUnitTest.class,
     expression.function.SetFileTest.class,
     expression.function.SetTest.class,
+    expression.function.ZipTest.class,
     expression.ExpressionListTest.class,
     expression.LiteralTest.class,
     frontend.LexerTest.class,

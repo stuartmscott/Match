@@ -33,14 +33,14 @@ import org.mockito.Mockito;
 
 public class JavaJUnitTest {
 
-    private static final String RESULTS_OUT = "./out/results";
-    private static final String MKDIR_COMMAND = String.format("mkdir -p %s", RESULTS_OUT);
-    private static final String RUN_COMMAND = String.format("java -cp X:X:X:X:X org.junit.runner.JUnitCore main.AllTests | tee %s/FooBarTestResult", RESULTS_OUT);
+    private static final String RESULTS_OUT = "out/java/results/";
     private static final String FOOBAR = "FooBar";
     private static final String FOOBAR_MAIN_CLASS = "main.AllTests";
     private static final String FOOBAR_RESULT = "FooBarTestResult";
     private static final String FOOBAR_TEST = "FooBarTest";
-    private static final String OUTPUT = String.format("%s/FooBarTestResult", RESULTS_OUT);
+    private static final String OUTPUT = RESULTS_OUT + FOOBAR_RESULT;
+    private static final String MKDIR_COMMAND = String.format("mkdir -p %s", RESULTS_OUT);
+    private static final String RUN_COMMAND = String.format("java -cp X:X:X:X:X org.junit.runner.JUnitCore main.AllTests | tee %s", OUTPUT);
 
     @Test
     public void javaJUnit() {
@@ -61,6 +61,8 @@ public class JavaJUnitTest {
         IFunction function = new JavaJUnit(match, target, parameters);
         function.configure();
         Assert.assertEquals("Wrong resolution", OUTPUT, function.resolve());
+        Mockito.verify(match, Mockito.times(1)).setProperty(Mockito.eq(FOOBAR_RESULT), Mockito.eq(OUTPUT));
+        Mockito.verify(match, Mockito.times(1)).addFile(Mockito.eq(OUTPUT));
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_COMMAND));
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(RUN_COMMAND));
     }
