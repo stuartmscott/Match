@@ -33,12 +33,24 @@ Match hides away the heavy lifting in Java, leaving the build files simple, intu
         main_class = "main.SampleTest"
     )
 
+    # Package the distribution
+    Zip(
+        name = "SampleDist"
+        source = [
+            Find("scripts")
+            GetFile("Sample")
+        ]
+    )
+
 ## Functions
 - Find - finds all files under the given directory, filtering files by an optional pattern.
 - Get - looks up a build property given a key.
+- GetFile - gets a reference to a file created by another function.
 - JavaJar - compiles java code into a jar.
 - JavaJUnit - runs JUnit tests.
 - Set - sets a build property given a key/value pair.
+- SetFile - sets a file property and reference.
+- Zip - compresses the source files into a .zip file.
 
 ## Extensions
 Match can easily be extended to include project-, language- or workspace-specific functions.
