@@ -68,10 +68,10 @@ public class Zip extends Function {
     @Override
     public String resolve() {
         // Collect sources
-        Set<String> sources = new HashSet<>();
+        Set<String> sources = new HashSet<String>();
         sources.addAll(mSource.resolveList());
         System.out.println("Zip Sources: " + sources);
-        List sortedList = new ArrayList(sources);
+        List<String> sortedList = new ArrayList<String>(sources);
         Collections.sort(sortedList);
         String sourcesString = Utilities.join(" ", sortedList);
         System.out.println("Zip Sources: " + sourcesString);

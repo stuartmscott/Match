@@ -57,7 +57,12 @@ public class Match implements IMatch {
     public boolean mQuiet = false;
 
     public Match(File root) {
-        mRoot = root;
+        mRoot = (root == null) ? new File(".") : root;
+    }
+
+    @Override
+    public File getRootDir() {
+        return mRoot;
     }
 
     List<File> getAllFiles() {
@@ -117,8 +122,8 @@ public class Match implements IMatch {
             error(String.format("no targets provided %s", file));
         }
         try {
-            if (!latch.await(2, TimeUnit.MINUTES)) {
-                error(file + " took too long (> 2mins)");
+            if (!latch.await(3, TimeUnit.MINUTES)) {
+                error(file + " took too long (> 3mins)");
             }
         } catch(InterruptedException e) {
             error("await interrupted");
@@ -159,6 +164,7 @@ public class Match implements IMatch {
         long start = System.currentTimeMillis();
         println("Scanning");
         scanRoot(mRoot);
+        println("Matches: " + mMatchFiles);
         println("Parsing");
         List<ITarget> targets = new ArrayList<ITarget>();
         for (File match : mMatchFiles) {
@@ -186,8 +192,8 @@ public class Match implements IMatch {
             new BuildThread(target, latch).start();
         }
         try {
-            if (!latch.await(2, TimeUnit.MINUTES)) {
-                error("build took too long (> 2mins)");
+            if (!latch.await(5, TimeUnit.MINUTES)) {
+                error("build took too long (> 5mins)");
             }
         } catch(InterruptedException e) {
             error("build interrupted");
@@ -219,12 +225,13 @@ public class Match implements IMatch {
      * {inheritDoc}
      */
     @Override
-    public void runCommand(String command) {
+    public int runCommand(String command) {
+        int result = 0;
         try {
             Process process = Runtime.getRuntime().exec(new String[] {"/bin/bash", "-c", command});
             BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            int result = process.waitFor();
+            result = process.waitFor();
             String line = "";
             boolean loop = true;
             while (loop) {
@@ -246,6 +253,7 @@ public class Match implements IMatch {
         } catch (Exception e) {
             error(e);
         }
+        return result;
     }
 
     /**

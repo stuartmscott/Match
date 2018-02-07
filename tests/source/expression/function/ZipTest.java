@@ -82,6 +82,7 @@ public class ZipTest {
     public void zip() {
         IMatch match = Mockito.mock(IMatch.class);//, Mockito.withSettings().verboseLogging());
         ITarget target = Mockito.mock(ITarget.class);
+        Mockito.when(match.getRootDir()).thenReturn(mRoot);
         Mockito.when(match.getProperty(FOO)).thenReturn(FOO_JAR);
         Mockito.when(target.getFile()).thenReturn(new File(mRoot, "match"));
         Map<String, IExpression> parameters = new HashMap<>();

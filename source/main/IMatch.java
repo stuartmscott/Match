@@ -15,7 +15,14 @@
  */
 package main;
 
+import java.io.File;
+
 public interface IMatch {
+
+    /**
+     * @return the top level directory
+     */
+    File getRootDir();
 
     /**
      * Gets the property for the given key from this build.
@@ -65,7 +72,7 @@ public interface IMatch {
     void awaitFile(String file);
 
     /**
-     * Runs the given command.
+     * Runs the given command and returns the exit code.
      */
-    void runCommand(String command);
+    int runCommand(String command);
 }

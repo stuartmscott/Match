@@ -57,10 +57,10 @@ public class JavaJar extends Function {
         mName = name.resolve();
         mSource = getParameter(SOURCE);
         mOutput = JAR_OUTPUT + mName + ".jar";
-        mIntermediateClasses = CLASS_OUTPUT + mName + "/";
+        mIntermediateClasses = String.format("%s%s/", CLASS_OUTPUT, mName);
         if (hasParameter(PROTO)) {
             mProtoSource = getParameter(PROTO);
-            mIntermediateProtos = PROTO_OUTPUT + mName + "/";
+            mIntermediateProtos = String.format("%s%s/", PROTO_OUTPUT, mName);
         }
         mManifest = mIntermediateClasses + "MANIFEST.MF";
         mMainClass = getParameter(MAIN_CLASS);
@@ -85,7 +85,7 @@ public class JavaJar extends Function {
      */
     @Override
     public String resolve() {
-        List<String> libraries = new ArrayList<>();
+        List<String> libraries = new ArrayList<String>();
         String javacClasspath = "";
         String jarClasspath = "";
         if (hasParameter(LIBRARY)) {
@@ -100,7 +100,7 @@ public class JavaJar extends Function {
         mMatch.runCommand(String.format(MKDIR_COMMAND, mIntermediateClasses));
         mMatch.runCommand(String.format(MKDIR_COMMAND, JAR_OUTPUT));
         mMatch.runCommand(String.format(ECHO_COMMAND, mMainClass.resolve(), jarClasspath, mManifest));
-        Set<String> sources = new HashSet<>();
+        Set<String> sources = new HashSet<String>();
         sources.addAll(mSource.resolveList());
         // Compile protos
         if (mProtoSource != null) {
@@ -109,7 +109,7 @@ public class JavaJar extends Function {
             // Find all java files generated
             File directory = new File(mIntermediateProtos);
             String path = directory.getAbsolutePath() + "/";
-            Set<String> generated = new HashSet();
+            Set<String> generated = new HashSet<String>();
             Find.scanFiles(directory, path, generated, Pattern.compile(".*.java"));
             sources.addAll(generated);
         }

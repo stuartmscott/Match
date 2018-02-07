@@ -84,8 +84,9 @@ public class JavaJUnit extends Function {
         }
         String classpath = String.format("-cp %s", Utilities.join(":", libraries));
         mMatch.runCommand(String.format(MKDIR_COMMAND, RESULT_OUTPUT));
-        mMatch.runCommand(String.format(RUN_COMMAND, classpath, mMainClass, mOutput));
-        mMatch.provideFile(mOutput);
+        if (mMatch.runCommand(String.format(RUN_COMMAND, classpath, mMainClass, mOutput)) == 0) {
+            mMatch.provideFile(mOutput);
+        }
         return mOutput;
     }
 }

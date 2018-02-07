@@ -90,6 +90,7 @@ public class FindTest {
     private void resolve(Set<String> expected, String... values) {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
+        Mockito.when(match.getRootDir()).thenReturn(mRoot);
         Mockito.when(target.getFile()).thenReturn(new File(mRoot, "match"));
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         for (int i = 0; i < values.length; i++) {
@@ -99,6 +100,7 @@ public class FindTest {
         function.configure();
         List<String> actual = function.resolveList();
         Assert.assertEquals("Wrong number of files", expected.size(), actual.size());
+        Assert.assertEquals("Wrong files", expected.toString(), actual.toString());
         for (String file : actual) {
             Assert.assertTrue(String.format("%s not found", file), expected.contains(file));
         }

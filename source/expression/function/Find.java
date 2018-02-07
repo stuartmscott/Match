@@ -21,6 +21,8 @@ import main.IMatch;
 import main.ITarget;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +34,7 @@ public class Find extends Function {
 
     private IExpression mDirectory;
     private IExpression mPattern;
-    private Set<String> mFiles = new HashSet();
+    private Set<String> mFiles = new HashSet<String>();
 
     public Find(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
@@ -49,16 +51,21 @@ public class Find extends Function {
      */
     @Override
     public void configure() {
-        File root = mTarget.getFile().getParentFile();
+        File root = mMatch.getRootDir();
+        Path rootPath = root.toPath();
+        File match = mTarget.getFile();
+        File matchDir = match.getParentFile();
         String dir = mDirectory.resolve();
         File directory = null;
-        String path = "";
         if (dir == null || dir.isEmpty()) {
-            directory = root;
+            directory = matchDir;
         } else {
-            directory = new File(root, dir);
-            int index = root.getAbsolutePath().length() + 1;
-            path = directory.getAbsolutePath().substring(index) + "/";
+            directory = new File(matchDir, dir);
+        }
+        Path dirPath = directory.toPath();
+        String path = rootPath.relativize(dirPath).toString();
+        if (!path.isEmpty()) {
+            path += "/";
         }
         String pattern = mPattern == null ? ".*" : mPattern.resolve();
         scanFiles(directory, path, mFiles, Pattern.compile(pattern));

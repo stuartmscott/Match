@@ -12,21 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-Set(
-    name = "junit"
-    value = "libraries/junit-4.12.jar"
-)
-
-Set(
-    name = "hamcrest"
-    value = "libraries/hamcrest-core-1.3.jar"
-)
-
-Set(
-    name = "mockito"
-    value = "libraries/mockito-all-1.10.19.jar"
-)
-
 JavaJar(
     name = "Match"
     source = Find("source")

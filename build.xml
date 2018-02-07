@@ -59,7 +59,7 @@
 
     <target name="run" depends="jar">
         <java fork="true" classname="${main-class}">
-            <arg line="./sample/"/>
+            <arg line="."/>
             <classpath>
                 <path refid="classpath"/>
                 <path refid="application"/>

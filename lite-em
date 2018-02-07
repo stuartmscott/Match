@@ -14,5 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-java -jar libraries/Match.jar .
+java -jar libraries/Match-0.3.jar .
 
