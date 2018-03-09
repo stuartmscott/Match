@@ -33,12 +33,14 @@ public class JavaJarTest {
     private static final String CLASSES_OUT = "out/java/classes/FooBar/";
     private static final String JARS_OUT = "out/java/jar/";
     private static final String JAR_OUT = "out/java/jar/FooBar.jar";
-    private static final String MANIFEST_OUT = "out/java/classes/FooBar/MANIFEST.MF";
+    private static final String MANIFEST_OUT = "out/java/manifest/FooBar/";
+    private static final String MANIFEST_MF = "out/java/manifest/FooBar/MANIFEST.MF";
     private static final String MKDIR_CLASSES_OUT_COMMAND = String.format("mkdir -p %s", CLASSES_OUT);
+    private static final String MKDIR_MANIFEST_OUT_COMMAND = String.format("mkdir -p %s", MANIFEST_OUT);
     private static final String MKDIR_JAR_OUT_COMMAND = String.format("mkdir -p %s", JARS_OUT);
-    private static final String ECHO_COMMAND = String.format("echo \"Manifest-Version: 1.0\nMain-Class: FooBar\n\" > %s", MANIFEST_OUT);
+    private static final String ECHO_COMMAND = String.format("echo \"Manifest-Version: 1.0\nMain-Class: FooBar\n\" > %s", MANIFEST_MF);
     private static final String JAVAC_COMMAND = String.format("javac  FooBar -d %s", CLASSES_OUT);
-    private static final String JAR_COMMAND = String.format("jar cfm %s %s -C %s .", JAR_OUT, MANIFEST_OUT, CLASSES_OUT);
+    private static final String JAR_COMMAND = String.format("jar cfm %s %s -C %s .", JAR_OUT, MANIFEST_MF, CLASSES_OUT);
 
     @Test
     public void javaJar() {
@@ -55,6 +57,7 @@ public class JavaJarTest {
         Mockito.verify(match, Mockito.times(1)).setProperty(Mockito.eq(FOOBAR), Mockito.eq(JAR_OUT));
         Mockito.verify(match, Mockito.times(1)).addFile(Mockito.eq(JAR_OUT));
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_CLASSES_OUT_COMMAND));
+        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_MANIFEST_OUT_COMMAND));
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_JAR_OUT_COMMAND));
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(ECHO_COMMAND));
         Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(JAVAC_COMMAND));
@@ -63,6 +66,11 @@ public class JavaJarTest {
 
     @Test
     public void javaJarProto() {
+        // TODO
+    }
+
+    @Test
+    public void javaJarResource() {
         // TODO
     }
 

@@ -16,16 +16,16 @@
 <project name="Match" basedir="." default="main">
 
     <property name="source.directory" value="source"/>
-    <property name="source.tests.directory" value="tests/source"/>
-    <property name="libraries.directory" value="libraries"/>
-    <property name="out.directory"  value="out"/>
-    <property name="classes.directory" value="${out.directory}/java/classes/Match"/>
-    <property name="classes.tests.directory"  value="${out.directory}/java/classes/MatchTest"/>
+    <property name="source.tests.directory" value="tests/source/"/>
+    <property name="libraries.directory" value="libraries/"/>
+    <property name="out.directory"  value="out/"/>
+    <property name="classes.directory" value="${out.directory}/java/classes/Match/"/>
+    <property name="classes.tests.directory"  value="${out.directory}/java/classes/MatchTest/"/>
     <property name="jar.directory" value="${out.directory}/java/jar"/>
     <property name="main-class" value="main.Match"/>
 
     <path id="classpath">
-        <fileset dir="${libraries.directory}" includes="**/*.jar" excludes="**/Match*"/>
+        <fileset dir="${libraries.directory}" includes="*.jar" excludes="**/Match*"/>
         <pathelement location="${classes.directory}" />
         <pathelement location="${classes.tests.directory}" />
     </path>
@@ -59,7 +59,7 @@
 
     <target name="run" depends="jar">
         <java fork="true" classname="${main-class}">
-            <arg line="."/>
+            <arg line="root=."/>
             <classpath>
                 <path refid="classpath"/>
                 <path refid="application"/>

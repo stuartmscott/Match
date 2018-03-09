@@ -43,6 +43,7 @@ public class SetFile extends Set {
         if (!file.exists()) {
             mMatch.error(String.format("File %s does not exist", file.getAbsolutePath()));
         }
+        target.setName("SetFile:" + mKey);
     }
 
     /**

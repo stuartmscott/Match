@@ -23,11 +23,28 @@ public class Target implements ITarget {
 
     private IMatch mMatch;
     private File mFile;
+    private String mName = "";
     private IFunction mFunction;
 
     public Target(IMatch match, File file) {
         mMatch = match;
         mFile = file;
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public String getName() {
+        return mName;
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public void setName(String name) {
+        mName = name;
     }
 
     /**
@@ -61,5 +78,13 @@ public class Target implements ITarget {
     public void build() {
         mFunction.resolve();
         // TODO put this target's input and output files in the database
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return getName();
     }
 }

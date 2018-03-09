@@ -49,6 +49,7 @@ public class JavaJUnit extends Function {
             mMatch.error("JavaJar function expects a String main_class");
         }
         mName = name.resolve();
+        target.setName(mName);
         mMainClass = mainClass.resolve();
         mOutput = RESULT_OUTPUT + mName;
     }
@@ -87,6 +88,7 @@ public class JavaJUnit extends Function {
         if (mMatch.runCommand(String.format(RUN_COMMAND, classpath, mMainClass, mOutput)) == 0) {
             mMatch.provideFile(mOutput);
         }
+        // TODO provide a pass file for other targets to await
         return mOutput;
     }
 }

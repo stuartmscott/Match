@@ -47,6 +47,7 @@ public class Zip extends Function {
             mMatch.error("Zip function expects a String name");
         }
         mName = name.resolve();
+        target.setName(mName);
         mSource = getParameter(SOURCE);
         mOutput = ZIP_OUTPUT + mName + ".zip";
         // TODO ensure zip isn't re-created if the inputs haven't been modified

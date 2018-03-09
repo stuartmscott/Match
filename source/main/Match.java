@@ -31,9 +31,12 @@ import frontend.Lexem;
 import frontend.Lexer;
 import frontend.Parser;
 
+import main.Config;
+
 public class Match implements IMatch {
 
     public static final String MATCH = "match";
+    public static final int ERROR = -1;
     public static final List<Lexem> LEXEMS = new ArrayList<Lexem>();
     static {
         LEXEMS.add(new Lexem(Category.NEWLINE, "\n"));
@@ -49,15 +52,19 @@ public class Match implements IMatch {
         LEXEMS.add(new Lexem(Category.LOWER_CASE, "[a-z][_a-zA-Z0-9]*"));
     }
 
+    private Config mConfig;
     private File mRoot;
-    private Map<String, String> mProperties = new ConcurrentHashMap<String, String>();
     private Map<String, CountDownLatch> mFiles = new ConcurrentHashMap<String, CountDownLatch>();
     private final List<File> mMatchFiles = new ArrayList<File>();
     private final List<File> mAllFiles = new ArrayList<File>();
     public boolean mQuiet = false;
 
-    public Match(File root) {
-        mRoot = (root == null) ? new File(".") : root;
+    public Match(Config config) {
+        mConfig = config;
+        mRoot = new File(config.get("root"));
+        // TODO SetFile should support URL from which file can be downloaded if missing
+        // TODO Support exec targets to allow supporting custom commands, or
+        // TODO Add AndroidGradle and AndroidAnt functions to build with gradle or ant
     }
 
     @Override
@@ -74,7 +81,7 @@ public class Match implements IMatch {
      */
     @Override
     public String getProperty(String key) {
-        String property = mProperties.get(key);
+        String property = mConfig.get(key);
         if (property == null) {
             error(String.format("no targets set property %s", key));
         }
@@ -86,7 +93,7 @@ public class Match implements IMatch {
      */
     @Override
     public void setProperty(String key, String value) {
-        mProperties.put(key, value);
+        mConfig.put(key, value);
     }
 
     /**
@@ -172,6 +179,7 @@ public class Match implements IMatch {
             Parser parser = new Parser(this, lexer);
             targets.addAll(parser.parse());
         }
+        println("Targets: " + targets);
         println("Configuring");
         // Create a thread for each target, but only start a thread if the number of targets that
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
@@ -287,12 +295,12 @@ public class Match implements IMatch {
      */
     @Override
     public void error(Exception exception) {
-        throw new RuntimeException(exception);
+        System.err.println(exception.getMessage());
+        System.exit(ERROR);
     }
 
     public static void main(String args[]) {
-        File root = new File(args[0]);
-        Match match = new Match(root);
+        Match match = new Match(Config.create(args));
         match.light();
     }
 

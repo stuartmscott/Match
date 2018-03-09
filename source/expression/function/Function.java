@@ -34,6 +34,7 @@ public abstract class Function extends Expression implements IFunction {
     public static final String JAR_OUTPUT = "out/java/jar/";
     public static final String LIBRARY = "library";
     public static final String MAIN_CLASS = "main_class";
+    public static final String MANIFEST_OUTPUT = "out/java/manifest/";
     public static final String NAME = "name";
     public static final String PATTERN = "pattern";
     public static final String PROTO_OUTPUT = "out/java/proto/";

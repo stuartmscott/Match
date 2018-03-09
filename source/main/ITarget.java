@@ -22,6 +22,16 @@ import java.io.File;
 public interface ITarget {
 
     /**
+     * @return the target name
+     */
+    String getName();
+
+    /**
+     * Sets the target name
+     */
+    void setName(String name);
+
+    /**
      * @return the match file
      */
     File getFile();

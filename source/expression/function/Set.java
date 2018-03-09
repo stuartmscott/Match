@@ -38,6 +38,7 @@ public class Set extends Function {
         }
         mKey = key.resolve();
         mValue = value.resolve();
+        target.setName("Set:" + mKey);
     }
 
     /**

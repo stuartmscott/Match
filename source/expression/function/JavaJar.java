@@ -32,19 +32,22 @@ import java.util.regex.Pattern;
 
 public class JavaJar extends Function {
 
-    private static final String MKDIR_COMMAND = "mkdir -p %s";
-    private static final String PROTO = "proto";
-    private static final String PROTOC_COMMAND = "protoc --java_out=%s %s";
     private static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\n%s\" > %s";
     private static final String JAVAC_COMMAND = "javac %s %s -d %s";
     private static final String JAR_COMMAND = "jar cfm %s %s -C %s .";
+    private static final String MKDIR_COMMAND = "mkdir -p %s";
+    private static final String PROTO = "proto";
+    private static final String PROTOC_COMMAND = "protoc --java_out=%s %s";
+    private static final String RESOURCE = "resource";
 
     private IExpression mSource;
     private IExpression mProtoSource;
+    private IExpression mResource;
     private IExpression mMainClass;
     private String mName;
     private String mManifest;
     private String mIntermediateClasses;
+    private String mIntermediateManifests;
     private String mIntermediateProtos;
     private String mOutput;
 
@@ -55,6 +58,7 @@ public class JavaJar extends Function {
             mMatch.error("JavaJar function expects a String name");
         }
         mName = name.resolve();
+        target.setName(mName);
         mSource = getParameter(SOURCE);
         mOutput = JAR_OUTPUT + mName + ".jar";
         mIntermediateClasses = String.format("%s%s/", CLASS_OUTPUT, mName);
@@ -62,7 +66,11 @@ public class JavaJar extends Function {
             mProtoSource = getParameter(PROTO);
             mIntermediateProtos = String.format("%s%s/", PROTO_OUTPUT, mName);
         }
-        mManifest = mIntermediateClasses + "MANIFEST.MF";
+        if (hasParameter(RESOURCE)) {
+            mResource = getParameter(RESOURCE);
+        }
+        mIntermediateManifests = String.format("%s%s/", MANIFEST_OUTPUT, mName);
+        mManifest = mIntermediateManifests + "MANIFEST.MF";
         mMainClass = getParameter(MAIN_CLASS);
     }
 
@@ -77,6 +85,9 @@ public class JavaJar extends Function {
         mSource.configure();
         if (mProtoSource != null) {
             mProtoSource.configure();
+        }
+        if (mResource != null) {
+            mResource.configure();
         }
     }
 
@@ -98,8 +109,10 @@ public class JavaJar extends Function {
             jarClasspath = String.format("Class-Path: %s\n", Utilities.join(":", libraries));
         }
         mMatch.runCommand(String.format(MKDIR_COMMAND, mIntermediateClasses));
+        mMatch.runCommand(String.format(MKDIR_COMMAND, mIntermediateManifests));
         mMatch.runCommand(String.format(MKDIR_COMMAND, JAR_OUTPUT));
         mMatch.runCommand(String.format(ECHO_COMMAND, mMainClass.resolve(), jarClasspath, mManifest));
+        mMatch.provideFile(mManifest);
         Set<String> sources = new HashSet<String>();
         sources.addAll(mSource.resolveList());
         // Compile protos
@@ -116,7 +129,12 @@ public class JavaJar extends Function {
         // Compile java
         mMatch.runCommand(String.format(JAVAC_COMMAND, javacClasspath, Utilities.join(" ", sources), mIntermediateClasses));
         // Package jar
-        mMatch.runCommand(String.format(JAR_COMMAND, mOutput, mManifest, mIntermediateClasses));
+        Set<String> jarIn = new HashSet<String>();
+        jarIn.add(mIntermediateClasses);
+        if (mResource != null) {
+            jarIn.addAll(mResource.resolveList());
+        }
+        mMatch.runCommand(String.format(JAR_COMMAND, mOutput, mManifest, Utilities.join(",", jarIn)));
         mMatch.provideFile(mOutput);
         return mOutput;
     }

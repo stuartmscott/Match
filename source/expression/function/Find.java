@@ -44,6 +44,7 @@ public class Find extends Function {
         } else {
             mDirectory = getParameter(ANONYMOUS);
         }
+        target.setName("Find:" + mPattern + " " + mDirectory);
     }
 
     /**

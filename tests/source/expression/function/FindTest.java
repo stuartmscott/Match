@@ -17,6 +17,7 @@ package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
+import main.Config;
 import main.IMatch;
 import main.ITarget;
 import main.MatchTest;
@@ -32,7 +33,9 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 public class FindTest {
@@ -45,13 +48,18 @@ public class FindTest {
     private final Set<String> filesC = new HashSet<String>();
     private final Set<String> filesD = new HashSet<String>();
 
-    private File mRoot;
-    private String mRootPath;
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+    public File root;
+    public String rootPath;
+    public Config config;
 
     @Before
     public void setUp() throws IOException {
-        mRoot = MatchTest.createFileStructure();
-        mRootPath = mRoot.toString();
+        root = folder.getRoot();
+        MatchTest.createFileStructure(root);
+        config = new Config();
+        config.put("root", root.getAbsolutePath());
         filesA.add("a/b");
         filesA.add("c/d/e");
         filesA.add("c/d/f");
@@ -64,7 +72,7 @@ public class FindTest {
 
     @After
     public void tearDown() throws IOException {
-        MatchTest.deleteFileStructure(mRoot);
+        //
     }
 
     @Test
@@ -90,8 +98,8 @@ public class FindTest {
     private void resolve(Set<String> expected, String... values) {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
-        Mockito.when(match.getRootDir()).thenReturn(mRoot);
-        Mockito.when(target.getFile()).thenReturn(new File(mRoot, "match"));
+        Mockito.when(match.getRootDir()).thenReturn(root);
+        Mockito.when(target.getFile()).thenReturn(new File(root, "match"));
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         for (int i = 0; i < values.length; i++) {
             parameters.put(values[i], new Literal(match, target, values[++i]));

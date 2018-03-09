@@ -22,28 +22,31 @@ import java.util.concurrent.CountDownLatch;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class MatchTest {
 
     private static final String FOO = "foo";
     private static final String BAR = "bar";
 
-    private File mRoot;
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+    public File root;
+    public Config config;
 
     @Before
     public void setUp() throws IOException {
-        mRoot = createFileStructure();
-    }
-
-    @After
-    public void tearDown() throws IOException {
-        deleteFileStructure(mRoot);
+        root = folder.getRoot();
+        createFileStructure(root);
+        config = new Config();
+        config.put("root", root.getAbsolutePath());
     }
 
     @Test
     public void properties() throws Exception {
-        Match match = createMatch(mRoot);
+        Match match = createMatch(config);
         try {
             match.getProperty(FOO);
             Assert.fail("Match should fail if property is not set");
@@ -54,7 +57,7 @@ public class MatchTest {
 
     @Test
     public void files() throws Exception {
-        Match match = createMatch(mRoot);
+        Match match = createMatch(config);
         File file = File.createTempFile(FOO, BAR);
         String fileName = file.getAbsolutePath();
         match.addFile(fileName);
@@ -69,7 +72,7 @@ public class MatchTest {
 
     @Test
     public void files_noAdd() throws Exception {
-        Match match = createMatch(mRoot);
+        Match match = createMatch(config);
         try {
             // Provide a file that wasn't added
             match.provideFile(FOO);
@@ -84,19 +87,18 @@ public class MatchTest {
 
     @Test
     public void loadFiles() throws Exception {
-        Match match = createMatch(mRoot);
+        Match match = createMatch(config);
         match.light();
         Assert.assertEquals("Wrong number of files", 4, match.getAllFiles().size());
     }
 
-    private Match createMatch(File root) {
-        Match match = new Match(root);
+    private Match createMatch(Config config) {
+        Match match = new Match(config);
         match.mQuiet = true;
         return match;
     }
 
-    public static File createFileStructure() throws IOException {
-        File root = new File("temp" + Long.toString(System.currentTimeMillis()));
+    public static File createFileStructure(File root) throws IOException {
         root.mkdirs();
         Assert.assertTrue("Root doesn't exist", root.exists());
         Assert.assertTrue("Root isn't a directory", root.isDirectory());
@@ -115,17 +117,6 @@ public class MatchTest {
         File bar = new File(root, "bar");
         bar.createNewFile();
         return root;
-    }
-
-    public static void deleteFileStructure(File directory) {
-        for (File child : directory.listFiles()) {
-            if (child.isDirectory()) {
-                deleteFileStructure(child);
-            } else {
-                child.delete();
-            }
-        }
-        directory.delete();
     }
 
     private static class Worker extends Thread {

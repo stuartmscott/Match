@@ -33,6 +33,7 @@ public class GetFile extends Get {
             mMatch.error("GetFile expects a String key");
         }
         mKey = key.resolve();
+        target.setName("GetFile:" + mKey);
     }
 
     /**

@@ -33,6 +33,7 @@ public class Get extends Function {
             mMatch.error("Get function expects a String key");
         }
         mKey = key.resolve();
+        target.setName("Get:" + mKey);
     }
 
     /**

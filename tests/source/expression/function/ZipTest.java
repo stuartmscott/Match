@@ -19,6 +19,7 @@ import expression.Expression;
 import expression.ExpressionList;
 import expression.IExpression;
 import expression.Literal;
+import main.Config;
 import main.IMatch;
 import main.ITarget;
 import main.MatchTest;
@@ -35,7 +36,9 @@ import java.util.regex.Pattern;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 public class ZipTest {
@@ -53,19 +56,24 @@ public class ZipTest {
     private static final String MKDIR_ZIP_OUT_COMMAND = String.format("mkdir -p %s", ZIPS_OUT);
     private static final String ZIP_COMMAND = String.format("zip -r %s %s", ZIP_OUT, SOURCES);
 
-    private File mRoot;
-    private String mRootPath;
-    private File mCDir;
-    private File mCDEFile;
-    private File mCDFFile;
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+    public Config config;
+    public File root;
+    public String rootPath;
+    public File mCDir;
+    public File mCDEFile;
+    public File mCDFFile;
 
     @Before
     public void setUp() throws IOException {
-        mRoot = MatchTest.createFileStructure();
-        mRootPath = mRoot.toString();
-        mCDir = new File(mRoot, C_DIR);
-        mCDEFile = new File(mRoot, C_D_E_FILE);
-        mCDFFile = new File(mRoot, C_D_F_FILE);
+        root = folder.getRoot();
+        MatchTest.createFileStructure(root);
+        config = new Config();
+        config.put("root", root.getAbsolutePath());
+        mCDir = new File(root, C_DIR);
+        mCDEFile = new File(root, C_D_E_FILE);
+        mCDFFile = new File(root, C_D_F_FILE);
         /*
         List<String> files = new ArrayList();
         Find.scanFiles(mRoot, "", files, Pattern.compile(".*"));
@@ -75,16 +83,16 @@ public class ZipTest {
 
     @After
     public void tearDown() throws IOException {
-        MatchTest.deleteFileStructure(mRoot);
+        //
     }
 
     @Test
     public void zip() {
         IMatch match = Mockito.mock(IMatch.class);//, Mockito.withSettings().verboseLogging());
         ITarget target = Mockito.mock(ITarget.class);
-        Mockito.when(match.getRootDir()).thenReturn(mRoot);
+        Mockito.when(match.getRootDir()).thenReturn(root);
         Mockito.when(match.getProperty(FOO)).thenReturn(FOO_JAR);
-        Mockito.when(target.getFile()).thenReturn(new File(mRoot, "match"));
+        Mockito.when(target.getFile()).thenReturn(new File(root, "match"));
         Map<String, IExpression> parameters = new HashMap<>();
         parameters.put(Function.NAME, new Literal(match, target, FOOBAR));
         List<IExpression> elements = new ArrayList<IExpression>();

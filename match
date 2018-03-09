@@ -16,6 +16,10 @@ JavaJar(
     name = "Match"
     source = Find("source")
     main_class = "main.Match"
+    library = [
+        "config"
+        "protobuf"
+    ]
 )
 
 JavaJar(
@@ -24,6 +28,7 @@ JavaJar(
     main_class = "main.AllTests"
     library = [
         "Match"
+        "config"
         "junit"
         "hamcrest"
         "mockito"
@@ -35,6 +40,7 @@ JavaJUnit(
     library = [
         "MatchTest"
         "Match"
+        "config"
     ]
     main_class = "main.AllTests"
 )
