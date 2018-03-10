@@ -63,8 +63,11 @@ public class Match implements IMatch {
         mConfig = config;
         mRoot = new File(config.get("root"));
         // TODO SetFile should support URL from which file can be downloaded if missing
-        // TODO Support exec targets to allow supporting custom commands, or
-        // TODO Add AndroidGradle and AndroidAnt functions to build with gradle or ant
+        // TODO Add Library function, with 'name', 'version', 'url' params and cache under /tmp/match/libraries, eliminating libraries/ symbolic links and handling auto download.
+        // TODO Support exec targets to allow supporting custom commands, or add AndroidGradle and AndroidAnt functions to build with gradle or ant resp.
+        // TODO Support parallel builds
+        // TODO Support incremental builds
+        // TODO Support building select targets vs all
     }
 
     @Override
@@ -287,7 +290,8 @@ public class Match implements IMatch {
      */
     @Override
     public void error(String message) {
-        throw new RuntimeException(message);
+        System.err.println(message);
+        System.exit(ERROR);
     }
 
     /**
@@ -295,8 +299,7 @@ public class Match implements IMatch {
      */
     @Override
     public void error(Exception exception) {
-        System.err.println(exception.getMessage());
-        System.exit(ERROR);
+        error(exception.getMessage());
     }
 
     public static void main(String args[]) {

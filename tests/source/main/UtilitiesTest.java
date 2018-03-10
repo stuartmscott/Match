@@ -16,6 +16,7 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.junit.Assert;
@@ -27,29 +28,29 @@ public class UtilitiesTest {
 
     @Test
     public void join_none() {
-        List<String> list = new ArrayList<>();
-        Assert.assertEquals("Incorrect join", "", Utilities.join(SEPARATOR, list));
+        Collection<String> list = new ArrayList<>();
+        Assert.assertEquals("Incorrect join", "", Utilities.<String>join(SEPARATOR, list));
     }
 
     @Test
     public void join_single() {
-        List<String> list = new ArrayList<>();
+        Collection<String> list = new ArrayList<>();
         list.add("foo");
-        Assert.assertEquals("Incorrect join", "foo", Utilities.join(SEPARATOR, list));
+        Assert.assertEquals("Incorrect join", "foo", Utilities.<String>join(SEPARATOR, list));
     }
 
     @Test
     public void join_multiple() {
-        List<String> list = new ArrayList<>();
+        Collection<String> list = new ArrayList<>();
         list.add("foo");
         list.add("bar");
         list.add("blah");
-        Assert.assertEquals("Incorrect join", "foo:bar:blah", Utilities.join(SEPARATOR, list));
+        Assert.assertEquals("Incorrect join", "foo:bar:blah", Utilities.<String>join(SEPARATOR, list));
     }
 
     @Test
     public void newList() {
-        List<String> list = Utilities.newList("foo");
+        List<String> list = Utilities.<String>newList("foo");
         Assert.assertEquals("Incorrect list length", 1, list.size());
         Assert.assertEquals("Incorrect list element", "foo", list.get(0));
     }

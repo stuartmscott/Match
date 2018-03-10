@@ -31,8 +31,10 @@ public abstract class Function extends Expression implements IFunction {
     public static final String ANONYMOUS = "_";
     public static final String CLASS_OUTPUT = "out/java/classes/";
     public static final String DIRECTORY = "directory";
+    public static final String EXTENSION = "extension";
     public static final String JAR_OUTPUT = "out/java/jar/";
     public static final String LIBRARY = "library";
+    public static final String LOCATION = "location";
     public static final String MAIN_CLASS = "main_class";
     public static final String MANIFEST_OUTPUT = "out/java/manifest/";
     public static final String NAME = "name";
@@ -40,6 +42,7 @@ public abstract class Function extends Expression implements IFunction {
     public static final String PROTO_OUTPUT = "out/java/proto/";
     public static final String SOURCE = "source";
     public static final String VALUE = "value";
+    public static final String VERSION = "version";
     public static final String ZIP_OUTPUT = "out/zip/";
 
     private Map<String, IExpression> mParameters = new HashMap<String, IExpression>();
@@ -73,7 +76,7 @@ public abstract class Function extends Expression implements IFunction {
     public IExpression getParameter(String key) {
         IExpression parameter =  mParameters.get(key);
         if (parameter == null) {
-            mMatch.error(String.format("missing parameter %s", key));
+            mMatch.error(String.format("%s missing parameter %s", mTarget.getName(), key));
         }
         return parameter;
     }

@@ -24,21 +24,8 @@ import java.util.Map;
 
 public class SetFile extends Set {
 
-    private String mKey;
-    private String mValue;
-
     public SetFile(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        IExpression key = getParameter(NAME);
-        IExpression value = getParameter(VALUE);
-        if (!(key instanceof Literal)) {
-            mMatch.error("SetFile expects a String key");
-        }
-        if (!(value instanceof Literal)) {
-            mMatch.error("SetFile expects a String value");
-        }
-        mKey = key.resolve();
-        mValue = value.resolve();
         File file = new File(mValue);
         if (!file.exists()) {
             mMatch.error(String.format("File %s does not exist", file.getAbsolutePath()));
@@ -51,16 +38,8 @@ public class SetFile extends Set {
      */
     @Override
     public void configure() {
-        mMatch.setProperty(mKey, mValue);
+        super.configure();
         mMatch.addFile(mValue);
         mMatch.provideFile(mValue);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String resolve() {
-        return mValue;
     }
 }

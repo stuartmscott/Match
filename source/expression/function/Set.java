@@ -23,8 +23,8 @@ import java.util.Map;
 
 public class Set extends Function {
 
-    private String mKey;
-    private String mValue;
+    protected String mKey;
+    protected String mValue;
 
     public Set(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);

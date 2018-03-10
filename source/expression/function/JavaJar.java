@@ -37,7 +37,8 @@ public class JavaJar extends Function {
     private static final String JAR_COMMAND = "jar cfm %s %s -C %s .";
     private static final String MKDIR_COMMAND = "mkdir -p %s";
     private static final String PROTO = "proto";
-    private static final String PROTOC_COMMAND = "protoc --java_out=%s %s";
+    // This assumes protoc-gen-javalite and protoc share directory
+    private static final String PROTOC_COMMAND = "protoc --plugin=$(dirname $(which protoc))/protoc-gen-javalite --javalite_out=%s %s";
     private static final String RESOURCE = "resource";
 
     private IExpression mSource;

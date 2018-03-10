@@ -17,6 +17,7 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Permission;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.After;
@@ -42,6 +43,12 @@ public class MatchTest {
         createFileStructure(root);
         config = new Config();
         config.put("root", root.getAbsolutePath());
+        System.setSecurityManager(new ExitSecurityManager());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        System.setSecurityManager(null);
     }
 
     @Test
@@ -50,7 +57,7 @@ public class MatchTest {
         try {
             match.getProperty(FOO);
             Assert.fail("Match should fail if property is not set");
-        } catch (Exception e) {}
+        } catch (ExitException e) {}
         match.setProperty(FOO, BAR);
         Assert.assertEquals("Wrong property", BAR, match.getProperty(FOO));
     }
@@ -117,6 +124,27 @@ public class MatchTest {
         File bar = new File(root, "bar");
         bar.createNewFile();
         return root;
+    }
+
+    private static class ExitException extends SecurityException {
+        public static final long serialVersionUID = -1;
+        final int mStatus;
+        ExitException(int status) {
+            super("ExitException");
+            mStatus = status;
+        }
+    }
+
+    private static class ExitSecurityManager extends SecurityManager {
+        @Override
+        public void checkPermission(Permission permission) {}
+        @Override
+        public void checkPermission(Permission permission, Object context) {}
+        @Override
+        public void checkExit(int status) {
+            super.checkExit(status);
+            throw new ExitException(status);
+        }
     }
 
     private static class Worker extends Thread {

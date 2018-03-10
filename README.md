@@ -5,6 +5,14 @@ A lightweight, fast and extensible build system.
 
 Match hides away the heavy lifting in Java, leaving the build files simple, intuitive, and easy to maintain.
 
+    # Add the library
+    Library(
+        name = "junit"
+        version = "4.12"
+        extension = "jar"
+        location = "http://search.maven.org/remotecontent?filepath=junit/junit/"
+    )
+
     # Build the code
     JavaJar(
         name = "Sample"
@@ -48,6 +56,7 @@ Match hides away the heavy lifting in Java, leaving the build files simple, intu
 - GetFile - gets a reference to a file created by another function.
 - JavaJar - compiles java code into a jar.
 - JavaJUnit - runs JUnit tests.
+- Library - adds a library to the build, downloading if necessary.
 - Set - sets a build property given a key/value pair.
 - SetFile - sets a file property and reference.
 - Zip - compresses the source files into a .zip file.

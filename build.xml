@@ -25,7 +25,10 @@
     <property name="main-class" value="main.Match"/>
 
     <path id="classpath">
-        <fileset dir="${libraries.directory}" includes="*.jar" excludes="**/Match*"/>
+        <fileset dir="${libraries.directory}" includes="Config-0.1.jar"/>
+        <fileset dir="${libraries.directory}" includes="junit-4.12.jar"/>
+        <fileset dir="${libraries.directory}" includes="hamcrest-core-1.3.jar"/>
+        <fileset dir="${libraries.directory}" includes="mockito-all-1.10.19.jar"/>
         <pathelement location="${classes.directory}" />
         <pathelement location="${classes.tests.directory}" />
     </path>
@@ -52,9 +55,14 @@
         <jar destfile="${jar.directory}/${ant.project.name}.jar" basedir="${classes.directory}">
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
+                <attribute name="Class-path" value="${libraries.directory}Config.jar"/>
             </manifest>
         </jar>
-        <jar destfile="${jar.directory}/${ant.project.name}Test.jar" basedir="${classes.tests.directory}"/>
+        <jar destfile="${jar.directory}/${ant.project.name}Test.jar" basedir="${classes.tests.directory}">
+            <manifest>
+                <attribute name="Class-path" value="${libraries.directory}Config.jar"/>
+            </manifest>
+        </jar>
     </target>
 
     <target name="run" depends="jar">

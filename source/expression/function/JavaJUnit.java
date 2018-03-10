@@ -71,8 +71,8 @@ public class JavaJUnit extends Function {
         List<String> libraries = new ArrayList<>();
         Set<String> libs = new HashSet<>();
         libs.add("junit");
-        libs.add("hamcrest");
-        libs.add("mockito");
+        libs.add("hamcrest-core");
+        libs.add("mockito-all");
         if (hasParameter(LIBRARY)) {
             for (String library : getParameter(LIBRARY).resolveList()) {
                 libs.add(library);

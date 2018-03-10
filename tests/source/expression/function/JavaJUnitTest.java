@@ -46,8 +46,8 @@ public class JavaJUnitTest {
     public void javaJUnit() {
         IMatch match = Mockito.mock(IMatch.class);
         Mockito.when(match.getProperty("junit")).thenReturn("X");
-        Mockito.when(match.getProperty("hamcrest")).thenReturn("X");
-        Mockito.when(match.getProperty("mockito")).thenReturn("X");
+        Mockito.when(match.getProperty("hamcrest-core")).thenReturn("X");
+        Mockito.when(match.getProperty("mockito-all")).thenReturn("X");
         Mockito.when(match.getProperty("FooBar")).thenReturn("X");
         Mockito.when(match.getProperty("FooBarTest")).thenReturn("X");
         ITarget target = Mockito.mock(ITarget.class);

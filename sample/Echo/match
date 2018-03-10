@@ -1,4 +1,4 @@
-# Copyright 2015 Stuart Scott
+# Copyright 2018 Stuart Scott
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+Library(
+    name = "junit"
+    version = "4.12"
+    extension = "jar"
+    location = "http://search.maven.org/remotecontent?filepath=junit/junit/"
+)
+
+Library(
+    name = "hamcrest-core"
+    version = "1.3"
+    extension = "jar"
+    location = "http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/"
+)
+
+Library(
+    name = "mockito-all"
+    version = "1.10.19"
+    extension = "jar"
+    location = "http://search.maven.org/remotecontent?filepath=org/mockito/mockito-all/"
+)
 
 JavaJar(
     name = "Echo"
@@ -25,8 +46,8 @@ JavaJar(
     library = [
         "Echo"
         "junit"
-        "hamcrest"
-        "mockito"
+        "hamcrest-core"
+        "mockito-all"
     ]
 )
 
