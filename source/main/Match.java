@@ -114,6 +114,20 @@ public class Match implements IMatch {
      * {inheritDoc}
      */
     @Override
+    public void addDirectory(File directory) {
+        for (File child : directory.listFiles()) {
+            if (child.isDirectory()) {
+                addDirectory(child);
+            } else {
+                addScannedFile(child);
+            }
+        }
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
     public void provideFile(String file) {
         CountDownLatch latch = mFiles.get(file);
         if (latch == null) {

@@ -55,9 +55,14 @@ public interface IMatch {
     void error(Exception exception);
 
     /**
-     * Adds the given file to the target's output file.
+     * Adds the given file to the target's output.
      */
     void addFile(String file);
+
+    /**
+     * Adds the directory and it's children to the target's output.
+     */
+    void addDirectory(File directory);
 
     /**
      * Called when a file is ready to be used by other target.

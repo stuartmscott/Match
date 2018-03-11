@@ -37,8 +37,10 @@ public class JavaJar extends Function {
     private static final String JAR_COMMAND = "jar cfm %s %s -C %s .";
     private static final String MKDIR_COMMAND = "mkdir -p %s";
     private static final String PROTO = "proto";
+    private static final String PROTO_LITE = "proto_lite";
+    private static final String PROTOC_COMMAND = "protoc --java_out=%s %s";
     // This assumes protoc-gen-javalite and protoc share directory
-    private static final String PROTOC_COMMAND = "protoc --plugin=$(dirname $(which protoc))/protoc-gen-javalite --javalite_out=%s %s";
+    private static final String PROTOC_LITE_COMMAND = "protoc --plugin=$(dirname $(which protoc))/protoc-gen-javalite --javalite_out=%s %s";
     private static final String RESOURCE = "resource";
 
     private IExpression mSource;
@@ -119,9 +121,15 @@ public class JavaJar extends Function {
         // Compile protos
         if (mProtoSource != null) {
             mMatch.runCommand(String.format(MKDIR_COMMAND, mIntermediateProtos));
-            mMatch.runCommand(String.format(PROTOC_COMMAND, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
-            // Find all java files generated
+            if (hasParameter(PROTO_LITE) && getParameter(PROTO_LITE).resolve().equals("true")) {
+                mMatch.runCommand(String.format(PROTOC_LITE_COMMAND, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+            } else {
+                mMatch.runCommand(String.format(PROTOC_COMMAND, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+            }
             File directory = new File(mIntermediateProtos);
+            // Add to the build
+            mMatch.addDirectory(directory);
+            // Get the relative paths of all java files generated
             String path = directory.getAbsolutePath() + "/";
             Set<String> generated = new HashSet<String>();
             Find.scanFiles(directory, path, generated, Pattern.compile(".*.java"));
@@ -129,6 +137,8 @@ public class JavaJar extends Function {
         }
         // Compile java
         mMatch.runCommand(String.format(JAVAC_COMMAND, javacClasspath, Utilities.join(" ", sources), mIntermediateClasses));
+        // Add to the build
+        mMatch.addDirectory(new File(mIntermediateClasses));
         // Package jar
         Set<String> jarIn = new HashSet<String>();
         jarIn.add(mIntermediateClasses);
