@@ -15,12 +15,12 @@
  */
 package expression.function;
 
+import config.Config;
 import expression.IExpression;
 import expression.Literal;
-import main.Config;
-import main.IMatch;
-import main.ITarget;
-import main.MatchTest;
+import match.IMatch;
+import match.ITarget;
+import match.MatchTest;
 
 import java.io.File;
 import java.io.IOException;

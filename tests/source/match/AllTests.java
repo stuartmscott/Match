@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package main;
+package match;
 
 import org.junit.runners.Suite;
 import org.junit.runner.RunWith;
@@ -33,9 +33,9 @@ import org.junit.runner.RunWith;
     expression.LiteralTest.class,
     frontend.LexerTest.class,
     frontend.ParserTest.class,
-    main.MatchTest.class,
-    main.TargetTest.class,
-    main.UtilitiesTest.class
+    match.MatchTest.class,
+    match.TargetTest.class,
+    match.UtilitiesTest.class
 })
 public class AllTests {
     //nothing

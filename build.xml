@@ -22,7 +22,7 @@
     <property name="classes.directory" value="${out.directory}/java/classes/Match/"/>
     <property name="classes.tests.directory"  value="${out.directory}/java/classes/MatchTest/"/>
     <property name="jar.directory" value="${out.directory}/java/jar"/>
-    <property name="main-class" value="main.Match"/>
+    <property name="main-class" value="match.Match"/>
 
     <path id="classpath">
         <fileset dir="${libraries.directory}" includes="Config-0.1.jar"/>
@@ -81,7 +81,7 @@
                 <path refid="classpath"/>
                 <path refid="application"/>
             </classpath>
-            <test name="main.AllTests"/>
+            <test name="match.AllTests"/>
             <formatter type="brief" usefile="false"/>
         </junit>
     </target>

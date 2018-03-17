@@ -36,13 +36,13 @@ Library(
 JavaJar(
     name = "Echo"
     source = Find("source")
-    main_class = "main.Echo"
+    main_class = "echo.Echo"
 )
 
 JavaJar(
     name = "EchoTest"
     source = Find("tests/source")
-    main_class = "main.EchoTest"
+    main_class = "echo.EchoTest"
     library = [
         "Echo"
         "junit"
@@ -57,5 +57,5 @@ JavaJUnit(
         "EchoTest"
         "Echo"
     ]
-    main_class = "main.EchoTest"
+    main_class = "echo.EchoTest"
 )

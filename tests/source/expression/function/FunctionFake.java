@@ -16,8 +16,8 @@
 package expression.function;
 
 import expression.IExpression;
-import main.IMatch;
-import main.ITarget;
+import match.IMatch;
+import match.ITarget;
 
 import java.util.Map;
 

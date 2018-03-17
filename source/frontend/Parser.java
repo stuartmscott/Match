@@ -20,9 +20,9 @@ import expression.IExpression;
 import expression.Literal;
 import expression.function.Function;
 import expression.function.IFunction;
-import main.IMatch;
-import main.ITarget;
-import main.Target;
+import match.IMatch;
+import match.ITarget;
+import match.Target;
 
 import java.io.File;
 import java.util.ArrayList;

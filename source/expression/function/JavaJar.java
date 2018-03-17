@@ -17,9 +17,9 @@ package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import main.IMatch;
-import main.ITarget;
-import main.Utilities;
+import match.IMatch;
+import match.ITarget;
+import match.Utilities;
 
 import java.io.File;
 import java.util.ArrayList;

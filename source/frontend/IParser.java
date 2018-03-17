@@ -17,7 +17,7 @@ package frontend;
 
 import expression.IExpression;
 import expression.function.IFunction;
-import main.ITarget;
+import match.ITarget;
 
 import java.util.List;
 import java.util.Map;

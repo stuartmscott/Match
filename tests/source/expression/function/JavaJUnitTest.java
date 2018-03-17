@@ -18,8 +18,8 @@ package expression.function;
 import expression.ExpressionList;
 import expression.IExpression;
 import expression.Literal;
-import main.IMatch;
-import main.ITarget;
+import match.IMatch;
+import match.ITarget;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,12 +35,12 @@ public class JavaJUnitTest {
 
     private static final String RESULTS_OUT = "out/java/results/";
     private static final String FOOBAR = "FooBar";
-    private static final String FOOBAR_MAIN_CLASS = "main.AllTests";
+    private static final String FOOBAR_MAIN_CLASS = "match.AllTests";
     private static final String FOOBAR_RESULT = "FooBarTestResult";
     private static final String FOOBAR_TEST = "FooBarTest";
     private static final String OUTPUT = RESULTS_OUT + FOOBAR_RESULT;
     private static final String MKDIR_COMMAND = String.format("mkdir -p %s", RESULTS_OUT);
-    private static final String RUN_COMMAND = String.format("java -cp X:X:X:X:X org.junit.runner.JUnitCore main.AllTests 2>&1 | tee %s", OUTPUT);
+    private static final String RUN_COMMAND = String.format("java -cp X:X:X:X:X org.junit.runner.JUnitCore match.AllTests 2>&1 | tee %s", OUTPUT);
 
     @Test
     public void javaJUnit() {

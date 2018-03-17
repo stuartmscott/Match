@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package main;
-
-import main.Echo;
+package echo;
 
 import org.junit.Assert;
 import org.junit.Test;

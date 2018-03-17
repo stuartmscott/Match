@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package main;
+package match;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,7 +31,7 @@ import frontend.Lexem;
 import frontend.Lexer;
 import frontend.Parser;
 
-import main.Config;
+import config.Config;
 
 public class Match implements IMatch {
 
@@ -52,27 +52,32 @@ public class Match implements IMatch {
         LEXEMS.add(new Lexem(Category.LOWER_CASE, "[a-z][_a-zA-Z0-9]*"));
     }
 
-    private Config mConfig;
-    private File mRoot;
-    private Map<String, CountDownLatch> mFiles = new ConcurrentHashMap<String, CountDownLatch>();
+    private final Config mConfig;
+    private final File mRoot;
+    private final boolean mQuiet;
+    private final Map<String, CountDownLatch> mFiles = new ConcurrentHashMap<String, CountDownLatch>();
     private final List<File> mMatchFiles = new ArrayList<File>();
     private final List<File> mAllFiles = new ArrayList<File>();
-    public boolean mQuiet = false;
 
     public Match(Config config) {
         mConfig = config;
         mRoot = new File(config.get("root"));
-        // TODO SetFile should support URL from which file can be downloaded if missing
-        // TODO Add Library function, with 'name', 'version', 'url' params and cache under /tmp/match/libraries, eliminating libraries/ symbolic links and handling auto download.
-        // TODO Support exec targets to allow supporting custom commands, or add AndroidGradle and AndroidAnt functions to build with gradle or ant resp.
-        // TODO Support parallel builds
-        // TODO Support incremental builds
-        // TODO Support building select targets vs all
+        mQuiet = config.getBoolean("quiet");
+        // TODO exec targets to allow supporting custom commands, or add AndroidGradle and AndroidAnt functions to build with gradle or ant resp.
+        // TODO parallel builds
+        // TODO incremental builds
+        // TODO building select targets vs all
+        // TODO function to create distributions
     }
 
     @Override
     public File getRootDir() {
         return mRoot;
+    }
+
+    @Override
+    public boolean isQuiet() {
+        return mQuiet;
     }
 
     List<File> getAllFiles() {

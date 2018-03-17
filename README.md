@@ -17,14 +17,14 @@ Match hides away the heavy lifting in Java, leaving the build files simple, intu
     JavaJar(
         name = "Sample"
         source = Find("source")
-        main_class = "main.Sample"
+        main_class = "match.Sample"
     )
     
     # Build the tests
     JavaJar(
         name = "SampleTest"
         source = Find("tests/source")
-        main_class = "main.SampleTest"
+        main_class = "match.SampleTest"
         library = [
             "Sample"
             "junit"
@@ -38,7 +38,7 @@ Match hides away the heavy lifting in Java, leaving the build files simple, intu
             "SampleTest"
             "Sample"
         ]
-        main_class = "main.SampleTest"
+        main_class = "match.SampleTest"
     )
 
     # Package the distribution

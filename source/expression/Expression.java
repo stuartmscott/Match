@@ -15,9 +15,9 @@
  */
 package expression;
 
-import main.IMatch;
-import main.ITarget;
-import main.Utilities;
+import match.IMatch;
+import match.ITarget;
+import match.Utilities;
 
 import java.util.List;
 

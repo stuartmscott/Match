@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import main.IMatch;
-import main.ITarget;
-import main.Utilities;
+import match.IMatch;
+import match.ITarget;
+import match.Utilities;
 import expression.IExpression;
 import expression.Literal;
 

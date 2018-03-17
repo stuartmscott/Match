@@ -15,8 +15,8 @@
  */
 package frontend;
 
-import main.IMatch;
-import main.Match;
+import match.IMatch;
+import match.Match;
 
 import java.io.BufferedWriter;
 import java.io.File;

@@ -15,7 +15,7 @@
  */
 package frontend;
 
-import main.IMatch;
+import match.IMatch;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package main;
+package match;
+
+import config.Config;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,9 +102,8 @@ public class MatchTest {
     }
 
     private Match createMatch(Config config) {
-        Match match = new Match(config);
-        match.mQuiet = true;
-        return match;
+        config.put("quiet");
+        return new Match(config);
     }
 
     public static File createFileStructure(File root) throws IOException {

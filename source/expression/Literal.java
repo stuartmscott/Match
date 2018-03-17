@@ -15,8 +15,8 @@
  */
 package expression;
 
-import main.IMatch;
-import main.ITarget;
+import match.IMatch;
+import match.ITarget;
 
 public class Literal extends Expression {
 

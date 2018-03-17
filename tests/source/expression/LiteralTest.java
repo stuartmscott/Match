@@ -15,8 +15,8 @@
  */
 package expression;
 
-import main.IMatch;
-import main.ITarget;
+import match.IMatch;
+import match.ITarget;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;

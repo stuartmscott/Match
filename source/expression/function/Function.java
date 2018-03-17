@@ -17,8 +17,8 @@ package expression.function;
 
 import expression.Expression;
 import expression.IExpression;
-import main.IMatch;
-import main.ITarget;
+import match.IMatch;
+import match.ITarget;
 
 import java.io.File;
 import java.lang.reflect.Constructor;

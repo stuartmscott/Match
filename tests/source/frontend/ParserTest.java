@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import main.IMatch;
-import main.ITarget;
-import main.Match;
+import match.IMatch;
+import match.ITarget;
+import match.Match;
 
 import org.junit.Assert;
 import org.junit.Before;
