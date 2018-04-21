@@ -43,7 +43,7 @@ Library(
 JavaJar(
     name = "Match"
     source = Find("source")
-    main_class = "match.Match"
+    main-class = "match.Match"
     library = [
         "Config"
     ]
@@ -52,7 +52,7 @@ JavaJar(
 JavaJar(
     name = "MatchTest"
     source = Find("tests/source")
-    main_class = "match.AllTests"
+    main-class = "match.AllTests"
     library = [
         "Match"
         "Config"
@@ -69,7 +69,7 @@ JavaJUnit(
         "Match"
         "Config"
     ]
-    main_class = "match.AllTests"
+    main-class = "match.AllTests"
 )
 
 Release(

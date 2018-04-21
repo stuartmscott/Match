@@ -52,7 +52,7 @@ public class JavaJarTest {
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         parameters.put(Function.NAME, new Literal(match, target, FOOBAR));
         parameters.put(Function.SOURCE, new Literal(match, target, FOOBAR));
-        parameters.put(Function.MAIN_CLASS, new Literal(match, target, FOOBAR));
+        parameters.put(JavaJar.MAIN_CLASS, new Literal(match, target, FOOBAR));
         IFunction function = new JavaJar(match, target, parameters);
         function.configure();
         Assert.assertEquals("Wrong resolution", JAR_OUT, function.resolve());
@@ -79,7 +79,7 @@ public class JavaJarTest {
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         parameters.put(Function.NAME, new Literal(match, target, FOOBAR));
         parameters.put(Function.SOURCE, new Literal(match, target, FOOBAR));
-        parameters.put(Function.MAIN_CLASS, new Literal(match, target, FOOBAR));
+        parameters.put(JavaJar.MAIN_CLASS, new Literal(match, target, FOOBAR));
         parameters.put(JavaJar.RESOURCE, new Literal(match, target, RESOURCE));
         IFunction function = new JavaJar(match, target, parameters);
         function.configure();

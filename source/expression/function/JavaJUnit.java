@@ -30,8 +30,9 @@ import expression.Literal;
 
 public class JavaJUnit extends Function {
 
-    private static final String RESULT_OUTPUT = "out/java/results/";
-    private static final String RUN_COMMAND = "java %s org.junit.runner.JUnitCore %s 2>&1 | tee %s";
+    public static final String MAIN_CLASS = "main-class";
+    public static final String RESULT_OUTPUT = "out/java/results/";
+    public static final String RUN_COMMAND = "java %s org.junit.runner.JUnitCore %s 2>&1 | tee %s";
 
     private String mName;
     private String mMainClass;

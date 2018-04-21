@@ -28,14 +28,13 @@ import java.util.Map;
 
 public abstract class Function extends Expression implements IFunction {
 
-    public static final String ANONYMOUS = "_";
+    public static final String ANONYMOUS = "-";
     public static final String CLASS_OUTPUT = "out/java/classes/";
     public static final String DIRECTORY = "directory";
     public static final String EXTENSION = "extension";
     public static final String JAR_OUTPUT = "out/java/jar/";
     public static final String LIBRARY = "library";
     public static final String LOCATION = "location";
-    public static final String MAIN_CLASS = "main_class";
     public static final String MANIFEST_OUTPUT = "out/java/manifest/";
     public static final String MKDIR_COMMAND = "mkdir -p %s";
     public static final String NAME = "name";

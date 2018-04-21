@@ -35,8 +35,9 @@ public class JavaJar extends Function {
     public static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\n%s\" > %s";
     public static final String JAVAC_COMMAND = "javac %s %s -d %s";
     public static final String JAR_COMMAND = "jar cfm %s %s %s -C %s .";
+    public static final String MAIN_CLASS = "main-class";
     public static final String PROTO = "proto";
-    public static final String PROTO_LITE = "proto_lite";
+    public static final String PROTO_LITE = "proto-lite";
     public static final String PROTOC_COMMAND = "protoc --proto_path=%s --java_out=%s %s";
     // This assumes protoc-gen-javalite and protoc share directory
     public static final String PROTOC_LITE_COMMAND = "protoc --plugin=$(dirname $(which protoc))/protoc-gen-javalite --proto_path=%s --javalite_out=%s %s";

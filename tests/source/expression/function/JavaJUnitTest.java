@@ -57,7 +57,7 @@ public class JavaJUnitTest {
         elements.add(new Literal(match, target, FOOBAR));
         elements.add(new Literal(match, target, FOOBAR_TEST));
 		parameters.put(Function.LIBRARY, new ExpressionList(match, target, elements));
-        parameters.put(Function.MAIN_CLASS, new Literal(match, target, FOOBAR_MAIN_CLASS));
+        parameters.put(JavaJUnit.MAIN_CLASS, new Literal(match, target, FOOBAR_MAIN_CLASS));
         IFunction function = new JavaJUnit(match, target, parameters);
         function.configure();
         Assert.assertEquals("Wrong resolution", OUTPUT, function.resolve());
