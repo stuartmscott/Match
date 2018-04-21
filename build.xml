@@ -17,7 +17,7 @@
 
     <property name="source.directory" value="source"/>
     <property name="source.tests.directory" value="tests/source/"/>
-    <property name="libraries.directory" value="libraries/"/>
+    <property name="libraries.directory" value="${user.home}/match/libraries/"/>
     <property name="out.directory"  value="out/"/>
     <property name="classes.directory" value="${out.directory}/java/classes/Match/"/>
     <property name="classes.tests.directory"  value="${out.directory}/java/classes/MatchTest/"/>

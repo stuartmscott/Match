@@ -37,9 +37,12 @@ public abstract class Function extends Expression implements IFunction {
     public static final String LOCATION = "location";
     public static final String MAIN_CLASS = "main_class";
     public static final String MANIFEST_OUTPUT = "out/java/manifest/";
+    public static final String MKDIR_COMMAND = "mkdir -p %s";
     public static final String NAME = "name";
     public static final String PATTERN = "pattern";
     public static final String PROTO_OUTPUT = "out/java/proto/";
+    public static final String RELEASE_OUTPUT = "release/";
+    public static final String RESOURCE = "resource";
     public static final String SOURCE = "source";
     public static final String VALUE = "value";
     public static final String VERSION = "version";
@@ -83,7 +86,8 @@ public abstract class Function extends Expression implements IFunction {
 
     public static Function getFunction(String name, IMatch match, ITarget target, Map<String, IExpression> parameters) {
         try {
-            Class<?> clazz = Class.forName(String.format("expression.function.%s", name));
+            String className = String.format("expression.function.%s", name);
+            Class<?> clazz = Class.forName(className);
             Constructor<?> constructor = clazz.getDeclaredConstructor(IMatch.class, ITarget.class, Map.class);
             return (Function) constructor.newInstance(match, target, parameters);
         } catch (Exception e) {

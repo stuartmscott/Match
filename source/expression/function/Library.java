@@ -19,6 +19,7 @@ import expression.IExpression;
 import expression.Literal;
 import match.IMatch;
 import match.ITarget;
+import match.Utilities;
 import java.io.File;
 import java.net.URL;
 import java.util.Map;
@@ -26,9 +27,14 @@ import java.util.Map;
 public class Library extends Function {
 
     private static final String CURL_COMMAND = "curl %s -o %s";
+    private static final String ARCHITECTURE = "architecture";// "x86_64"
+    private static final String ANDROID = "android";
+    private static final String LINUX = "linux";
+    private static final String MAC = "mac";
+    private static final String WINDOWS = "windows";
 
-    private final File mCacheDir;
-    private final String mKey;
+    private final File mDir;
+    private final String mName;
     private final String mVersion;
     private final String mExtension;
     private final File mFile;
@@ -37,41 +43,84 @@ public class Library extends Function {
 
     public Library(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        File root = match.getRootDir();
-        mCacheDir = new File(root, "libraries/");
-        mCacheDir.mkdirs();
-        IExpression key = getParameter(NAME);
-        IExpression version = getParameter(VERSION);
+        mDir = match.getLibrariesDir();
+        mDir.mkdirs();
+        StringBuilder sb = new StringBuilder();
+        IExpression name = getParameter(NAME);
+        if (!(name instanceof Literal)) {
+            mMatch.error("Library function expects a String name");
+        }
+        mName = name.resolve();
+        target.setName("Library:" + mName);
+        sb.append(mName);
+        if (hasParameter(ANDROID) && Utilities.isAndroid()) {
+            IExpression android = getParameter(ANDROID);
+            if (!(android instanceof Literal)) {
+                mMatch.error("Library function expects a String android");
+            }
+            sb.append("-");
+            sb.append(android.resolve());
+        }
+        if (hasParameter(LINUX) && Utilities.isLinux()) {
+            IExpression linux = getParameter(LINUX);
+            if (!(linux instanceof Literal)) {
+                mMatch.error("Library function expects a String linux");
+            }
+            sb.append("-");
+            sb.append(linux.resolve());
+        }
+        if (hasParameter(MAC) && Utilities.isMac()) {
+            IExpression mac = getParameter(MAC);
+            if (!(mac instanceof Literal)) {
+                mMatch.error("Library function expects a String mac");
+            }
+            sb.append("-");
+            sb.append(mac.resolve());
+        }
+        if (hasParameter(WINDOWS) && Utilities.isWindows()) {
+            IExpression windows = getParameter(WINDOWS);
+            if (!(windows instanceof Literal)) {
+                mMatch.error("Library function expects a String windows");
+            }
+            sb.append("-");
+            sb.append(windows.resolve());
+        }
+        if (hasParameter(VERSION)) {
+            IExpression version = getParameter(VERSION);
+            if (!(version instanceof Literal)) {
+                mMatch.error("Library function expects a String version");
+            }
+            mVersion = version.resolve();
+            sb.append("-");
+            sb.append(mVersion);
+        } else {
+            mVersion = "";
+        }
         IExpression extension = getParameter(EXTENSION);
-        IExpression location = getParameter(LOCATION);
-        if (!(key instanceof Literal)) {
-            mMatch.error("Library function expects a String key");
-        }
-        if (!(version instanceof Literal)) {
-            mMatch.error("Library function expects a String version");
-        }
         if (!(extension instanceof Literal)) {
             mMatch.error("Library function expects a String extension");
         }
-        if (!(location instanceof Literal)) {
-            mMatch.error("Library function expects a String URL");
-        }
-        mKey = key.resolve();
-        mVersion = version.resolve();
         mExtension = extension.resolve();
-        String filename = String.format("%s-%s.%s", mKey, mVersion, mExtension);
-        try {
-            // JUnit - http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar
-            // Hamcrest - http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar
-            // Mockito - http://search.maven.org/remotecontent?filepath=org/mockito/mockito-core/2.15.0/mockito-core-2.15.0.jar
-            // Protobuf - http://search.maven.org/remotecontent?filepath=com/google/protobuf/protobuf-java/3.5.1/protobuf-java-3.5.1.jar
-            mURL = new URL(String.format("%s%s/%s", location.resolve(), mVersion, filename));
-        } catch (Exception e) {
-            mMatch.error(e);
+        sb.append(".");
+        sb.append(mExtension);
+        String filename = sb.toString();
+        if (hasParameter(LOCATION)) {
+            IExpression location = getParameter(LOCATION);
+            if (!(location instanceof Literal)) {
+                mMatch.error("Library function expects a String URL");
+            }
+            try {
+                // JUnit - http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar
+                // Hamcrest - http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar
+                // Mockito - http://search.maven.org/remotecontent?filepath=org/mockito/mockito-core/2.15.0/mockito-core-2.15.0.jar
+                // Protobuf - http://search.maven.org/remotecontent?filepath=com/google/protobuf/protobuf-java/3.5.1/protobuf-java-3.5.1.jar
+                mURL = new URL(String.format("%s%s/%s", location.resolve(), mVersion, filename));
+            } catch (Exception e) {
+                mMatch.error(e);
+            }
         }
-        mFile = new File(mCacheDir, filename);
-        mFilePath = root.toPath().relativize(mFile.toPath()).toString();
-        target.setName("Library:" + mKey);
+        mFile = new File(mDir, filename);
+        mFilePath = mFile.toPath().toString();
     }
 
     /**
@@ -79,7 +128,7 @@ public class Library extends Function {
      */
     @Override
     public void configure() {
-        mMatch.setProperty(mKey, mFilePath);
+        mMatch.setProperty(mName, mFilePath);
         mMatch.addFile(mFilePath);
     }
 
@@ -88,10 +137,12 @@ public class Library extends Function {
      */
     @Override
     public String resolve() {
-        if (!mFile.exists()) {
+        if (!mFile.exists() && mURL != null) {
             mMatch.runCommand(String.format(CURL_COMMAND, mURL.toString(), mFilePath));
         }
-        mMatch.provideFile(mFilePath);
+        if (mFile.exists()) {
+            mMatch.provideFile(mFilePath);
+        }
         return mFilePath;
     }
 }

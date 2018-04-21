@@ -33,8 +33,7 @@ import java.util.regex.Pattern;
 
 public class Zip extends Function {
 
-    private static final String MKDIR_COMMAND = "mkdir -p %s";
-    private static final String ZIP_COMMAND = "zip -r %s %s";
+    public final static String ZIP_COMMAND = "zip -r %s %s";
 
     private IExpression mSource;
     private String mName;

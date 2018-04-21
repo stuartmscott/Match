@@ -57,6 +57,7 @@ Match hides away the heavy lifting in Java, leaving the build files simple, intu
 - JavaJar - compiles java code into a jar.
 - JavaJUnit - runs JUnit tests.
 - Library - adds a library to the build, downloading if necessary.
+- Release - builds a release bundle, and pushes it out the distribution channels.
 - Set - sets a build property given a key/value pair.
 - SetFile - sets a file property and reference.
 - Zip - compresses the source files into a .zip file.

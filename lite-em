@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-LIBRARIES="libraries"
+LIBRARIES="$HOME/match/libraries"
 CONFIG_JAR="$LIBRARIES/Config-0.1.jar"
 MATCH_JAR="$LIBRARIES/Match-0.3.jar"
 
@@ -29,4 +29,4 @@ if [ ! -f "$MATCH_JAR" ]; then
     curl -L https://github.com/stuartmscott/Match/releases/download/v0.3/Match-0.3.jar -o $MATCH_JAR
 fi
 
-java -cp $CONFIG_JAR:$MATCH_JAR match.Match root=.
+java -cp $CONFIG_JAR:$MATCH_JAR match.Match root=. libraries="$LIBRARIES"

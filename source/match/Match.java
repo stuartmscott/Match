@@ -19,9 +19,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -54,14 +60,16 @@ public class Match implements IMatch {
 
     private final Config mConfig;
     private final File mRoot;
+    private final File mLibraries;
     private final boolean mQuiet;
-    private final Map<String, CountDownLatch> mFiles = new ConcurrentHashMap<String, CountDownLatch>();
-    private final List<File> mMatchFiles = new ArrayList<File>();
-    private final List<File> mAllFiles = new ArrayList<File>();
+    private final Map<String, CountDownLatch> mFiles = new ConcurrentHashMap<>();
+    private final List<File> mMatchFiles = new ArrayList<>();
+    private final List<File> mAllFiles = new ArrayList<>();
 
     public Match(Config config) {
         mConfig = config;
         mRoot = new File(config.get("root"));
+        mLibraries = new File(config.has("libraries") ? config.get("libraries") : System.getProperty("java.io.tmpdir"));
         mQuiet = config.getBoolean("quiet");
         // TODO exec targets to allow supporting custom commands, or add AndroidGradle and AndroidAnt functions to build with gradle or ant resp.
         // TODO parallel builds
@@ -73,6 +81,11 @@ public class Match implements IMatch {
     @Override
     public File getRootDir() {
         return mRoot;
+    }
+
+    @Override
+    public File getLibrariesDir() {
+        return mLibraries;
     }
 
     @Override
@@ -256,6 +269,8 @@ public class Match implements IMatch {
      */
     @Override
     public int runCommand(String command) {
+        // TODO support commands running from the root directory or
+        // the same directory as the match file that defined the target.
         int result = 0;
         try {
             Process process = Runtime.getRuntime().exec(new String[] {"/bin/bash", "-c", command});
@@ -318,7 +333,9 @@ public class Match implements IMatch {
      */
     @Override
     public void error(Exception exception) {
-        error(exception.getMessage());
+        StringWriter sw = new StringWriter();
+        exception.printStackTrace(new PrintWriter(sw));
+        error(sw.toString());
     }
 
     public static void main(String args[]) {

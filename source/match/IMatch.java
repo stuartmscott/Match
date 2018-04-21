@@ -25,6 +25,11 @@ public interface IMatch {
     File getRootDir();
 
     /**
+     * @return the directory holding the build's libraries
+     */
+    File getLibrariesDir();
+
+    /**
      * @return true iff this execution is quiet
      */
     boolean isQuiet();

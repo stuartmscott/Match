@@ -32,16 +32,14 @@ import java.util.regex.Pattern;
 
 public class JavaJar extends Function {
 
-    private static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\n%s\" > %s";
-    private static final String JAVAC_COMMAND = "javac %s %s -d %s";
-    private static final String JAR_COMMAND = "jar cfm %s %s -C %s .";
-    private static final String MKDIR_COMMAND = "mkdir -p %s";
-    private static final String PROTO = "proto";
-    private static final String PROTO_LITE = "proto_lite";
-    private static final String PROTOC_COMMAND = "protoc --java_out=%s %s";
+    public static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\n%s\" > %s";
+    public static final String JAVAC_COMMAND = "javac %s %s -d %s";
+    public static final String JAR_COMMAND = "jar cfm %s %s %s -C %s .";
+    public static final String PROTO = "proto";
+    public static final String PROTO_LITE = "proto_lite";
+    public static final String PROTOC_COMMAND = "protoc --proto_path=%s --java_out=%s %s";
     // This assumes protoc-gen-javalite and protoc share directory
-    private static final String PROTOC_LITE_COMMAND = "protoc --plugin=$(dirname $(which protoc))/protoc-gen-javalite --javalite_out=%s %s";
-    private static final String RESOURCE = "resource";
+    public static final String PROTOC_LITE_COMMAND = "protoc --plugin=$(dirname $(which protoc))/protoc-gen-javalite --proto_path=%s --javalite_out=%s %s";
 
     private IExpression mSource;
     private IExpression mProtoSource;
@@ -102,6 +100,7 @@ public class JavaJar extends Function {
         List<String> libraries = new ArrayList<String>();
         String javacClasspath = "";
         String jarClasspath = "";
+        // TODO consider extract libraries into intermediate classes directory
         if (hasParameter(LIBRARY)) {
             for (String library : getParameter(LIBRARY).resolveList()) {
                 String path = mMatch.getProperty(library);
@@ -120,11 +119,12 @@ public class JavaJar extends Function {
         sources.addAll(mSource.resolveList());
         // Compile protos
         if (mProtoSource != null) {
+            File dir = mTarget.getFile().getParentFile();
             mMatch.runCommand(String.format(MKDIR_COMMAND, mIntermediateProtos));
             if (hasParameter(PROTO_LITE) && getParameter(PROTO_LITE).resolve().equals("true")) {
-                mMatch.runCommand(String.format(PROTOC_LITE_COMMAND, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+                mMatch.runCommand(String.format(PROTOC_LITE_COMMAND, dir, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
             } else {
-                mMatch.runCommand(String.format(PROTOC_COMMAND, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+                mMatch.runCommand(String.format(PROTOC_COMMAND, dir, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
             }
             File directory = new File(mIntermediateProtos);
             // Add to the build
@@ -140,12 +140,8 @@ public class JavaJar extends Function {
         // Add to the build
         mMatch.addDirectory(new File(mIntermediateClasses));
         // Package jar
-        Set<String> jarIn = new HashSet<String>();
-        jarIn.add(mIntermediateClasses);
-        if (mResource != null) {
-            jarIn.addAll(mResource.resolveList());
-        }
-        mMatch.runCommand(String.format(JAR_COMMAND, mOutput, mManifest, Utilities.join(",", jarIn)));
+        String resources = (mResource == null) ? "" : Utilities.join(" ", mResource.resolveList());
+        mMatch.runCommand(String.format(JAR_COMMAND, mOutput, mManifest, resources, mIntermediateClasses));
         mMatch.provideFile(mOutput);
         return mOutput;
     }

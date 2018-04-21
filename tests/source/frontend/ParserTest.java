@@ -131,6 +131,7 @@ public class ParserTest {
         Lexer lexer = LexerTest.createLexer(mMatch, input);
         Parser parser = new Parser(mMatch, lexer);
         IExpression expression = parser.matchExpression();
+        Assert.assertNotNull("Expected expression", expression);
         List<String> list = expression.resolveList();
         Assert.assertEquals("Incorrect list size", 2, list.size());
         Assert.assertEquals("Incorrect list element", "Blah", list.get(0));

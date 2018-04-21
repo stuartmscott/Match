@@ -3,9 +3,8 @@
 .DS_Store
 .project
 .metadata
-libraries
 out
-sample/Echo/libraries
+release
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

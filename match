@@ -71,3 +71,10 @@ JavaJUnit(
     ]
     main_class = "match.AllTests"
 )
+
+Release(
+    source = "Match"
+    version = "0.3"
+    extension = "jar"
+    channel = "cp %s $HOME/match/libraries/"
+)

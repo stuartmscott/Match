@@ -56,7 +56,6 @@ public class FunctionTest {
     @Test
     public void getFunction() {
         IFunction function = Function.getFunction(FAKE, mMatch, mTarget, mParameters);
-        function.configure();
         Assert.assertNotNull("Expected to get function", function);
         function.configure();
         Assert.assertEquals("Wrong function resolution", FOO + BAR, function.resolve());
