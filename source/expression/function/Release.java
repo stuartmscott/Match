@@ -41,7 +41,8 @@ public class Release extends Function {
     private String mSource;
     private String mName;
     private String mOutputDir;
-    private String mOutputFile;
+    private String mOutput;
+    private File mOutputFile;
 
     public Release(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
@@ -59,6 +60,7 @@ public class Release extends Function {
             }
             extension = ext.resolve();
         }
+        // TODO switch to YYYYMMDD
         float version = 0.1f;
         if (hasParameter(VERSION)) {
             IExpression ver = getParameter(VERSION);
@@ -70,8 +72,11 @@ public class Release extends Function {
         mName = String.format("%s-%1.1f.%s", mSource, version, extension);
         target.setName(mName);
         mOutputDir = String.format("%sv%1.1f/", RELEASE_OUTPUT, version);
-        mOutputFile = String.format("%s%s", mOutputDir, mName);
+        File directory = new File(target.getDirectory(), mOutputDir);
+        mOutputFile = new File(directory, mName);
+        mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
         // TODO ensure release isn't re-created if the inputs haven't been modified
+        // TODO wait for test result before releasing - avoid releasing bad code
     }
 
     /**
@@ -79,8 +84,8 @@ public class Release extends Function {
      */
     @Override
     public void configure() {
-        mMatch.addFile(mOutputFile);
-        mMatch.setProperty(mName, mOutputFile);
+        mMatch.addFile(mOutput);
+        mMatch.setProperty(mName, mOutput);
         mChannel.configure();
     }
 
@@ -90,17 +95,17 @@ public class Release extends Function {
     @Override
     public String resolve() {
         // Create output directory
-        mMatch.runCommand(String.format(MKDIR_COMMAND, mOutputDir));
+        mTarget.runCommand(String.format(MKDIR_COMMAND, mOutputDir));
         // Get the source file
         String source = mMatch.getProperty(mSource);
         mMatch.awaitFile(source);
         // Create release
-        mMatch.runCommand(String.format(CP_COMMAND, source, mOutputFile));
+        mTarget.runCommand(String.format(CP_COMMAND, source, mOutput));
         // Push out distribution channels
         for (String channel : mChannel.resolveList()) {
-            mMatch.runCommand(String.format(channel, mOutputFile));
+            mTarget.runCommand(String.format(channel, mOutput));
         }
         mMatch.provideFile(mOutputFile);
-        return mOutputFile;
+        return mOutput;
     }
 }

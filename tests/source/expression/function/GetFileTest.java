@@ -50,14 +50,14 @@ public class GetFileTest {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
         mFile = SetFileTest.setFile(match, target);
-        mFilename = mFile.getAbsolutePath();
+        mFilename = mFile.toPath().toString();
         Mockito.when(match.getProperty(FOO)).thenReturn(mFilename);
         IFunction function = getFunction(match, target);
         function.configure();
         Assert.assertEquals("Wrong function resolution", mFilename, function.resolve());
         Mockito.verify(match, Mockito.times(1)).setProperty(FOO, mFilename);
         Mockito.verify(match, Mockito.times(1)).addFile(mFilename);
-        Mockito.verify(match, Mockito.times(1)).provideFile(mFilename);
+        Mockito.verify(match, Mockito.times(1)).provideFile(mFile);
     }
 
     private IFunction getFunction(IMatch match, ITarget target) {

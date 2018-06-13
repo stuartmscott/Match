@@ -24,11 +24,15 @@ import java.util.Map;
 
 public class SetFile extends Set {
 
+    private File file;
+    private String filename;
+
     public SetFile(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        File file = new File(mValue);
+        file = new File(target.getDirectory(), mValue);
+        filename = file.toPath().normalize().toAbsolutePath().toString();
         if (!file.exists()) {
-            mMatch.error(String.format("File %s does not exist", file.getAbsolutePath()));
+            mMatch.error(String.format("File %s does not exist", filename));
         }
         target.setName("SetFile:" + mKey);
     }
@@ -39,7 +43,7 @@ public class SetFile extends Set {
     @Override
     public void configure() {
         super.configure();
-        mMatch.addFile(mValue);
-        mMatch.provideFile(mValue);
+        mMatch.addFile(filename);
+        mMatch.provideFile(file);
     }
 }

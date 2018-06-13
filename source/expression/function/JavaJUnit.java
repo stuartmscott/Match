@@ -37,6 +37,7 @@ public class JavaJUnit extends Function {
     private String mName;
     private String mMainClass;
     private String mOutput;
+    private File mOutputFile;
 
     public JavaJUnit(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
@@ -51,7 +52,8 @@ public class JavaJUnit extends Function {
         mName = name.resolve();
         target.setName(mName);
         mMainClass = mainClass.resolve();
-        mOutput = RESULT_OUTPUT + mName;
+        mOutputFile = new File(target.getDirectory(), RESULT_OUTPUT + mName);
+        mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
     }
 
     /**
@@ -84,9 +86,9 @@ public class JavaJUnit extends Function {
             libraries.add(path);
         }
         String classpath = String.format("-cp %s", Utilities.join(":", libraries));
-        mMatch.runCommand(String.format(MKDIR_COMMAND, RESULT_OUTPUT));
-        if (mMatch.runCommand(String.format(RUN_COMMAND, classpath, mMainClass, mOutput)) == 0) {
-            mMatch.provideFile(mOutput);
+        mTarget.runCommand(String.format(MKDIR_COMMAND, RESULT_OUTPUT));
+        if (mTarget.runCommand(String.format(RUN_COMMAND, classpath, mMainClass, mOutput)) == 0) {
+            mMatch.provideFile(mOutputFile);
         }
         // TODO provide a pass file for other targets to await
         return mOutput;

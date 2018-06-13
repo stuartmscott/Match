@@ -52,10 +52,9 @@ public class Find extends Function {
      */
     @Override
     public void configure() {
-        File root = mMatch.getRootDir();
-        Path rootPath = root.toPath();
         File match = mTarget.getFile();
         File matchDir = match.getParentFile();
+        Path matchDirPath = matchDir.toPath();
         String dir = mDirectory.resolve();
         File directory = null;
         if (dir == null || dir.isEmpty()) {
@@ -64,13 +63,14 @@ public class Find extends Function {
             directory = new File(matchDir, dir);
         }
         Path dirPath = directory.toPath();
-        String path = rootPath.relativize(dirPath).toString();
+        String path = matchDirPath.relativize(dirPath).toString();
         if (!path.isEmpty()) {
             path += "/";
         }
+        // System.out.println("Searching path " + path);
         String pattern = mPattern == null ? ".*" : mPattern.resolve();
         scanFiles(directory, path, mFiles, Pattern.compile(pattern));
-        // System.out.println(mFiles);
+        // System.out.println("Found " + mFiles);
     }
 
     /**
@@ -80,9 +80,10 @@ public class Find extends Function {
     public List<String> resolveList() {
         List<String> files = new ArrayList<String>();
         for (String file : mFiles) {
-            mMatch.awaitFile(file);
+            File f = new File(mTarget.getFile().getParentFile(), file);
+            String path = f.toPath().normalize().toAbsolutePath().toString();
+            mMatch.awaitFile(path);
             files.add(file);
-            //files.add(new Literal(mMatch, mTarget, file).resolve());
         }
         return files;
     }

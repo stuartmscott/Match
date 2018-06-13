@@ -47,11 +47,13 @@ public class JavaJar extends Function {
     private IExpression mResource;
     private IExpression mMainClass;
     private String mName;
+    private File mManifestFile;
     private String mManifest;
     private String mIntermediateClasses;
     private String mIntermediateManifests;
     private String mIntermediateProtos;
     private String mOutput;
+    private File mOutputFile;
 
     public JavaJar(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
@@ -62,7 +64,8 @@ public class JavaJar extends Function {
         mName = name.resolve();
         target.setName(mName);
         mSource = getParameter(SOURCE);
-        mOutput = JAR_OUTPUT + mName + ".jar";
+        mOutputFile = new File(target.getDirectory(), JAR_OUTPUT + mName + ".jar");
+        mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
         mIntermediateClasses = String.format("%s%s/", CLASS_OUTPUT, mName);
         if (hasParameter(PROTO)) {
             mProtoSource = getParameter(PROTO);
@@ -72,7 +75,8 @@ public class JavaJar extends Function {
             mResource = getParameter(RESOURCE);
         }
         mIntermediateManifests = String.format("%s%s/", MANIFEST_OUTPUT, mName);
-        mManifest = mIntermediateManifests + "MANIFEST.MF";
+        mManifestFile = new File(target.getDirectory(), mIntermediateManifests + "MANIFEST.MF");
+        mManifest = mManifestFile.toPath().normalize().toAbsolutePath().toString();
         mMainClass = getParameter(MAIN_CLASS);
     }
 
@@ -98,6 +102,7 @@ public class JavaJar extends Function {
      */
     @Override
     public String resolve() {
+        File matchDir = mTarget.getDirectory();
         List<String> libraries = new ArrayList<String>();
         String javacClasspath = "";
         String jarClasspath = "";
@@ -108,42 +113,50 @@ public class JavaJar extends Function {
                 mMatch.awaitFile(path);
                 libraries.add(path);
             }
+            // TODO this is broken:
+            // error: java.io.IOException: line too long
+            // error:  at java.util.jar.Attributes.read(Attributes.java:379)
+            // error:  at java.util.jar.Manifest.read(Manifest.java:199)
+            // error:  at java.util.jar.Manifest.<init>(Manifest.java:69)
+            // error:  at sun.tools.jar.Main.run(Main.java:176)
+            // error:  at sun.tools.jar.Main.main(Main.java:1288)
+            // error: jar cfm out/java/jar/JoyTest.jar out/java/manifest/JoyTest/MANIFEST.MF  -C out/java/classes/JoyTest/ .
+            // TODO maybe extract libraries into intermediate directory then jar together
             javacClasspath = String.format("-cp %s", Utilities.join(":", libraries));
-            jarClasspath = String.format("Class-Path: %s\n", Utilities.join(":", libraries));
+            //jarClasspath = String.format("Class-Path: %s\n", Utilities.join(":", libraries));
         }
-        mMatch.runCommand(String.format(MKDIR_COMMAND, mIntermediateClasses));
-        mMatch.runCommand(String.format(MKDIR_COMMAND, mIntermediateManifests));
-        mMatch.runCommand(String.format(MKDIR_COMMAND, JAR_OUTPUT));
-        mMatch.runCommand(String.format(ECHO_COMMAND, mMainClass.resolve(), jarClasspath, mManifest));
-        mMatch.provideFile(mManifest);
+        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateClasses));
+        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateManifests));
+        mTarget.runCommand(String.format(MKDIR_COMMAND, JAR_OUTPUT));
+        mTarget.runCommand(String.format(ECHO_COMMAND, mMainClass.resolve(), jarClasspath, mManifest));
+        mMatch.provideFile(mManifestFile);
         Set<String> sources = new HashSet<String>();
         sources.addAll(mSource.resolveList());
         // Compile protos
         if (mProtoSource != null) {
-            File dir = mTarget.getFile().getParentFile();
-            mMatch.runCommand(String.format(MKDIR_COMMAND, mIntermediateProtos));
+            mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateProtos));
             if (hasParameter(PROTO_LITE) && getParameter(PROTO_LITE).resolve().equals("true")) {
-                mMatch.runCommand(String.format(PROTOC_LITE_COMMAND, dir, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+                mTarget.runCommand(String.format(PROTOC_LITE_COMMAND, matchDir, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
             } else {
-                mMatch.runCommand(String.format(PROTOC_COMMAND, dir, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+                mTarget.runCommand(String.format(PROTOC_COMMAND, matchDir, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
             }
-            File directory = new File(mIntermediateProtos);
+            File directory = new File(matchDir, mIntermediateProtos);
             // Add to the build
             mMatch.addDirectory(directory);
             // Get the relative paths of all java files generated
-            String path = directory.getAbsolutePath() + "/";
+            String path = directory.toPath().toString() + "/";
             Set<String> generated = new HashSet<String>();
             Find.scanFiles(directory, path, generated, Pattern.compile(".*.java"));
             sources.addAll(generated);
         }
         // Compile java
-        mMatch.runCommand(String.format(JAVAC_COMMAND, javacClasspath, Utilities.join(" ", sources), mIntermediateClasses));
+        mTarget.runCommand(String.format(JAVAC_COMMAND, javacClasspath, Utilities.join(" ", sources), mIntermediateClasses));
         // Add to the build
-        mMatch.addDirectory(new File(mIntermediateClasses));
+        mMatch.addDirectory(new File(matchDir, mIntermediateClasses));
         // Package jar
         String resources = (mResource == null) ? "" : Utilities.join(" ", mResource.resolveList());
-        mMatch.runCommand(String.format(JAR_COMMAND, mOutput, mManifest, resources, mIntermediateClasses));
-        mMatch.provideFile(mOutput);
+        mTarget.runCommand(String.format(JAR_COMMAND, mOutput, mManifest, resources, mIntermediateClasses));
+        mMatch.provideFile(mOutputFile);
         return mOutput;
     }
 }

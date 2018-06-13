@@ -44,7 +44,7 @@ public class MatchTest {
         root = folder.getRoot();
         createFileStructure(root);
         config = new Config();
-        config.put("root", root.getAbsolutePath());
+        config.put("root", root.toPath().toString());
         System.setSecurityManager(new ExitSecurityManager());
     }
 
@@ -68,13 +68,13 @@ public class MatchTest {
     public void files() throws Exception {
         Match match = createMatch(config);
         File file = File.createTempFile(FOO, BAR);
-        String fileName = file.getAbsolutePath();
+        String fileName = file.toPath().toString();
         match.addFile(fileName);
         Worker worker = new Worker(match, fileName);
         worker.start();
         worker.await();
         Assert.assertFalse("Worker should not have ended", worker.mEnded);
-        match.provideFile(fileName);
+        match.provideFile(file);
         worker.join();
         Assert.assertTrue("Worker should have ended", worker.mEnded);
     }
@@ -84,7 +84,7 @@ public class MatchTest {
         Match match = createMatch(config);
         try {
             // Provide a file that wasn't added
-            match.provideFile(FOO);
+            match.provideFile(new File(FOO));
             Assert.fail("Match should fail if file wasn't added");
         } catch (Exception e) {}
         try {

@@ -37,6 +37,7 @@ public class Zip extends Function {
 
     private IExpression mSource;
     private String mName;
+    private File mOutputFile;
     private String mOutput;
 
     public Zip(IMatch match, ITarget target, Map<String, IExpression> parameters) {
@@ -48,7 +49,8 @@ public class Zip extends Function {
         mName = name.resolve();
         target.setName(mName);
         mSource = getParameter(SOURCE);
-        mOutput = ZIP_OUTPUT + mName + ".zip";
+        mOutputFile = new File(target.getDirectory(), ZIP_OUTPUT + mName + ".zip");
+        mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
         // TODO ensure zip isn't re-created if the inputs haven't been modified
     }
 
@@ -77,10 +79,10 @@ public class Zip extends Function {
         System.out.println("Zip Sources: " + sourcesString);
 
         // Create output directory
-        mMatch.runCommand(String.format(MKDIR_COMMAND, ZIP_OUTPUT));
+        mTarget.runCommand(String.format(MKDIR_COMMAND, ZIP_OUTPUT));
         // Create zip
-        mMatch.runCommand(String.format(ZIP_COMMAND, mOutput, sourcesString));
-        mMatch.provideFile(mOutput);
+        mTarget.runCommand(String.format(ZIP_COMMAND, mOutput, sourcesString));
+        mMatch.provideFile(mOutputFile);
         return mOutput;
     }
 }

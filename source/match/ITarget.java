@@ -37,6 +37,11 @@ public interface ITarget {
     File getFile();
 
     /**
+     * @return the match file's enclosing directory
+     */
+    File getDirectory();
+
+    /**
      * Sets the function that will build this target.
      */
     void setFunction(IFunction function);
@@ -50,5 +55,10 @@ public interface ITarget {
      * Build this target.
      */
     void build();
+
+    /**
+     * Runs the given command in the target's enclosing directory and returns the exit code.
+     */
+    int runCommand(String command);
 
 }

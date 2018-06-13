@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 public class JavaJUnitTest {
@@ -40,7 +42,9 @@ public class JavaJUnitTest {
     private static final String FOOBAR_TEST = "FooBarTest";
     private static final String OUTPUT = RESULTS_OUT + FOOBAR_RESULT;
     private static final String MKDIR_COMMAND = String.format("mkdir -p %s", RESULTS_OUT);
-    private static final String RUN_COMMAND = String.format("java -cp X:X:X:X:X org.junit.runner.JUnitCore match.AllTests 2>&1 | tee %s", OUTPUT);
+
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void javaJUnit() {
@@ -51,6 +55,8 @@ public class JavaJUnitTest {
         Mockito.when(match.getProperty("FooBar")).thenReturn("X");
         Mockito.when(match.getProperty("FooBarTest")).thenReturn("X");
         ITarget target = Mockito.mock(ITarget.class);
+        Mockito.when(target.getDirectory()).thenReturn(folder.getRoot());
+        Mockito.when(target.getFile()).thenReturn(new File(folder.getRoot(), "match"));
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         parameters.put(Function.NAME, new Literal(match, target, FOOBAR_RESULT));
         List<IExpression> elements = new ArrayList<>();
@@ -60,11 +66,12 @@ public class JavaJUnitTest {
         parameters.put(JavaJUnit.MAIN_CLASS, new Literal(match, target, FOOBAR_MAIN_CLASS));
         IFunction function = new JavaJUnit(match, target, parameters);
         function.configure();
-        Assert.assertEquals("Wrong resolution", OUTPUT, function.resolve());
-        Mockito.verify(match, Mockito.times(1)).setProperty(Mockito.eq(FOOBAR_RESULT), Mockito.eq(OUTPUT));
-        Mockito.verify(match, Mockito.times(1)).addFile(Mockito.eq(OUTPUT));
-        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_COMMAND));
-        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(RUN_COMMAND));
+        String output = new File(folder.getRoot(), OUTPUT).toPath().toString();
+        Assert.assertEquals("Wrong resolution", output, function.resolve());
+        Mockito.verify(match, Mockito.times(1)).setProperty(Mockito.eq(FOOBAR_RESULT), Mockito.eq(output));
+        Mockito.verify(match, Mockito.times(1)).addFile(Mockito.eq(output));
+        Mockito.verify(target, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_COMMAND));
+        Mockito.verify(target, Mockito.times(1)).runCommand(Mockito.eq(String.format("java -cp X:X:X:X:X org.junit.runner.JUnitCore match.AllTests 2>&1 | tee %s", output)));
     }
 
 }

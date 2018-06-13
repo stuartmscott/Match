@@ -59,7 +59,7 @@ public class FindTest {
         root = folder.getRoot();
         MatchTest.createFileStructure(root);
         config = new Config();
-        config.put("root", root.getAbsolutePath());
+        config.put("root", root.toPath().toString());
         filesA.add("a/b");
         filesA.add("c/d/e");
         filesA.add("c/d/f");

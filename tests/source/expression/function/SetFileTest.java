@@ -52,10 +52,10 @@ public class SetFileTest {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
         mFile = SetFileTest.setFile(match, target);
-        mFilename = mFile.getAbsolutePath();
+        mFilename = mFile.toPath().toString();
         Mockito.verify(match, Mockito.times(1)).setProperty(FOO, mFilename);
         Mockito.verify(match, Mockito.times(1)).addFile(mFilename);
-        Mockito.verify(match, Mockito.times(1)).provideFile(mFilename);
+        Mockito.verify(match, Mockito.times(1)).provideFile(mFile);
     }
 
     static File setFile(IMatch match, ITarget target) {
@@ -67,7 +67,7 @@ public class SetFileTest {
         }
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         parameters.put(NAME, new Literal(match, target, FOO));
-        parameters.put(VALUE, new Literal(match, target, file.getAbsolutePath()));
+        parameters.put(VALUE, new Literal(match, target, file.toPath().toString()));
         IFunction function = new SetFile(match, target, parameters);
         function.configure();
         function.resolve();

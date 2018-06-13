@@ -120,7 +120,7 @@ public class Library extends Function {
             }
         }
         mFile = new File(mDir, filename);
-        mFilePath = mFile.toPath().toString();
+        mFilePath = mFile.toPath().normalize().toAbsolutePath().toString();
     }
 
     /**
@@ -138,10 +138,10 @@ public class Library extends Function {
     @Override
     public String resolve() {
         if (!mFile.exists() && mURL != null) {
-            mMatch.runCommand(String.format(CURL_COMMAND, mURL.toString(), mFilePath));
+            mTarget.runCommand(String.format(CURL_COMMAND, mURL.toString(), mFilePath));
         }
         if (mFile.exists()) {
-            mMatch.provideFile(mFilePath);
+            mMatch.provideFile(mFile);
         }
         return mFilePath;
     }

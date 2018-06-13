@@ -54,7 +54,6 @@ public class ZipTest {
     private static final String ZIP_OUT = "out/zip/FooBar.zip";
     private static final String SOURCES = C_D_E_FILE + " " + C_D_F_FILE + " " + FOO_JAR;
     private static final String MKDIR_ZIP_OUT_COMMAND = String.format("mkdir -p %s", ZIPS_OUT);
-    private static final String ZIP_COMMAND = String.format("zip -r %s %s", ZIP_OUT, SOURCES);
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -70,7 +69,7 @@ public class ZipTest {
         root = folder.getRoot();
         MatchTest.createFileStructure(root);
         config = new Config();
-        config.put("root", root.getAbsolutePath());
+        config.put("root", root.toPath().toString());
         mCDir = new File(root, C_DIR);
         mCDEFile = new File(root, C_D_E_FILE);
         mCDFFile = new File(root, C_D_F_FILE);
@@ -88,10 +87,11 @@ public class ZipTest {
 
     @Test
     public void zip() {
-        IMatch match = Mockito.mock(IMatch.class);//, Mockito.withSettings().verboseLogging());
+        IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
         Mockito.when(match.getRootDir()).thenReturn(root);
         Mockito.when(match.getProperty(FOO)).thenReturn(FOO_JAR);
+        Mockito.when(target.getDirectory()).thenReturn(root);
         Mockito.when(target.getFile()).thenReturn(new File(root, "match"));
         Map<String, IExpression> parameters = new HashMap<>();
         parameters.put(Function.NAME, new Literal(match, target, FOOBAR));
@@ -106,15 +106,16 @@ public class ZipTest {
         parameters.put(Function.SOURCE, sources);
         IFunction function = new Zip(match, target, parameters);
         function.configure();
-        Assert.assertEquals("Wrong resolution", ZIP_OUT, function.resolve());
+        String output = new File(root, ZIP_OUT).toPath().toString();
+        Assert.assertEquals("Wrong resolution", output, function.resolve());
 
-        Mockito.verify(match, Mockito.times(1)).setProperty(Mockito.eq(FOOBAR), Mockito.eq(ZIP_OUT));
-        Mockito.verify(match, Mockito.times(1)).addFile(Mockito.eq(ZIP_OUT));
+        Mockito.verify(match, Mockito.times(1)).setProperty(Mockito.eq(FOOBAR), Mockito.eq(output));
+        Mockito.verify(match, Mockito.times(1)).addFile(Mockito.eq(output));
         Mockito.verify(match, Mockito.times(1)).awaitFile(Mockito.eq(FOO_JAR));
-        Mockito.verify(match, Mockito.times(1)).awaitFile(Mockito.eq(C_D_E_FILE));
-        Mockito.verify(match, Mockito.times(1)).awaitFile(Mockito.eq(C_D_F_FILE));
-        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_ZIP_OUT_COMMAND));
-        Mockito.verify(match, Mockito.times(1)).runCommand(Mockito.eq(ZIP_COMMAND));
+        Mockito.verify(match, Mockito.times(1)).awaitFile(Mockito.eq(mCDEFile.toPath().normalize().toAbsolutePath().toString()));
+        Mockito.verify(match, Mockito.times(1)).awaitFile(Mockito.eq(mCDFFile.toPath().normalize().toAbsolutePath().toString()));
+        Mockito.verify(target, Mockito.times(1)).runCommand(Mockito.eq(MKDIR_ZIP_OUT_COMMAND));
+        Mockito.verify(target, Mockito.times(1)).runCommand(Mockito.eq(String.format("zip -r %s %s", output, SOURCES)));
     }
 
 }

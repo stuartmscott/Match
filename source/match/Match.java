@@ -15,10 +15,7 @@
  */
 package match;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
@@ -122,9 +119,6 @@ public class Match implements IMatch {
      */
     @Override
     public void addFile(String file) {
-        if (file.startsWith("./")) {
-            throw new RuntimeException("RAWR");
-        }
         mFiles.put(file, new CountDownLatch(1));
     }
 
@@ -146,10 +140,24 @@ public class Match implements IMatch {
      * {inheritDoc}
      */
     @Override
-    public void provideFile(String file) {
-        CountDownLatch latch = mFiles.get(file);
+    public void provideFile(File file) {
+        String filename = file.toPath().normalize().toAbsolutePath().toString();
+        if (!file.exists()) {
+            error(String.format("provideFile called with non-existant file %s", filename));
+        }
+        if (file.isDirectory()) {
+            error(String.format("provideFile called with directory %s", filename));
+        }
+        CountDownLatch latch = mFiles.get(filename);
         if (latch == null) {
-            error(String.format("provideFile called before addFile for %s", file));
+            /*
+            for (String f : mFiles.keySet()) {
+                System.out.println("File " + f);
+            }
+            for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
+                System.out.println("Stack " + e);
+            }*/
+            error(String.format("provideFile called before addFile for %s", filename));
         }
         latch.countDown();
     }
@@ -161,6 +169,13 @@ public class Match implements IMatch {
     public void awaitFile(String file) {
         CountDownLatch latch = mFiles.get(file);
         if (latch == null) {
+            /*
+            for (String f : mFiles.keySet()) {
+                System.out.println("File " + f);
+            }
+            for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
+                System.out.println("Stack " + e);
+            }*/
             error(String.format("no targets provided %s", file));
         }
         try {
@@ -219,12 +234,8 @@ public class Match implements IMatch {
         // Create a thread for each target, but only start a thread if the number of targets that
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
         for (File file : mAllFiles) {
-            String full = file.toString();
-            if (full.startsWith("./")) {
-                full = full.substring(2);
-            }
-            addFile(full);
-            provideFile(full);
+            addFile(file.toPath().normalize().toAbsolutePath().toString());
+            provideFile(file);
         }
         for (ITarget target : targets) {
             target.configure();
@@ -268,43 +279,6 @@ public class Match implements IMatch {
      * {inheritDoc}
      */
     @Override
-    public int runCommand(String command) {
-        // TODO support commands running from the root directory or
-        // the same directory as the match file that defined the target.
-        int result = 0;
-        try {
-            Process process = Runtime.getRuntime().exec(new String[] {"/bin/bash", "-c", command});
-            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            result = process.waitFor();
-            String line = "";
-            boolean loop = true;
-            while (loop) {
-                loop = false;
-                if ((line = input.readLine()) != null) {
-                    println(line);
-                    loop = true;
-                }
-                if ((line = error.readLine()) != null) {
-                    if (result != 0) {
-                        println(String.format("error: %s", line));
-                    }
-                    loop = true;
-                }
-            }
-            if (result != 0) {
-                error("error: " + command);
-            }
-        } catch (Exception e) {
-            error(e);
-        }
-        return result;
-    }
-
-    /**
-     * {inheritDoc}
-     */
-    @Override
     public void warn(String message) {
         println(String.format("warning: %s", message));
     }
@@ -339,7 +313,7 @@ public class Match implements IMatch {
     }
 
     public static void main(String args[]) {
-        String[] files = { System.getProperty("user.home") + "/match/config" };
+        File[] files = { new File(System.getProperty("user.home") + "/match/config") };
         Match match = new Match(Config.create(args, files));
         match.light();
     }

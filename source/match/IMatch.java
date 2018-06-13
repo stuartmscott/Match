@@ -79,15 +79,10 @@ public interface IMatch {
      *
      * This will allow all targets that are awaiting this file to continue.
      */
-    void provideFile(String file);
+    void provideFile(File file);
 
     /**
      * Waits until the given file has been created.
      */
     void awaitFile(String file);
-
-    /**
-     * Runs the given command and returns the exit code.
-     */
-    int runCommand(String command);
 }

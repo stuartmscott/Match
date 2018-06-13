@@ -17,7 +17,10 @@ package match;
 
 import expression.function.IFunction;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class Target implements ITarget {
 
@@ -59,6 +62,14 @@ public class Target implements ITarget {
      * {inheritDoc}
      */
     @Override
+    public File getDirectory() {
+        return mFile.getParentFile();
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
     public void setFunction(IFunction function) {
         mFunction = function;
     }
@@ -86,5 +97,42 @@ public class Target implements ITarget {
     @Override
     public String toString() {
         return getName();
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public int runCommand(String command) {
+        int result = 0;
+        try {
+            ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
+            pb.directory(getDirectory());
+            Process process = pb.start();
+            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            result = process.waitFor();
+            String line = "";
+            boolean loop = true;
+            while (loop) {
+                loop = false;
+                if ((line = input.readLine()) != null) {
+                    mMatch.println(line);
+                    loop = true;
+                }
+                if ((line = error.readLine()) != null) {
+                    if (result != 0) {
+                        mMatch.println(String.format("error: %s", line));
+                    }
+                    loop = true;
+                }
+            }
+            if (result != 0) {
+                mMatch.error("error: " + command);
+            }
+        } catch (Exception e) {
+            mMatch.error(e);
+        }
+        return result;
     }
 }
