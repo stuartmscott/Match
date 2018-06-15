@@ -89,6 +89,8 @@ public class JavaJUnit extends Function {
         mTarget.runCommand(String.format(MKDIR_COMMAND, RESULT_OUTPUT));
         if (mTarget.runCommand(String.format(RUN_COMMAND, classpath, mMainClass, mOutput)) == 0) {
             mMatch.provideFile(mOutputFile);
+        } else {
+            // TODO consider throwing an error to stop Match
         }
         // TODO provide a pass file for other targets to await
         return mOutput;

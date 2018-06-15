@@ -33,10 +33,12 @@ import java.util.regex.Pattern;
 
 public class Release extends Function {
 
+    public final static String AWAIT = "await";
     public final static String CHANNEL = "channel";
     public final static String CP_COMMAND = "cp %s %s";
     // TODO for f in out/java/jar/*.jar; do cp "$f" "/tmp/libraries/$(basename $f .jar)-0.1.jar"; done;
 
+    private IExpression mAwait;
     private IExpression mChannel;
     private String mSource;
     private String mName;
@@ -51,6 +53,7 @@ public class Release extends Function {
             mMatch.error("Release function expects a String source");
         }
         mSource = source.resolve();
+        mAwait = getParameter(AWAIT);
         mChannel = getParameter(CHANNEL);
         String extension = "zip";
         if (hasParameter(EXTENSION)) {
@@ -76,7 +79,6 @@ public class Release extends Function {
         mOutputFile = new File(directory, mName);
         mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
         // TODO ensure release isn't re-created if the inputs haven't been modified
-        // TODO wait for test result before releasing - avoid releasing bad code
     }
 
     /**
@@ -86,6 +88,7 @@ public class Release extends Function {
     public void configure() {
         mMatch.addFile(mOutput);
         mMatch.setProperty(mName, mOutput);
+        mAwait.configure();
         mChannel.configure();
     }
 
@@ -94,6 +97,10 @@ public class Release extends Function {
      */
     @Override
     public String resolve() {
+        // Await checks
+        for (String await : mAwait.resolveList()) {
+            mMatch.awaitFile(mMatch.getProperty(await));
+        }
         // Create output directory
         mTarget.runCommand(String.format(MKDIR_COMMAND, mOutputDir));
         // Get the source file

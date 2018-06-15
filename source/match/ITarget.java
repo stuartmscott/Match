@@ -57,8 +57,18 @@ public interface ITarget {
     void build();
 
     /**
+     * @return true if this target has been built
+     */
+    boolean isBuilt();
+
+    /**
      * Runs the given command in the target's enclosing directory and returns the exit code.
      */
     int runCommand(String command);
+
+    /**
+     * @return the most recent command run by this target.
+     */
+    String getLastCommand();
 
 }

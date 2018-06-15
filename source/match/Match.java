@@ -247,6 +247,11 @@ public class Match implements IMatch {
         }
         try {
             if (!latch.await(5, TimeUnit.MINUTES)) {
+                for (ITarget target : targets) {
+                    if (!target.isBuilt()) {
+                        println(target + " still running " + target.getLastCommand());
+                    }
+                }
                 error("build took too long (> 5mins)");
             }
         } catch(InterruptedException e) {

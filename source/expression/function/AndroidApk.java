@@ -34,7 +34,8 @@ public class AndroidApk extends Function {
 
     public static final String AAPT_ADD_COMMAND = "%saapt add -f %s %s";
     public static final String AAPT_ADD_K_COMMAND = "%saapt add -k -f %s %s";
-    public static final String AAPT_APK_COMMAND = "%saapt package -f -m -F %s -M %s -S %s -I %s";
+    public static final String AAPT_APK_COMMAND = "%saapt package -f -m -F %s -M %s -I %s";
+    public static final String AAPT_APK_RES_COMMAND = "%saapt package -f -m -F %s -M %s -S %s -I %s";
     public static final String AAPT_RES_COMMAND = "%saapt package -f -m -J %s -M %s -S %s -I %s";
     public static final String API_VERSION = "api-version";
     public static final String APK_OUTPUT = "out/android/apk/";
@@ -43,6 +44,7 @@ public class AndroidApk extends Function {
     public static final String BUILD_TOOLS_VERSION = "build-tools-version";
     public static final String DEX_OUTPUT = "out/android/dex/";
     public static final String DX_COMMAND = "%sdx --dex --output=%s %s %s";
+    public static final String JAR_COMMAND = "jar cf %s -C %s .";
     public static final String JAVAC_COMMAND = "javac -bootclasspath %s %s -sourcepath %s %s -d %s";
     public static final String KEYSTORE = "keystore";
     public static final String KEYSTORE_PASSWORD_FILE = "keystore-password-file";
@@ -67,11 +69,14 @@ public class AndroidApk extends Function {
     private String mResourceDirectory;
     private String mIntermediateApks;
     private String mIntermediateClasses;
+    private String mIntermediateJars;
     private String mIntermediateDex;
     private String mIntermediateProtos;
     private String mIntermediateResources;
-    private String mOutput;
-    private File mOutputFile;
+    private String mOutputApk;
+    private File mOutputApkFile;
+    private String mOutputJar;
+    private File mOutputJarFile;
 
     public AndroidApk(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
@@ -88,6 +93,7 @@ public class AndroidApk extends Function {
         mKeyStorePassword = getParameter(KEYSTORE_PASSWORD_FILE).resolve();
         mIntermediateApks = String.format("%s%s/", APK_OUTPUT, mName);
         mIntermediateClasses = String.format("%s%s/", CLASS_OUTPUT, mName);
+        mIntermediateJars = String.format("%s%s/", JAR_OUTPUT, mName);
         mIntermediateDex = String.format("%s%s/", DEX_OUTPUT, mName);
         mIntermediateResources = String.format("%s%s/", RESOURCE_OUTPUT, mName);
         if (hasParameter(MANIFEST)) {
@@ -112,11 +118,11 @@ public class AndroidApk extends Function {
                 mMatch.error("AndroidApk function expects a String resource directory");
             }
             mResourceDirectory = resourceDir.resolve();
-        } else {
-            mResourceDirectory = "resource";
         }
-        mOutputFile = new File(target.getDirectory(), mIntermediateApks + mName + ".apk");
-        mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
+        mOutputApkFile = new File(target.getDirectory(), mIntermediateApks + mName + ".apk");
+        mOutputApk = mOutputApkFile.toPath().normalize().toAbsolutePath().toString();
+        mOutputJarFile = new File(target.getDirectory(), mIntermediateJars + mName + ".jar");
+        mOutputJar = mOutputJarFile.toPath().normalize().toAbsolutePath().toString();
         // TODO create an apk intermediate directory in which classes.dex, resources,
         // libraries and other files are added with the correct directory path.
         // Then when the APK is created, everything should be in the right place
@@ -129,8 +135,10 @@ public class AndroidApk extends Function {
      */
     @Override
     public void configure() {
-        mMatch.addFile(mOutput);
-        mMatch.setProperty(mName, mOutput);
+        mMatch.addFile(mOutputApk);
+        mMatch.setProperty(mName, mOutputApk);
+        mMatch.addFile(mOutputJar);
+        mMatch.setProperty(mName + "-jar", mOutputJar);
         mSource.configure();
         if (mProtoSource != null) {
             mProtoSource.configure();
@@ -164,6 +172,7 @@ public class AndroidApk extends Function {
         }
         mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateApks));
         mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateClasses));
+        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateJars));
         mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateDex));
         mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateResources));
 
@@ -191,19 +200,34 @@ public class AndroidApk extends Function {
         }
 
         // Generate R.java
-        mTarget.runCommand(String.format(AAPT_RES_COMMAND, buildToolsDir, mIntermediateResources, mManifest, mResourceDirectory, platform));
-        File directory = new File(matchDir, mIntermediateResources);
+        if (mResourceDirectory != null) {
+            mTarget.runCommand(String.format(AAPT_RES_COMMAND, buildToolsDir, mIntermediateResources, mManifest, mResourceDirectory, platform));
+        }
+
         // Add to the build
-        mMatch.addDirectory(directory);
+        mMatch.addDirectory(new File(matchDir, mIntermediateResources));
 
         // Compile Java
         mTarget.runCommand(String.format(JAVAC_COMMAND, platform, javacClasspath, mIntermediateResources, Utilities.join(" ", sources), mIntermediateClasses));
+
+        // Add to the build
+        mMatch.addDirectory(new File(matchDir, mIntermediateClasses));
+
+        // Package jar
+        mTarget.runCommand(String.format(JAR_COMMAND, mOutputJar, mIntermediateClasses));
+
+        System.out.println("Android Jar " + mOutputJar);
+        mMatch.provideFile(mOutputJarFile);
 
         // Create classes.dex
         mTarget.runCommand(String.format(DX_COMMAND, buildToolsDir, classesDex, Utilities.join(" ", libraries), mIntermediateClasses));
 
         // Generate APK
-        mTarget.runCommand(String.format(AAPT_APK_COMMAND, buildToolsDir, unalignedApk, mManifest, mResourceDirectory, platform));
+        if (mResourceDirectory != null) {
+            mTarget.runCommand(String.format(AAPT_APK_RES_COMMAND, buildToolsDir, unalignedApk, mManifest, mResourceDirectory, platform));
+        } else {
+            mTarget.runCommand(String.format(AAPT_APK_COMMAND, buildToolsDir, unalignedApk, mManifest, platform));
+        }
 
         // Add classes.dex
         mTarget.runCommand(String.format(AAPT_ADD_K_COMMAND, buildToolsDir, unalignedApk, classesDex));
@@ -211,7 +235,6 @@ public class AndroidApk extends Function {
         // Add resources
         if (mResource != null) {
             for (String resource : mResource.resolveList()) {
-                // TODO fix path issues and support native libaries
                 mTarget.runCommand(String.format(AAPT_ADD_COMMAND, buildToolsDir, unalignedApk, resource));
             }
         }
@@ -219,9 +242,9 @@ public class AndroidApk extends Function {
         mTarget.runCommand(String.format(ZIP_ALIGN_COMMAND, buildToolsDir, unalignedApk, alignedApk));
 
         // Sign APK
-        mTarget.runCommand(String.format(APK_SIGNER_COMMAND, buildToolsDir, mKeyStore, mKeyStorePassword, mOutput, alignedApk));
-        System.out.println("Android APK" + mOutput);
-        mMatch.provideFile(mOutputFile);
-        return mOutput;
+        mTarget.runCommand(String.format(APK_SIGNER_COMMAND, buildToolsDir, mKeyStore, mKeyStorePassword, mOutputApk, alignedApk));
+        System.out.println("Android APK " + mOutputApk);
+        mMatch.provideFile(mOutputApkFile);
+        return mOutputApk;
     }
 }

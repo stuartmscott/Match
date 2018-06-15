@@ -28,6 +28,8 @@ public class Target implements ITarget {
     private File mFile;
     private String mName = "";
     private IFunction mFunction;
+    private String mLastCommand;
+    private volatile boolean mFinished = false;
 
     public Target(IMatch match, File file) {
         mMatch = match;
@@ -87,8 +89,20 @@ public class Target implements ITarget {
      */
     @Override
     public void build() {
-        mFunction.resolve();
-        // TODO put this target's input and output files in the database
+        try {
+            mFunction.resolve();
+            // TODO put this target's input and output files in the database
+        } finally {
+            mFinished = true;
+        }
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public boolean isBuilt() {
+        return mFinished;
     }
 
     /**
@@ -106,6 +120,7 @@ public class Target implements ITarget {
     public int runCommand(String command) {
         int result = 0;
         try {
+            mLastCommand = command;
             ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
             pb.directory(getDirectory());
             Process process = pb.start();
@@ -134,5 +149,13 @@ public class Target implements ITarget {
             mMatch.error(e);
         }
         return result;
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
+    public String getLastCommand() {
+        return mLastCommand;
     }
 }

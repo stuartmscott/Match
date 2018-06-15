@@ -5,6 +5,7 @@
 .metadata
 out
 release
+sample/out
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

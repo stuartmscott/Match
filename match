@@ -77,4 +77,5 @@ Release(
     version = "0.3"
     extension = "jar"
     channel = "cp %s $HOME/match/libraries/"
+    await = "MatchTestResult"
 )

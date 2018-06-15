@@ -33,8 +33,8 @@ import java.util.regex.Pattern;
 public class JavaJar extends Function {
 
     public static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\n%s\" > %s";
-    public static final String JAVAC_COMMAND = "javac %s %s -d %s";
     public static final String JAR_COMMAND = "jar cfm %s %s %s -C %s .";
+    public static final String JAVAC_COMMAND = "javac %s %s -d %s";
     public static final String MAIN_CLASS = "main-class";
     public static final String PROTO = "proto";
     public static final String PROTO_LITE = "proto-lite";
