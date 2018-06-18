@@ -12,21 +12,17 @@ Match Release
 - Parallel builds
 - Supports extensions with project-, language-, and/or workspace-specific rules.
 
-
-
+# v0.4
+- Adds Android support
+- Adds Java Protobuf and Protobuf Lite support
+- Adds Zip support
+- Improves Library handling
+- Build timeouts
+- Ditch "main" package for "match"
 
 # 20180801
 - Move to YYYYMMDD-based versioning for automation
 - Leverage Config for arguments and configurations
-- Add support for
-    - Android
-    - Library
-    - Protobuf
-    - Protobuf Lite
-    - Release
-    - Zip
-- Build timeouts
-- Ditch "main" package for "match"
 
 # 20180901
 

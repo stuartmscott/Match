@@ -74,7 +74,7 @@ JavaJUnit(
 
 Release(
     source = "Match"
-    version = "0.3"
+    version = "0.4"
     extension = "jar"
     channel = "cp %s $HOME/match/libraries/"
     await = "MatchTestResult"
