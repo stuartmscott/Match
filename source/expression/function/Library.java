@@ -137,8 +137,12 @@ public class Library extends Function {
      */
     @Override
     public String resolve() {
-        if (!mFile.exists() && mURL != null) {
-            mTarget.runCommand(String.format(CURL_COMMAND, mURL.toString(), mFilePath));
+        if (!mFile.exists()) {
+            if (mURL != null) {
+                mTarget.runCommand(String.format(CURL_COMMAND, mURL.toString(), mFilePath));
+            } else {
+                mMatch.error(mFilePath + " does not exist");
+            }
         }
         if (mFile.exists()) {
             mMatch.provideFile(mFile);
