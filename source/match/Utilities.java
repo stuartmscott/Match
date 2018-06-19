@@ -44,11 +44,12 @@ public final class Utilities {
     }
 
     public static boolean isAndroid() {
+        System.out.println(System.getProperty("os.name"));
         return false;
     }
 
     public static boolean isLinux() {
-        return false;
+        return System.getProperty("os.name").equals("Linux");
     }
 
     public static boolean isMac() {
