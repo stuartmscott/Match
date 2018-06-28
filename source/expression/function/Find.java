@@ -23,6 +23,7 @@ import match.ITarget;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -68,8 +69,7 @@ public class Find extends Function {
             path += "/";
         }
         // System.out.println("Searching path " + path);
-        String pattern = mPattern == null ? ".*" : mPattern.resolve();
-        scanFiles(directory, path, mFiles, Pattern.compile(pattern));
+        scanFiles(directory, path, mFiles, mPattern == null ? ".*" : mPattern.resolve());
         // System.out.println("Found " + mFiles);
     }
 
@@ -88,7 +88,11 @@ public class Find extends Function {
         return files;
     }
 
-    public static void scanFiles(File directory, String path, Set<String> files, Pattern pattern) {
+    public static void scanFiles(File directory, String path, Collection<String> files, String pattern) {
+        scanFiles(directory, path, files, Pattern.compile(pattern));
+    }
+
+    public static void scanFiles(File directory, String path, Collection<String> files, Pattern pattern) {
         for (File file : directory.listFiles()) {
             String filename = file.getName();
             String fullname = path + filename;

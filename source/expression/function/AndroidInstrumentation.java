@@ -44,8 +44,8 @@ public class AndroidInstrumentation extends Function {
     public static final String SDK_LOCATION = "android-sdk-location";
 
     private String mName;
-    private String mApk;
-    private String mApkTest;
+    private IExpression mApk;
+    private IExpression mApkTest;
     private String mPackage;
     private String mPackageTest;
     private String mRunner;
@@ -60,8 +60,8 @@ public class AndroidInstrumentation extends Function {
         }
         mName = name.resolve();
         target.setName(mName);
-        mApk = getParameter(APK).resolve();
-        mApkTest = getParameter(APK_TEST).resolve();
+        mApk = getParameter(APK);
+        mApkTest = getParameter(APK_TEST);
         mPackage = getParameter(PACKAGE).resolve();
         mPackageTest = getParameter(PACKAGE_TEST).resolve();
         mRunner = getParameter(RUNNER).resolve();
@@ -76,6 +76,8 @@ public class AndroidInstrumentation extends Function {
     public void configure() {
         mMatch.addFile(mOutput);
         mMatch.setProperty(mName, mOutput);
+        mApk.configure();
+        mApkTest.configure();
     }
 
     /**
@@ -87,15 +89,19 @@ public class AndroidInstrumentation extends Function {
         String platformToolsDir = String.format(PLATFORM_TOOLS, sdkLocation);
         mTarget.runCommand(String.format(MKDIR_COMMAND, RESULT_OUTPUT));
 
-        String apk = mMatch.getProperty(mApk);
-        String apkTest = mMatch.getProperty(mApkTest);
-        mMatch.awaitFile(apk);
-        mMatch.awaitFile(apkTest);
+        for (IExpression e : new IExpression[] {mApk, mApkTest}) {
+            for (String apk : e.resolveList()) {
+                String file = mMatch.getProperty(apk);
+                mMatch.awaitFile(file);
+                if (mTarget.runCommand(String.format(ADB_INSTALL, platformToolsDir, file)) != 0) {
+                    mMatch.error("Could not install " + file);
+                }
+            }
+        }
 
-        if (mTarget.runCommand(String.format(ADB_INSTALL, platformToolsDir, apk)) == 0 &&
-                mTarget.runCommand(String.format(ADB_INSTALL, platformToolsDir, apkTest)) == 0 &&
-                mTarget.runCommand(String.format(ADB_INSTRUMENT, platformToolsDir, mPackageTest, mRunner, mOutput)) == 0) {
+        if (mTarget.runCommand(String.format(ADB_INSTRUMENT, platformToolsDir, mPackageTest, mRunner, mOutput)) == 0) {
             mMatch.provideFile(mOutputFile);
+            // TODO uninstall instrumentation apk
         } else {
             // TODO consider throwing an error to stop Match
         }

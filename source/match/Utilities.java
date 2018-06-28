@@ -15,6 +15,9 @@
  */
 package match;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -58,5 +61,11 @@ public final class Utilities {
 
     public static boolean isWindows() {
         return System.getProperty("os.name").startsWith("Windows");
+    }
+
+    public static void writeStringToFile(String string, File file) throws Exception {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        writer.write(string);
+        writer.close();
     }
 }

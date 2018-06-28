@@ -39,6 +39,8 @@ public abstract class Function extends Expression implements IFunction {
     public static final String MKDIR_COMMAND = "mkdir -p %s";
     public static final String NAME = "name";
     public static final String PATTERN = "pattern";
+    public static final String PROTO = "proto";
+    public static final String PROTO_LITE = "proto-lite";
     public static final String PROTO_OUTPUT = "out/java/proto/";
     public static final String RELEASE_OUTPUT = "release/";
     public static final String RESOURCE = "resource";

@@ -25,7 +25,9 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 public class GetFileTest {
@@ -33,6 +35,9 @@ public class GetFileTest {
     private static final String FOO = "foo";
     private static final String NAME = "name";
     private static final String VALUE = "value";
+
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     private File mFile = null;
     private String mFilename;
@@ -46,11 +51,12 @@ public class GetFileTest {
     }
 
     @Test
-    public void get() {
+    public void get() throws Exception {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
-        mFile = SetFileTest.setFile(match, target);
+        mFile = folder.newFile(FOO);
         mFilename = mFile.toPath().toString();
+        SetFileTest.setFile(match, target, mFile);
         Mockito.when(match.getProperty(FOO)).thenReturn(mFilename);
         IFunction function = getFunction(match, target);
         function.configure();

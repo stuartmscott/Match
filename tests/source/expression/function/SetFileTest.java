@@ -26,7 +26,9 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 public class SetFileTest {
@@ -35,6 +37,9 @@ public class SetFileTest {
     private static final String BAR = "bar";
     private static final String NAME = "name";
     private static final String VALUE = "value";
+
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     private File mFile = null;
     private String mFilename;
@@ -48,29 +53,23 @@ public class SetFileTest {
     }
 
     @Test
-    public void setFile() {
+    public void setFile() throws Exception {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
-        mFile = SetFileTest.setFile(match, target);
+        mFile = folder.newFile(FOO);
         mFilename = mFile.toPath().toString();
+        SetFileTest.setFile(match, target, mFile);
         Mockito.verify(match, Mockito.times(1)).setProperty(FOO, mFilename);
         Mockito.verify(match, Mockito.times(1)).addFile(mFilename);
         Mockito.verify(match, Mockito.times(1)).provideFile(mFile);
     }
 
-    static File setFile(IMatch match, ITarget target) {
-        File file = null;
-        try {
-            file = File.createTempFile(FOO, BAR);
-        } catch (IOException e) {
-            Assert.fail(e.getMessage());
-        }
+    static void setFile(IMatch match, ITarget target, File file) throws Exception {
         Map<String, IExpression> parameters = new HashMap<String, IExpression>();
         parameters.put(NAME, new Literal(match, target, FOO));
         parameters.put(VALUE, new Literal(match, target, file.toPath().toString()));
         IFunction function = new SetFile(match, target, parameters);
         function.configure();
         function.resolve();
-        return file;
     }
 }

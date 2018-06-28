@@ -35,6 +35,11 @@ public interface IMatch {
     boolean isQuiet();
 
     /**
+     * @return true if the property for the given key is defined in this build.
+     */
+    boolean hasProperty(String key);
+
+    /**
      * Gets the property for the given key from this build.
      */
     String getProperty(String key);

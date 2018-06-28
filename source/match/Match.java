@@ -98,6 +98,14 @@ public class Match implements IMatch {
      * {inheritDoc}
      */
     @Override
+    public boolean hasProperty(String key) {
+        return mConfig.has(key);
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    @Override
     public String getProperty(String key) {
         String property = mConfig.get(key);
         if (property == null) {

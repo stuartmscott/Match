@@ -17,17 +17,20 @@ package frontend;
 
 import match.IMatch;
 import match.Match;
+import match.Utilities;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 public class LexerTest {
+
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     private IMatch mMatch;
 
@@ -37,22 +40,28 @@ public class LexerTest {
     }
 
     @Test
-    public void lex_empty() {
-        Lexer lexer = createLexer(mMatch, "");
+    public void lex_empty() throws Exception {
+        File file = folder.newFile("match");
+        Utilities.writeStringToFile("", file);
+        Lexer lexer = createLexer(mMatch, file);
         Assert.assertEquals("Expected EOF when parsing an empty file", Category.EOF, lexer.getCurrentCategory());
     }
 
     @Test
-    public void lex_newLine() {
-        Lexer lexer = createLexer(mMatch, "myIdentifier\n");
+    public void lex_newLine() throws Exception {
+        File file = folder.newFile("match");
+        Utilities.writeStringToFile("myIdentifier\n", file);
+        Lexer lexer = createLexer(mMatch, file);
         Assert.assertEquals("Line numbering should start at 1", 1, lexer.mLineNumber);
         lexer.move();
         Assert.assertEquals("Expected line number to increase", 2, lexer.mLineNumber);
     }
 
     @Test
-    public void lex_whitespace() {
-        Lexer lexer = createLexer(mMatch, "          \t   myIdentifier");
+    public void lex_whitespace() throws Exception {
+        File file = folder.newFile("match");
+        Utilities.writeStringToFile("          \t   myIdentifier", file);
+        Lexer lexer = createLexer(mMatch, file);
         // Expect whitespace to be skipped
         Assert.assertEquals("Expected identifier", Category.LOWER_CASE, lexer.getCurrentCategory());
         lexer.move();
@@ -60,8 +69,10 @@ public class LexerTest {
     }
 
     @Test
-    public void lex_comment() {
-        Lexer lexer = createLexer(mMatch, "# Test Comment\n myIdentifier");
+    public void lex_comment() throws Exception {
+        File file = folder.newFile("match");
+        Utilities.writeStringToFile("# Test Comment\n myIdentifier", file);
+        Lexer lexer = createLexer(mMatch, file);
         // Expect comments to be skipped
         Assert.assertEquals("Expected identifier", Category.LOWER_CASE, lexer.getCurrentCategory());
         lexer.move();
@@ -69,8 +80,10 @@ public class LexerTest {
     }
 
     @Test
-    public void lex_brackets() {
-        Lexer lexer = createLexer(mMatch, "()[]");
+    public void lex_brackets() throws Exception {
+        File file = folder.newFile("match");
+        Utilities.writeStringToFile("()[]", file);
+        Lexer lexer = createLexer(mMatch, file);
         Assert.assertEquals("Expected ORB", Category.ORB, lexer.getCurrentCategory());
         lexer.move();
         Assert.assertEquals("Expected CRB", Category.CRB, lexer.getCurrentCategory());
@@ -83,40 +96,50 @@ public class LexerTest {
     }
 
     @Test
-    public void lex_literals() {
-        Lexer lexer = createLexer(mMatch, "\"Test Literal\"");
+    public void lex_literals() throws Exception {
+        File file = folder.newFile("match");
+        Utilities.writeStringToFile("\"Test Literal\"", file);
+        Lexer lexer = createLexer(mMatch, file);
         Assert.assertEquals("Expected string literal", Category.STRING_LITERAL, lexer.getCurrentCategory());
         lexer.move();
         Assert.assertEquals("Expected EOF", Category.EOF, lexer.getCurrentCategory());
     }
 
     @Test
-    public void lex_identifier() {
-        Lexer lexer = createLexer(mMatch, "myIdentifier");
+    public void lex_identifier() throws Exception {
+        File file = folder.newFile("match");
+        Utilities.writeStringToFile("myIdentifier", file);
+        Lexer lexer = createLexer(mMatch, file);
         Assert.assertEquals("Expected identifier", Category.LOWER_CASE, lexer.getCurrentCategory());
         lexer.move();
         Assert.assertEquals("Expected EOF", Category.EOF, lexer.getCurrentCategory());
     }
 
     @Test
-    public void lex_match() {
-        Lexer lexer = createLexer(mMatch, "myIdentifier");
+    public void lex_match() throws Exception {
+        File file = folder.newFile("match");
+        Utilities.writeStringToFile("myIdentifier", file);
+        Lexer lexer = createLexer(mMatch, file);
         Assert.assertEquals("Expected identifier", "myIdentifier", lexer.match(Category.LOWER_CASE));
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.anyString());
     }
 
     @Test
-    public void lex_noMatch() {
-        Lexer lexer = createLexer(mMatch, "myIdentifier");
+    public void lex_noMatch() throws Exception {
+        File file = folder.newFile("match");
+        Utilities.writeStringToFile("myIdentifier", file);
+        Lexer lexer = createLexer(mMatch, file);
         lexer.match(Category.COMMENT);
         String filename = lexer.getFilename();
         Mockito.verify(mMatch).error(Mockito.eq(String.format("%s:1 unexpected \"COMMENT\", found \"LOWER_CASE (myIdentifier)\"", filename)));
     }
 
     @Test
-    public void lex() {
+    public void lex() throws Exception {
         String input = "FunctionFake(name = \"Blah\" foo = FunctionFake() values = [ FunctionFake(\"bar\") \"far\"])"; 
-        Lexer lexer = LexerTest.createLexer(mMatch, input);
+        File file = folder.newFile("match");
+        Utilities.writeStringToFile(input, file);
+        Lexer lexer = createLexer(mMatch, file);
         Category[] categories = new Category[] {
             Category.UPPER_CASE,
             Category.ORB,
@@ -167,16 +190,7 @@ public class LexerTest {
         Mockito.verify(mMatch, Mockito.never()).error(Mockito.anyString());
     }
 
-    static Lexer createLexer(IMatch match, String input) {
-        File file = null;
-        try {
-            file = File.createTempFile("match", ".tmp");
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            writer.write(input);
-            writer.close();
-        } catch (IOException e) {
-            Assert.fail("Error while writing temp file " + e.getMessage());
-        }
+    static Lexer createLexer(IMatch match, File file) throws Exception {
         Lexer lexer = new Lexer(match, Match.LEXEMS, file);
         lexer.move();
         return lexer;

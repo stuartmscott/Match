@@ -67,7 +67,7 @@ public class MatchTest {
     @Test
     public void files() throws Exception {
         Match match = createMatch(config);
-        File file = File.createTempFile(FOO, BAR);
+        File file = folder.newFile(FOO);
         String fileName = file.toPath().toString();
         match.addFile(fileName);
         Worker worker = new Worker(match, fileName);

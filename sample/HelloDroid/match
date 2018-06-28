@@ -1,0 +1,138 @@
+# Copyright 2018 Stuart Scott
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Define libraries used
+Library(
+    name = "android-support-test"
+    version = "0.1"
+    extension = "aar"
+)
+
+Library(
+    name = "junit"
+    version = "4.12"
+    extension = "jar"
+    location = "http://search.maven.org/remotecontent?filepath=junit/junit/"
+)
+
+# Build Library
+AndroidApk(
+    name = "HelloDroidLib"
+    source = Find(
+        directory = "Lib/source"
+        pattern = ".*.java"
+    )
+    resource-directory = "Lib/resource"
+    api-version = "27"
+    build-tools-version = "27.0.3"
+    keystore = "private/hellodroid-release-key.keystore"
+    keystore-password-file = "private/hellodroid-release-key.password"
+    manifest = "Lib/AndroidManifest.xml"
+    static-library = "true"
+)
+
+# Build APK
+AndroidApk(
+    name = "HelloDroid"
+    source = Find(
+        directory = "App/source"
+        pattern = ".*.java"
+    )
+    resource-directory = "App/resource"
+    library = [
+        "HelloDroidLib"
+    ]
+    api-version = "27"
+    build-tools-version = "27.0.3"
+    keystore = "private/hellodroid-release-key.keystore"
+    keystore-password-file = "private/hellodroid-release-key.password"
+    manifest = "App/AndroidManifest.xml"
+)
+
+# Build unit tests
+JavaJar(
+    name = "HelloDroidLibTest"
+    source = Find("Lib/tests/source")
+    main-class = "hello.droid.common.AllTests"
+    library = [
+        "HelloDroidLib-jar" # Build against jar
+        "junit"
+    ]
+)
+
+# Build unit tests
+JavaJar(
+    name = "HelloDroidUnitTest"
+    source = Find("App/tests/unit")
+    main-class = "hello.droid.AllTests"
+    library = [
+        "HelloDroidLib-jar" # Build against jar
+        "HelloDroid-jar" # Build against jar
+        "junit"
+    ]
+)
+
+# Run unit tests
+JavaJUnit(
+    name = "HelloDroidLibTestResult"
+    library = [
+        "HelloDroidLibTest"
+        "HelloDroidLib-jar" # Build against jar
+        "junit"
+    ]
+    main-class = "hello.droid.common.AllTests"
+)
+
+# Run unit tests
+JavaJUnit(
+    name = "HelloDroidUnitTestResult"
+    library = [
+        "HelloDroidUnitTest"
+        "HelloDroidLib-jar" # Build against jar
+        "HelloDroid-jar" # Build against jar
+        "junit"
+    ]
+    main-class = "hello.droid.AllTests"
+)
+
+# Build instrumentation tests
+AndroidApk(
+    name = "HelloDroidInstrumentationTest"
+    source = Find(
+        directory = "App/tests/instrumentation"
+        pattern = ".*.java"
+    )
+    library = [
+        "HelloDroidLib-jar" # Build against jar
+        "HelloDroid-jar" # Build against jar
+        "android-support-test"
+        "junit"
+    ]
+    api-version = "27"
+    build-tools-version = "27.0.3"
+    keystore = "private/hellodroid-release-key.keystore"
+    keystore-password-file = "private/hellodroid-release-key.password"
+    manifest = "App/tests/instrumentation/AndroidManifest.xml"
+)
+
+# Run instrumentation tests
+AndroidInstrumentation(
+    name = "HelloDroidInstrumentationTestResult"
+    apk = "HelloDroid"
+    apk-test = "HelloDroidInstrumentationTest"
+    package = "hello.droid"
+    package-test = "hello.droid.test"
+    build-tools-version = "27.0.3"
+    runner = "android.support.test.runner.AndroidJUnitRunner"
+)
