@@ -4,7 +4,6 @@
 .project
 .metadata
 out
-release
 sample/out
 
 #Removed so users can see how keystore and password are stored

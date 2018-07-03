@@ -46,11 +46,6 @@ public final class Utilities {
         return list;
     }
 
-    public static boolean isAndroid() {
-        System.out.println(System.getProperty("os.name"));
-        return false;
-    }
-
     public static boolean isLinux() {
         return System.getProperty("os.name").equals("Linux");
     }
@@ -64,7 +59,11 @@ public final class Utilities {
     }
 
     public static void writeStringToFile(String string, File file) throws Exception {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        writeStringToFile(string, file, false);
+    }
+
+    public static void writeStringToFile(String string, File file, boolean append) throws Exception {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file, append));
         writer.write(string);
         writer.close();
     }

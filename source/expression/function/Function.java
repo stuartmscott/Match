@@ -28,26 +28,26 @@ import java.util.Map;
 
 public abstract class Function extends Expression implements IFunction {
 
-    public static final String ANONYMOUS = "-";
-    public static final String CLASS_OUTPUT = "out/java/classes/";
-    public static final String DIRECTORY = "directory";
-    public static final String EXTENSION = "extension";
-    public static final String JAR_OUTPUT = "out/java/jar/";
-    public static final String LIBRARY = "library";
-    public static final String LOCATION = "location";
-    public static final String MANIFEST_OUTPUT = "out/java/manifest/";
-    public static final String MKDIR_COMMAND = "mkdir -p %s";
-    public static final String NAME = "name";
-    public static final String PATTERN = "pattern";
-    public static final String PROTO = "proto";
-    public static final String PROTO_LITE = "proto-lite";
-    public static final String PROTO_OUTPUT = "out/java/proto/";
-    public static final String RELEASE_OUTPUT = "release/";
-    public static final String RESOURCE = "resource";
-    public static final String SOURCE = "source";
-    public static final String VALUE = "value";
-    public static final String VERSION = "version";
-    public static final String ZIP_OUTPUT = "out/zip/";
+    public final static String ANONYMOUS = "-";
+    public final static String CLASS_OUTPUT = "out/java/classes/";
+    public final static String DIRECTORY = "directory";
+    public final static String EXTENSION = "extension";
+    public final static String FILE = "file";
+    public final static String JAR_OUTPUT = "out/java/jar/";
+    public final static String LIBRARY = "library";
+    public final static String LOCATION = "location";
+    public final static String MANIFEST_OUTPUT = "out/java/manifest/";
+    public final static String MKDIR_COMMAND = "mkdir -p %s";
+    public final static String NAME = "name";
+    public final static String PATTERN = "pattern";
+    public final static String PROTO = "proto";
+    public final static String PROTO_LITE = "proto-lite";
+    public final static String PROTO_OUTPUT = "out/java/proto/";
+    public final static String RESOURCE = "resource";
+    public final static String SOURCE = "source";
+    public final static String VALUE = "value";
+    public final static String VERSION = "version";
+    public final static String ZIP_OUTPUT = "out/zip/";
 
     private Map<String, IExpression> mParameters = new HashMap<String, IExpression>();
 

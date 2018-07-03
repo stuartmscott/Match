@@ -16,10 +16,11 @@ limitations under the License.
 -->
 <resources>
 
-    <string name="app_name">HelloDroid</string>
+    <public type="id" name="button" />
+    <public type="id" name="text_view" />
 
-    <string name="hello_droid">Hello Droid</string>
-
-    <string name="say_hello">Say Hello</string>
+    <public type="string" name="app_name" />
+    <public type="string" name="hello_droid" />
+    <public type="string" name="say_hello" />
 
 </resources>

@@ -15,15 +15,13 @@
 # Define libraries used
 Library(
     name = "android-support-test"
-    version = "0.1"
-    extension = "aar"
+    file = "android-support-test-0.1.aar"
 )
 
 Library(
     name = "junit"
-    version = "4.12"
-    extension = "jar"
-    location = "http://search.maven.org/remotecontent?filepath=junit/junit/"
+    file = "junit-4.12.jar"
+    location = "http://search.maven.org/remotecontent?filepath=junit/junit/4.12/"
 )
 
 # Build Library
@@ -33,13 +31,17 @@ AndroidApk(
         directory = "Lib/source"
         pattern = ".*.java"
     )
-    resource-directory = "Lib/resource"
+    resource-directory = [
+        "Lib/resource"
+        "Lib/resource-aapt2"
+    ]
     api-version = "27"
     build-tools-version = "27.0.3"
     keystore = "private/hellodroid-release-key.keystore"
     keystore-password-file = "private/hellodroid-release-key.password"
     manifest = "Lib/AndroidManifest.xml"
-    static-library = "true"
+    is-library = "true"
+    use-aapt2 = "true"
 )
 
 # Build APK
@@ -58,6 +60,7 @@ AndroidApk(
     keystore = "private/hellodroid-release-key.keystore"
     keystore-password-file = "private/hellodroid-release-key.password"
     manifest = "App/AndroidManifest.xml"
+    use-aapt2 = "true"
 )
 
 # Build unit tests
@@ -124,6 +127,7 @@ AndroidApk(
     keystore = "private/hellodroid-release-key.keystore"
     keystore-password-file = "private/hellodroid-release-key.password"
     manifest = "App/tests/instrumentation/AndroidManifest.xml"
+    use-aapt2 = "true"
 )
 
 # Run instrumentation tests

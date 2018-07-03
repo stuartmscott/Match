@@ -19,10 +19,9 @@ limitations under the License.
 
     <application
             android:allowBackup="true"
-            android:label="@string/app_name"
+            android:label="@hello.droid.common:string/app_name"
             android:supportsRtl="true"
             android:theme="@android:style/Theme.Holo">
-        <uses-library android:name="hello.droid.common"/>
         <activity
                 android:label="@string/activity_name"
                 android:name="hello.droid.common.MainActivity">

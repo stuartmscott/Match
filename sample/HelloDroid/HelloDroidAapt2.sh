@@ -20,7 +20,7 @@ set -x
 # Tools
 SDK=$HOME/Library/Android/sdk
 BUILD_TOOLS=${SDK}/build-tools/27.0.3
-AAPT=${BUILD_TOOLS}/aapt
+AAPT2=${BUILD_TOOLS}/aapt2
 ADB=${SDK}/platform-tools/adb
 APK_SIGNER=${BUILD_TOOLS}/apksigner
 DEX=${BUILD_TOOLS}/dx
@@ -33,7 +33,6 @@ ANDROID_SUPPORT_TEST=${LIBRARIES}/android-support-test.jar
 JUNIT=${LIBRARIES}/junit-4.12.jar
 
 # Output
-OUT_ANDROID_AAR=out/android/aar
 OUT_ANDROID_APK=out/android/apk
 OUT_ANDROID_DEX=out/android/dex
 OUT_ANDROID_JAVA=out/android/java
@@ -44,7 +43,6 @@ OUT_JAVA_JAR=out/java/jar
 OUT_JAVA_MANIFEST=out/java/manifest
 
 # Create output directories
-mkdir -p ${OUT_ANDROID_AAR}
 mkdir -p ${OUT_ANDROID_APK}
 mkdir -p ${OUT_ANDROID_DEX}/HelloDroid/
 mkdir -p ${OUT_ANDROID_DEX}/HelloDroidInstrumentationTest/
@@ -58,24 +56,31 @@ mkdir -p ${OUT_ANDROID_RESULTS}
 mkdir -p ${OUT_JAVA_CLASSES}/HelloDroid/
 mkdir -p ${OUT_JAVA_CLASSES}/HelloDroidInstrumentationTest/
 mkdir -p ${OUT_JAVA_CLASSES}/HelloDroidLib/
-mkdir -p ${OUT_JAVA_JAR}/HelloDroid/
-mkdir -p ${OUT_JAVA_JAR}/HelloDroidInstrumentationTest/
-mkdir -p ${OUT_JAVA_JAR}/HelloDroidLib/
+mkdir -p ${OUT_JAVA_JAR}
 mkdir -p ${OUT_JAVA_MANIFEST}
 
 # Build library
-${AAPT} package -v -m -f \
+# Compile resources
+${AAPT2} compile -v \
+    -o ${OUT_ANDROID_RES}/HelloDroidLib/ \
+    Lib/resource/layout/main.xml
+${AAPT2} compile -v \
+    -o ${OUT_ANDROID_RES}/HelloDroidLib/ \
+    Lib/resource-aapt2/values/public.xml
+${AAPT2} compile -v \
+    -o ${OUT_ANDROID_RES}/HelloDroidLib/ \
+    Lib/resource/values/strings.xml
+# Link APK
+${AAPT2} link -v \
     --auto-add-overlay \
-    --non-constant-id \
-    --output-text-symbols ${OUT_ANDROID_RES}/HelloDroidLib/ \
-    -F ${OUT_ANDROID_AAR}/HelloDroidLib.aar \
-    -M Lib/AndroidManifest.xml \
-    -J ${OUT_ANDROID_JAVA}/HelloDroidLib/ \
-    -P ${OUT_ANDROID_RES}/HelloDroidLib/public_resources.xml \
-    -G ${OUT_ANDROID_RES}/HelloDroidLib/proguard.txt \
+    --static-lib \
+    -o ${OUT_ANDROID_APK}/HelloDroidLib.unaligned.apk \
+    --manifest Lib/AndroidManifest.xml \
+    --java ${OUT_ANDROID_JAVA}/HelloDroidLib/ \
     -I ${PLATFORM} \
-    -S Lib/resource \
-    -S Lib/resource-aapt
+    -R ${OUT_ANDROID_RES}/HelloDroidLib/layout_main.xml.flat \
+    -R ${OUT_ANDROID_RES}/HelloDroidLib/values_public.arsc.flat \
+    -R ${OUT_ANDROID_RES}/HelloDroidLib/values_strings.arsc.flat
 javac \
     -bootclasspath ${PLATFORM} \
     -sourcepath ${OUT_ANDROID_JAVA}/HelloDroidLib/ \
@@ -83,39 +88,55 @@ javac \
     Lib/source/hello/droid/common/MainActivity.java \
     -d ${OUT_JAVA_CLASSES}/HelloDroidLib/
 jar \
-    cf ${OUT_JAVA_JAR}/HelloDroidLib/classes.jar \
+    cf ${OUT_JAVA_JAR}/HelloDroidLib.jar \
     -C ${OUT_JAVA_CLASSES}/HelloDroidLib/ .
-zip -jX ${OUT_ANDROID_APK}/HelloDroidLib.aar \
-    ${OUT_JAVA_JAR}/HelloDroidLib/classes.jar
-zip -jX ${OUT_ANDROID_APK}/HelloDroidLib.aar \
-    ${OUT_ANDROID_RES}/HelloDroidLib/public_resources.xml
-zip -jX ${OUT_ANDROID_APK}/HelloDroidLib.aar \
-    ${OUT_ANDROID_RES}/HelloDroidLib/R.txt
+${DEX} --dex \
+    --verbose \
+    --debug \
+    --keep-classes \
+    --output=${OUT_ANDROID_DEX}/HelloDroidLib/classes.dex \
+    ${OUT_JAVA_CLASSES}/HelloDroidLib/
+zip -jX ${OUT_ANDROID_APK}/HelloDroidLib.unaligned.apk \
+    ${OUT_ANDROID_DEX}/HelloDroidLib/classes.dex
+${ZIP_ALIGN} \
+    -f 4 \
+    ${OUT_ANDROID_APK}/HelloDroidLib.unaligned.apk \
+    ${OUT_ANDROID_APK}/HelloDroidLib.aligned.apk
+${APK_SIGNER} sign \
+    --ks private/hellodroid-release-key.keystore \
+    --ks-pass file:private/hellodroid-release-key.password \
+    --out ${OUT_ANDROID_APK}/HelloDroidLib.apk \
+    ${OUT_ANDROID_APK}/HelloDroidLib.aligned.apk
 
 # Build App
-${AAPT} package -v -m -f \
+# Compile resources
+${AAPT2} compile -v \
+    -o ${OUT_ANDROID_RES}/HelloDroid/ \
+    App/resource/values/strings.xml
+# Link APK
+${AAPT2} link -v \
     --auto-add-overlay \
-    -F ${OUT_ANDROID_APK}/HelloDroid.unaligned.apk \
+    -o ${OUT_ANDROID_APK}/HelloDroid.unaligned.apk \
+    --manifest App/AndroidManifest.xml \
+    --java ${OUT_ANDROID_JAVA}/HelloDroid/ \
     -I ${PLATFORM} \
-    -I ${OUT_ANDROID_AAR}/HelloDroidLib.aar \
-    -J ${OUT_ANDROID_JAVA}/HelloDroid/ \
-    -M App/AndroidManifest.xml \
-    -S App/resource/
+    -R ${OUT_ANDROID_APK}/HelloDroidLib.apk \
+    -R ${OUT_ANDROID_RES}/HelloDroid/values_strings.arsc.flat
 javac \
     -bootclasspath ${PLATFORM} \
-    -cp ${OUT_JAVA_JAR}/HelloDroidLib/classes.jar \
+    -cp ${OUT_JAVA_JAR}/HelloDroidLib.jar \
     -sourcepath ${OUT_ANDROID_JAVA}/HelloDroid/ \
     App/source/hello/droid/OtherActivity.java \
     -d ${OUT_JAVA_CLASSES}/HelloDroid/
 jar \
-    cf ${OUT_JAVA_JAR}/HelloDroid/classes.jar \
+    cf ${OUT_JAVA_JAR}/HelloDroid.jar \
     -C ${OUT_JAVA_CLASSES}/HelloDroid/ .
 ${DEX} --dex \
     --verbose \
     --debug \
     --keep-classes \
     --output=${OUT_ANDROID_DEX}/HelloDroid/classes.dex \
-    ${OUT_JAVA_JAR}/HelloDroidLib/classes.jar \
+    ${OUT_JAVA_JAR}/HelloDroidLib.jar \
     ${OUT_JAVA_CLASSES}/HelloDroid/
 zip -jX ${OUT_ANDROID_APK}/HelloDroid.unaligned.apk \
     ${OUT_ANDROID_DEX}/HelloDroid/classes.dex
@@ -130,28 +151,29 @@ ${APK_SIGNER} sign \
     ${OUT_ANDROID_APK}/HelloDroid.aligned.apk
 
 # Build Instrumentation App
-${AAPT} package -v -m -f \
+# Link APK
+${AAPT2} link -v \
     --auto-add-overlay \
-    -F ${OUT_ANDROID_APK}/HelloDroidInstrumentationTest.unaligned.apk \
-    -J ${OUT_ANDROID_JAVA}/HelloDroidInstrumentationTest/ \
+    -o ${OUT_ANDROID_APK}/HelloDroidInstrumentationTest.unaligned.apk \
+    --manifest App/tests/instrumentation/AndroidManifest.xml \
+    --java ${OUT_ANDROID_JAVA}/HelloDroidInstrumentationTest/ \
     -I ${PLATFORM} \
-    -I ${OUT_ANDROID_APK}/HelloDroid.apk \
-    -M App/tests/instrumentation/AndroidManifest.xml
+    -I ${OUT_ANDROID_APK}/HelloDroid.apk
 javac \
     -bootclasspath ${PLATFORM} \
-    -cp ${OUT_JAVA_JAR}/HelloDroid/classes.jar:${OUT_JAVA_JAR}/HelloDroidLib/classes.jar:${JUNIT}:${ANDROID_SUPPORT_TEST} \
+    -cp ${OUT_JAVA_JAR}/HelloDroid.jar:${OUT_JAVA_JAR}/HelloDroidLib.jar:${JUNIT}:${ANDROID_SUPPORT_TEST} \
     -sourcepath ${OUT_ANDROID_JAVA}/HelloDroid/:${OUT_ANDROID_JAVA}/HelloDroidInstrumentationTest/:${OUT_ANDROID_JAVA}/HelloDroidLib/ \
     App/tests/instrumentation/hello/droid/HelloDroidInstrumentedTest.java \
     -d ${OUT_JAVA_CLASSES}/HelloDroidInstrumentationTest/
 jar \
-    cf ${OUT_JAVA_JAR}/HelloDroidInstrumentationTest/classes.jar \
+    cf ${OUT_JAVA_JAR}/HelloDroidInstrumentationTest.jar \
     -C ${OUT_JAVA_CLASSES}/HelloDroidInstrumentationTest/ .
 ${DEX} --dex \
     --verbose \
     --debug \
     --keep-classes \
     --output=${OUT_ANDROID_DEX}/HelloDroidInstrumentationTest/classes.dex \
-    ${OUT_JAVA_JAR}/HelloDroid/classes.jar \
+    ${OUT_JAVA_JAR}/HelloDroid.jar \
     ${JUNIT} \
     ${ANDROID_SUPPORT_TEST} \
     ${OUT_JAVA_CLASSES}/HelloDroidInstrumentationTest/

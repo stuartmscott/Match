@@ -121,6 +121,7 @@ public class Target implements ITarget {
         int result = 0;
         try {
             mLastCommand = command;
+            // mMatch.println(command);
             ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
             pb.directory(getDirectory());
             Process process = pb.start();

@@ -35,16 +35,10 @@ public class Release extends Function {
 
     public final static String AWAIT = "await";
     public final static String CHANNEL = "channel";
-    public final static String CP_COMMAND = "cp %s %s";
-    // TODO for f in out/java/jar/*.jar; do cp "$f" "/tmp/libraries/$(basename $f .jar)-0.1.jar"; done;
 
     private IExpression mAwait;
     private IExpression mChannel;
     private String mSource;
-    private String mName;
-    private String mOutputDir;
-    private String mOutput;
-    private File mOutputFile;
 
     public Release(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
@@ -53,31 +47,9 @@ public class Release extends Function {
             mMatch.error("Release function expects a String source");
         }
         mSource = source.resolve();
+        target.setName("Release:" + mSource);
         mAwait = getParameter(AWAIT);
         mChannel = getParameter(CHANNEL);
-        String extension = "zip";
-        if (hasParameter(EXTENSION)) {
-            IExpression ext = getParameter(EXTENSION);
-            if (!(ext instanceof Literal)) {
-                mMatch.error("Release function expects a String extension");
-            }
-            extension = ext.resolve();
-        }
-        // TODO switch to YYYYMMDD
-        float version = 0.1f;
-        if (hasParameter(VERSION)) {
-            IExpression ver = getParameter(VERSION);
-            if (!(ver instanceof Literal)) {
-                mMatch.error("Release function expects a float version");
-            }
-            version = Float.parseFloat(ver.resolve());
-        }
-        mName = String.format("%s-%1.1f.%s", mSource, version, extension);
-        target.setName(mName);
-        mOutputDir = String.format("%sv%1.1f/", RELEASE_OUTPUT, version);
-        File directory = new File(target.getDirectory(), mOutputDir);
-        mOutputFile = new File(directory, mName);
-        mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
         // TODO ensure release isn't re-created if the inputs haven't been modified
     }
 
@@ -86,8 +58,6 @@ public class Release extends Function {
      */
     @Override
     public void configure() {
-        mMatch.addFile(mOutput);
-        mMatch.setProperty(mName, mOutput);
         mAwait.configure();
         mChannel.configure();
     }
@@ -101,18 +71,15 @@ public class Release extends Function {
         for (String await : mAwait.resolveList()) {
             mMatch.awaitFile(mMatch.getProperty(await));
         }
-        // Create output directory
-        mTarget.runCommand(String.format(MKDIR_COMMAND, mOutputDir));
         // Get the source file
         String source = mMatch.getProperty(mSource);
         mMatch.awaitFile(source);
-        // Create release
-        mTarget.runCommand(String.format(CP_COMMAND, source, mOutput));
         // Push out distribution channels
         for (String channel : mChannel.resolveList()) {
-            mTarget.runCommand(String.format(channel, mOutput));
+            if (mTarget.runCommand(String.format(channel, source)) != 0) {
+                mMatch.error("Failed to release via channel: " + channel);
+            }
         }
-        mMatch.provideFile(mOutputFile);
-        return mOutput;
+        return "";
     }
 }

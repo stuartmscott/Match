@@ -187,8 +187,8 @@ public class Match implements IMatch {
             error(String.format("no targets provided %s", file));
         }
         try {
-            if (!latch.await(3, TimeUnit.MINUTES)) {
-                error(file + " took too long (> 3mins)");
+            if (!latch.await(10, TimeUnit.MINUTES)) {
+                error(file + " took too long (> 10mins)");
             }
         } catch(InterruptedException e) {
             error("await interrupted");
@@ -254,13 +254,13 @@ public class Match implements IMatch {
             new BuildThread(target, latch).start();
         }
         try {
-            if (!latch.await(5, TimeUnit.MINUTES)) {
+            if (!latch.await(15, TimeUnit.MINUTES)) {
                 for (ITarget target : targets) {
                     if (!target.isBuilt()) {
                         println(target + " still running " + target.getLastCommand());
                     }
                 }
-                error("build took too long (> 5mins)");
+                error("build took too long (> 15mins)");
             }
         } catch(InterruptedException e) {
             error("build interrupted");
