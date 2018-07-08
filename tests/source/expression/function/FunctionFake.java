@@ -13,18 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
-import match.IMatch;
-import match.ITarget;
 
 import java.util.Map;
 
+import match.IMatch;
+import match.ITarget;
+
+/**
+ * A fake function for testing.
+ */
 public class FunctionFake extends Function {
 
     private String resolution = "foobar";
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public FunctionFake(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
         if (parameters.containsKey(ANONYMOUS)) {
@@ -32,6 +40,10 @@ public class FunctionFake extends Function {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String resolve() {
         return resolution;
     }

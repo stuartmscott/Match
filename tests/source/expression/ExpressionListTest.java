@@ -13,23 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import match.IMatch;
 import match.ITarget;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+/**
+ * Tests for ExpressionList.
+ */
 public class ExpressionListTest {
 
     private static final String FOO = "foo";
     private static final String BAR = "bar";
     private static final String EXPECTED = "foo bar";
 
+    /**
+     * Tests the expression list resolves correctly.
+     */
     @Test
     public void list() {
         IMatch match = Mockito.mock(IMatch.class);

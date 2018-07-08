@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package frontend;
 
 public class Lexem {
 
-    public Category mCategory;
-    public String mRegex;
+    public Category category;
+    public String regex;
 
+    /**
+     * Creates a Lexem of the given category with the given regex.
+     */
     public Lexem(Category category, String regex) {
-        this.mCategory = category;
-        this.mRegex = regex;
+        this.category = category;
+        this.regex = regex;
     }
 
     /**
@@ -30,6 +34,6 @@ public class Lexem {
      */
     @Override
     public String toString() {
-        return mCategory + " : " + mRegex;
+        return category + " : " + regex;
     }
 }

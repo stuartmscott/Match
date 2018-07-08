@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package hello.droid.common;
 
-import org.junit.runners.Suite;
 import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    hello.droid.common.HelloDroidUnitTest.class,
+        hello.droid.common.HelloDroidUnitTest.class,
 })
 public class AllTests {
     //nothing

@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import config.Config;
+
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
-import match.MatchTest;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import match.IMatch;
+import match.ITarget;
+import match.MatchTest;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,6 +41,9 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
+/**
+ * Tests for Find function.
+ */
 public class FindTest {
 
     private static final String C = "c";
@@ -54,6 +60,9 @@ public class FindTest {
     public String rootPath;
     public Config config;
 
+    /**
+     * Sets up the file structure for the test.
+     */
     @Before
     public void setUp() throws IOException {
         root = folder.getRoot();
@@ -68,11 +77,6 @@ public class FindTest {
         filesC.add("c/d/e");
         filesC.add("c/d/f");
         filesD.add("c/d/e");
-    }
-
-    @After
-    public void tearDown() throws IOException {
-        //
     }
 
     @Test

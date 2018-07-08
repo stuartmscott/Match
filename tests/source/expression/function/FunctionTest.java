@@ -13,54 +13,71 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import match.IMatch;
+import match.ITarget;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
+/**
+ * Tests for Functions.
+ */
 public class FunctionTest {
 
     private static final String FOO = "foo";
     private static final String BAR = "bar";
     private static final String FAKE = "FunctionFake";
 
-    private IMatch mMatch;
-    private ITarget mTarget;
-    private Map<String, IExpression> mParameters;
+    @Mock
+    private IMatch match;
+    @Mock
+    private ITarget target;
+    private Map<String, IExpression> parameters;
 
+    /**
+     * Sets up the mocks and paramters for the tests.
+     */
     @Before
     public void setUp() {
-        mMatch = Mockito.mock(IMatch.class);
-        mTarget = Mockito.mock(ITarget.class);
-        mParameters = new HashMap<String, IExpression>();
+        MockitoAnnotations.initMocks(this);
+        parameters = new HashMap<String, IExpression>();
     }
 
+    /**
+     * Tests the function can get parameters.
+     */
     @Test
     public void parameters() {
-        Literal literal = new Literal(mMatch, mTarget, BAR);
-        mParameters.put(FOO, literal);
-        IFunction function = new FunctionFake(mMatch, mTarget, mParameters);
+        Literal literal = new Literal(match, target, BAR);
+        parameters.put(FOO, literal);
+        IFunction function = new FunctionFake(match, target, parameters);
         Assert.assertEquals("Wrong parameter", BAR, function.getParameter(FOO).resolve());
     }
 
+    /**
+     * Tests the function can be retrieved without errors.
+     */
     @Test
     public void getFunction() {
-        IFunction function = Function.getFunction(FAKE, mMatch, mTarget, mParameters);
+        IFunction function = Function.getFunction(FAKE, match, target, parameters);
         Assert.assertNotNull("Expected to get function", function);
         function.configure();
         Assert.assertEquals("Wrong function resolution", FOO + BAR, function.resolve());
-        Mockito.verify(mMatch, Mockito.never()).error(Mockito.anyString());
-        Mockito.verify(mMatch, Mockito.never()).error(Mockito.<Exception>anyObject());
+        Mockito.verify(match, Mockito.never()).error(Mockito.anyString());
+        Mockito.verify(match, Mockito.never()).error(Mockito.<Exception>anyObject());
     }
 
 }

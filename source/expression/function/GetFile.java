@@ -13,27 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
+
 import java.util.Map;
 
+import match.IMatch;
+import match.ITarget;
+
+/**
+ * Gets file with the given name.
+ */
 public class GetFile extends Get {
 
-    private String mKey;
+    private String key;
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public GetFile(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
         String parameterName = hasParameter(NAME) ? NAME : ANONYMOUS;
-        IExpression key = getParameter(parameterName);
-        if (!(key instanceof Literal)) {
-            mMatch.error("GetFile expects a String key");
+        IExpression k = getParameter(parameterName);
+        if (!(k instanceof Literal)) {
+            match.error("GetFile expects a String key");
         }
-        mKey = key.resolve();
-        target.setName("GetFile:" + mKey);
+        key = k.resolve();
+        target.setName("GetFile:" + key);
     }
 
     /**
@@ -41,8 +50,8 @@ public class GetFile extends Get {
      */
     @Override
     public String resolve() {
-        String file = mMatch.getProperty(mKey);
-        mMatch.awaitFile(file);
+        String file = match.getProperty(key);
+        match.awaitFile(file);
         return file;
     }
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package match;
 
 import java.io.File;
@@ -20,21 +21,29 @@ import java.io.File;
 public interface IMatch {
 
     /**
-     * @return the top level directory
+     * Gets the top level directory.
+     *
+     * @return the directory.
      */
     File getRootDir();
 
     /**
-     * @return the directory holding the build's libraries
+     * Gets the directory holding the build's libraries.
+     *
+     * @return the library directory.
      */
     File getLibrariesDir();
 
     /**
-     * @return true iff this execution is quiet
+     * Checks if this build is quiet.
+     *
+     * @return true iff this execution is quiet.
      */
     boolean isQuiet();
 
     /**
+     * Checks if the property has been set.
+     *
      * @return true if the property for the given key is defined in this build.
      */
     boolean hasProperty(String key);
@@ -82,7 +91,9 @@ public interface IMatch {
     /**
      * Called when a file is ready to be used by other target.
      *
+     * <p>
      * This will allow all targets that are awaiting this file to continue.
+     * </p>
      */
     void provideFile(File file);
 

@@ -13,22 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression;
+
+import java.util.Arrays;
+import java.util.List;
 
 import match.IMatch;
 import match.ITarget;
 import match.Utilities;
 
-import java.util.List;
-
 public abstract class Expression implements IExpression {
 
-    protected IMatch mMatch;
-    protected ITarget mTarget;
+    protected IMatch match;
+    protected ITarget target;
 
     public Expression(IMatch match, ITarget target) {
-        mMatch = match;
-        mTarget = target;
+        this.match = match;
+        this.target = target;
     }
 
     /**
@@ -42,7 +44,7 @@ public abstract class Expression implements IExpression {
      */
     @Override
     public List<String> resolveList() {
-        return Utilities.newList(resolve());
+        return Arrays.asList(resolve());
     }
 
     /**

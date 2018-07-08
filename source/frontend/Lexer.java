@@ -13,41 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package frontend;
 
-import match.IMatch;
+package frontend;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+
+import match.IMatch;
 
 public class Lexer implements ILexer {
 
-    public IMatch mMatch;
-    public File mFile;
-    public String mFilename;
-    public int mLineNumber = 1;
-    public List<Lexem> mLexems;
-    public InputStream mInput;
+    public IMatch match;
+    public File file;
+    public String filename;
+    public int lineNumber = 1;
+    public List<Lexem> lexems;
+    public InputStream input;
 
-    public int mInputInt;
-    public String mInputChar;
-    public String mCurrentValue = "";
-    public String mNextValue;
-    public Token mCurrentToken;
+    public int inputInt;
+    public String inputChar;
+    public String currentValue = "";
+    public String nextValue;
+    public Token currentToken;
 
+    /**
+     * Creates a Lexer for the given file with the given lexems.
+     */
     public Lexer(IMatch match, List<Lexem> lexems, File file) {
-        mMatch = match;
-        mLexems = lexems;
-        mFile = file;
-        mFilename = file.getAbsolutePath();
+        this.match = match;
+        this.lexems = lexems;
+        this.file = file;
+        filename = file.getAbsolutePath();
         try {
-            mInput = new FileInputStream(file);
+            input = new FileInputStream(file);
         } catch (FileNotFoundException e) {
-            mMatch.error(e);
+            match.error(e);
         }
     }
 
@@ -56,7 +60,7 @@ public class Lexer implements ILexer {
      */
     @Override
     public File getFile() {
-        return mFile;
+        return file;
     }
 
     /**
@@ -64,11 +68,11 @@ public class Lexer implements ILexer {
      */
     @Override
     public String getFilename() {
-        return mFilename;
+        return filename;
     }
 
     private void error(String message) {
-        mMatch.error(String.format("%s:%d %s", mFilename, mLineNumber, message));
+        match.error(String.format("%s:%d %s", filename, lineNumber, message));
     }
 
     /**
@@ -76,8 +80,8 @@ public class Lexer implements ILexer {
      */
     @Override
     public void move() {
-        mCurrentToken = nextToken();
-        if (mCurrentToken == null) {
+        currentToken = nextToken();
+        if (currentToken == null) {
             error("end of file reached unexpectedly");
         }
     }
@@ -90,10 +94,10 @@ public class Lexer implements ILexer {
             error("error reading file");
         }
         if (token != null) {
-            if (token.mCategory == Category.COMMENT || token.mCategory == Category.NEWLINE) {
-                mLineNumber++;
+            if (token.category == Category.COMMENT || token.category == Category.NEWLINE) {
+                lineNumber++;
                 token = nextToken();
-            } else if (token.mCategory == Category.WHITESPACE) {
+            } else if (token.category == Category.WHITESPACE) {
                 token = nextToken();
             }
         }
@@ -101,33 +105,33 @@ public class Lexer implements ILexer {
     }
 
     private Token getNextToken() throws IOException {
-        while ((mInputInt = mInput.read()) != -1) {
-            mInputChar = (char) mInputInt + "";
-            mNextValue = mCurrentValue + mInputChar;
-            Token currentToken = getToken(mCurrentValue);
-            Token nextToken = getToken(mNextValue);
+        while ((inputInt = input.read()) != -1) {
+            inputChar = (char) inputInt + "";
+            nextValue = currentValue + inputChar;
+            Token currentToken = getToken(currentValue);
+            Token nextToken = getToken(nextValue);
 
             if (currentToken == null) {
-                mCurrentValue = mNextValue;
+                currentValue = nextValue;
             } else {
                 if (nextToken == null) {
-                    mCurrentValue = mInputChar;
+                    currentValue = inputChar;
                     return currentToken;
                 } else {
-                    mCurrentValue = mNextValue;
+                    currentValue = nextValue;
                 }
             }
         }
-        if (!mCurrentValue.isEmpty()) {
-            Token leftover = getToken(mCurrentValue);
+        if (!currentValue.isEmpty()) {
+            Token leftover = getToken(currentValue);
             if (leftover == null) {
-                error(String.format("couldn't parse %s", mCurrentValue));
+                error(String.format("couldn't parse %s", currentValue));
             } else {
-                mCurrentValue = "";
+                currentValue = "";
                 return leftover;
             }
         }
-        return new Token(mLineNumber, Category.EOF);
+        return new Token(lineNumber, Category.EOF);
     }
 
     /**
@@ -135,7 +139,7 @@ public class Lexer implements ILexer {
      */
     @Override
     public boolean currentIs(Category category) {
-        return mCurrentToken.mCategory == category;
+        return currentToken.category == category;
     }
 
     /**
@@ -144,9 +148,9 @@ public class Lexer implements ILexer {
     @Override
     public String match(Category category) {
         if (!currentIs(category)) {
-            error("unexpected \"" + category + "\", found \"" + mCurrentToken.mCategory + " (" + mCurrentToken.mValue + ")\"");
+            error("unexpected \"" + category + "\", found \"" + currentToken.category + " (" + currentToken.value + ")\"");
         }
-        String value = mCurrentToken.mValue;
+        String value = currentToken.value;
         if (!currentIs(Category.EOF)) {
             move();
         }
@@ -158,7 +162,7 @@ public class Lexer implements ILexer {
      */
     @Override
     public Token getCurrent() {
-        return mCurrentToken;
+        return currentToken;
     }
 
     /**
@@ -166,7 +170,7 @@ public class Lexer implements ILexer {
      */
     @Override
     public Category getCurrentCategory() {
-        return mCurrentToken.mCategory;
+        return currentToken.category;
     }
 
     /**
@@ -174,13 +178,13 @@ public class Lexer implements ILexer {
      */
     @Override
     public String getCurrentValue() {
-        return mCurrentToken.mValue;
+        return currentToken.value;
     }
 
     private Token getToken(String value) {
-        for (Lexem lexem : mLexems) {
-            if (value.matches(lexem.mRegex)) {
-                return new Token(mLineNumber, lexem.mCategory, value);
+        for (Lexem lexem : lexems) {
+            if (value.matches(lexem.regex)) {
+                return new Token(lineNumber, lexem.category, value);
             }
         }
         return null;

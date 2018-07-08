@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.Expression;
 import expression.IExpression;
-import match.IMatch;
-import match.ITarget;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -26,34 +25,43 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import match.IMatch;
+import match.ITarget;
+
+/**
+ * Base class of build functions.
+ */
 public abstract class Function extends Expression implements IFunction {
 
-    public final static String ANONYMOUS = "-";
-    public final static String CLASS_OUTPUT = "out/java/classes/";
-    public final static String DIRECTORY = "directory";
-    public final static String EXTENSION = "extension";
-    public final static String FILE = "file";
-    public final static String JAR_OUTPUT = "out/java/jar/";
-    public final static String LIBRARY = "library";
-    public final static String LOCATION = "location";
-    public final static String MANIFEST_OUTPUT = "out/java/manifest/";
-    public final static String MKDIR_COMMAND = "mkdir -p %s";
-    public final static String NAME = "name";
-    public final static String PATTERN = "pattern";
-    public final static String PROTO = "proto";
-    public final static String PROTO_LITE = "proto-lite";
-    public final static String PROTO_OUTPUT = "out/java/proto/";
-    public final static String RESOURCE = "resource";
-    public final static String SOURCE = "source";
-    public final static String VALUE = "value";
-    public final static String VERSION = "version";
-    public final static String ZIP_OUTPUT = "out/zip/";
+    public static final String ANONYMOUS = "-";
+    public static final String CLASS_OUTPUT = "out/java/classes/";
+    public static final String DIRECTORY = "directory";
+    public static final String EXTENSION = "extension";
+    public static final String FILE = "file";
+    public static final String JAR_OUTPUT = "out/java/jar/";
+    public static final String LIBRARY = "library";
+    public static final String LOCATION = "location";
+    public static final String MANIFEST_OUTPUT = "out/java/manifest/";
+    public static final String MKDIR_COMMAND = "mkdir -p %s";
+    public static final String NAME = "name";
+    public static final String PATTERN = "pattern";
+    public static final String PROTO = "proto";
+    public static final String PROTO_LITE = "proto-lite";
+    public static final String PROTO_OUTPUT = "out/java/proto/";
+    public static final String RESOURCE = "resource";
+    public static final String SOURCE = "source";
+    public static final String VALUE = "value";
+    public static final String VERSION = "version";
+    public static final String ZIP_OUTPUT = "out/zip/";
 
-    private Map<String, IExpression> mParameters = new HashMap<String, IExpression>();
+    private Map<String, IExpression> parameters = new HashMap<String, IExpression>();
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public Function(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target);
-        mParameters = parameters;
+        this.parameters = parameters;
     }
 
     /**
@@ -61,7 +69,7 @@ public abstract class Function extends Expression implements IFunction {
      */
     @Override
     public String resolve() {
-        mMatch.error("Function does not resolve to a single String");
+        match.error("Function does not resolve to a single String");
         return null;
     }
 
@@ -70,7 +78,7 @@ public abstract class Function extends Expression implements IFunction {
      */
     @Override
     public boolean hasParameter(String key) {
-        return mParameters.containsKey(key);
+        return parameters.containsKey(key);
     }
 
     /**
@@ -78,13 +86,16 @@ public abstract class Function extends Expression implements IFunction {
      */
     @Override
     public IExpression getParameter(String key) {
-        IExpression parameter =  mParameters.get(key);
+        IExpression parameter =  parameters.get(key);
         if (parameter == null) {
-            mMatch.error(String.format("%s missing parameter %s", mTarget.getName(), key));
+            match.error(String.format("%s missing parameter %s", target.getName(), key));
         }
         return parameter;
     }
 
+    /**
+     * Returns an instance of the function with the given name.
+     */
     public static Function getFunction(String name, IMatch match, ITarget target, Map<String, IExpression> parameters) {
         try {
             String className = String.format("expression.function.%s", name);

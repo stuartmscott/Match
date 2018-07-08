@@ -19,6 +19,12 @@ Library(
 )
 
 Library(
+    name = "checkstyle"
+    file = "checkstyle-8.11-all.jar"
+    location = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.11/"
+)
+
+Library(
     name = "junit"
     file = "junit-4.12.jar"
     location = "http://search.maven.org/remotecontent?filepath=junit/junit/4.12/"
@@ -34,6 +40,15 @@ Library(
     name = "mockito-all"
     file = "mockito-all-1.10.19.jar"
     location = "http://search.maven.org/remotecontent?filepath=org/mockito/mockito-all/1.10.19/"
+)
+
+CheckStyle(
+    name = "MatchCheckStyleResult"
+    config = "$HOME/match/checkstyle.xml"
+    source = [
+        Find("source")
+        Find("tests/source")
+    ]
 )
 
 JavaJar(
@@ -71,5 +86,8 @@ JavaJUnit(
 Release(
     source = "Match"
     channel = "cp %s $HOME/match/libraries/Match-0.4.jar"
-    await = "MatchTestResult"
+    await = [
+        "MatchCheckStyleResult"
+        "MatchTestResult"
+    ]
 )

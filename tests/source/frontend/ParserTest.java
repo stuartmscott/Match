@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package frontend;
+
+import expression.IExpression;
+import expression.function.FunctionFake;
+import expression.function.IFunction;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -34,28 +39,27 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
-import expression.IExpression;
-import expression.function.FunctionFake;
-import expression.function.IFunction;
-
+/**
+ * Tests for Parser.
+ */
 public class ParserTest {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
-    private IMatch mMatch;
+    private IMatch match;
 
     @Before
     public void setUp() {
-        mMatch = Mockito.mock(IMatch.class);
+        match = Mockito.mock(IMatch.class);
     }
 
     @Test
     public void parse() throws Exception {
         File file = folder.newFile("match");
         Utilities.writeStringToFile("FunctionFake(name = \"Target1\") FunctionFake(name = \"Target2\")", file);
-        Lexer lexer = new Lexer(mMatch, Match.LEXEMS, file);
-        Parser parser = new Parser(mMatch, lexer);
+        Lexer lexer = new Lexer(match, Match.LEXEMS, file);
+        Parser parser = new Parser(match, lexer);
         List<ITarget> targets = parser.parse();
         Assert.assertEquals("Incorrect number of targets", 2, targets.size());
     }
@@ -65,13 +69,13 @@ public class ParserTest {
         String input = "FunctionFake()";
         File file = folder.newFile("match");
         Utilities.writeStringToFile(input, file);
-        Lexer lexer = LexerTest.createLexer(mMatch, file);
-        Parser parser = new Parser(mMatch, lexer);
+        Lexer lexer = LexerTest.createLexer(match, file);
+        Parser parser = new Parser(match, lexer);
         IFunction function = parser.matchFunction();
         Assert.assertNotNull("Couldn't load function", function);
         Assert.assertEquals("Wrong class", FunctionFake.class, function.getClass());
-        Mockito.verify(mMatch, Mockito.never()).error(Mockito.anyString());
-        Mockito.verify(mMatch, Mockito.never()).error(Mockito.<Exception>anyObject());
+        Mockito.verify(match, Mockito.never()).error(Mockito.anyString());
+        Mockito.verify(match, Mockito.never()).error(Mockito.<Exception>anyObject());
     }
 
     @Test
@@ -79,11 +83,11 @@ public class ParserTest {
         String input = "MissingFake()";
         File file = folder.newFile("match");
         Utilities.writeStringToFile(input, file);
-        Lexer lexer = LexerTest.createLexer(mMatch, file);
-        Parser parser = new Parser(mMatch, lexer);
+        Lexer lexer = LexerTest.createLexer(match, file);
+        Parser parser = new Parser(match, lexer);
         IFunction function = parser.matchFunction();
         Assert.assertNull("Function shouldn't exist", function);
-        Mockito.verify(mMatch, Mockito.times(1)).error(Mockito.<Exception>anyObject());
+        Mockito.verify(match, Mockito.times(1)).error(Mockito.<Exception>anyObject());
     }
 
     @Test
@@ -91,8 +95,8 @@ public class ParserTest {
         String input = "()";
         File file = folder.newFile("match");
         Utilities.writeStringToFile(input, file);
-        Lexer lexer = LexerTest.createLexer(mMatch, file);
-        Parser parser = new Parser(mMatch, lexer);
+        Lexer lexer = LexerTest.createLexer(match, file);
+        Parser parser = new Parser(match, lexer);
         Map<String, IExpression> parameters = parser.matchParameters();
         Assert.assertNotNull("Expected parameter map", parameters);
         Assert.assertEquals("Expected no parameters", 0, parameters.size());
@@ -103,8 +107,8 @@ public class ParserTest {
         String input = "(name = \"Blah\")";
         File file = folder.newFile("match");
         Utilities.writeStringToFile(input, file);
-        Lexer lexer = LexerTest.createLexer(mMatch, file);
-        Parser parser = new Parser(mMatch, lexer);
+        Lexer lexer = LexerTest.createLexer(match, file);
+        Parser parser = new Parser(match, lexer);
         Map<String, IExpression> parameters = parser.matchParameters();
         Assert.assertNotNull("Expected parameter map", parameters);
         Assert.assertEquals("Expected one parameters", 1, parameters.size());
@@ -118,8 +122,8 @@ public class ParserTest {
         String input = "(name = \"Blah\" foo = FunctionFake() values = [ FunctionFake(\"bar\") \"far\"])"; 
         File file = folder.newFile("match");
         Utilities.writeStringToFile(input, file);
-        Lexer lexer = LexerTest.createLexer(mMatch, file);
-        Parser parser = new Parser(mMatch, lexer);
+        Lexer lexer = LexerTest.createLexer(match, file);
+        Parser parser = new Parser(match, lexer);
         Map<String, IExpression> parameters = parser.matchParameters();
         Assert.assertNotNull("Expected parameter map", parameters);
         Assert.assertEquals("Expected one parameters", 3, parameters.size());
@@ -139,8 +143,8 @@ public class ParserTest {
         String input = "[\"Blah\" FunctionFake()]"; 
         File file = folder.newFile("match");
         Utilities.writeStringToFile(input, file);
-        Lexer lexer = LexerTest.createLexer(mMatch, file);
-        Parser parser = new Parser(mMatch, lexer);
+        Lexer lexer = LexerTest.createLexer(match, file);
+        Parser parser = new Parser(match, lexer);
         IExpression expression = parser.matchExpression();
         Assert.assertNotNull("Expected expression", expression);
         List<String> list = expression.resolveList();
@@ -154,8 +158,8 @@ public class ParserTest {
         String input = "\"Blah\""; 
         File file = folder.newFile("match");
         Utilities.writeStringToFile(input, file);
-        Lexer lexer = LexerTest.createLexer(mMatch, file);
-        Parser parser = new Parser(mMatch, lexer);
+        Lexer lexer = LexerTest.createLexer(match, file);
+        Parser parser = new Parser(match, lexer);
         IExpression expression = parser.matchExpression();
         Assert.assertEquals("Incorrect list element", "Blah", expression.resolve());
     }

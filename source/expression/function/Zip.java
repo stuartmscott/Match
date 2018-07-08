@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
-import match.Utilities;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,26 +29,33 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import match.IMatch;
+import match.ITarget;
+import match.Utilities;
+
 public class Zip extends Function {
 
-    public final static String ZIP_COMMAND = "zip -r %s %s";
+    public static final String ZIP_COMMAND = "zip -r %s %s";
 
-    private IExpression mSource;
-    private String mName;
-    private File mOutputFile;
-    private String mOutput;
+    private IExpression source;
+    private String name;
+    private File outputFile;
+    private String output;
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public Zip(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        IExpression name = getParameter(NAME);
-        if (!(name instanceof Literal)) {
-            mMatch.error("Zip function expects a String name");
+        IExpression n = getParameter(NAME);
+        if (!(n instanceof Literal)) {
+            match.error("Zip function expects a String name");
         }
-        mName = name.resolve();
-        target.setName(mName);
-        mSource = getParameter(SOURCE);
-        mOutputFile = new File(target.getDirectory(), ZIP_OUTPUT + mName + ".zip");
-        mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
+        name = n.resolve();
+        target.setName(name);
+        source = getParameter(SOURCE);
+        outputFile = new File(target.getDirectory(), ZIP_OUTPUT + name + ".zip");
+        output = outputFile.toPath().normalize().toAbsolutePath().toString();
         // TODO ensure zip isn't re-created if the inputs haven't been modified
     }
 
@@ -59,9 +64,9 @@ public class Zip extends Function {
      */
     @Override
     public void configure() {
-        mMatch.addFile(mOutput);
-        mMatch.setProperty(mName, mOutput);
-        mSource.configure();
+        match.addFile(output);
+        match.setProperty(name, output);
+        source.configure();
     }
 
     /**
@@ -71,7 +76,7 @@ public class Zip extends Function {
     public String resolve() {
         // Collect sources
         Set<String> sources = new HashSet<String>();
-        sources.addAll(mSource.resolveList());
+        sources.addAll(source.resolveList());
         System.out.println("Zip Sources: " + sources);
         List<String> sortedList = new ArrayList<String>(sources);
         Collections.sort(sortedList);
@@ -79,10 +84,10 @@ public class Zip extends Function {
         System.out.println("Zip Sources: " + sourcesString);
 
         // Create output directory
-        mTarget.runCommand(String.format(MKDIR_COMMAND, ZIP_OUTPUT));
+        target.runCommand(String.format(MKDIR_COMMAND, ZIP_OUTPUT));
         // Create zip
-        mTarget.runCommand(String.format(ZIP_COMMAND, mOutput, sourcesString));
-        mMatch.provideFile(mOutputFile);
-        return mOutput;
+        target.runCommand(String.format(ZIP_COMMAND, output, sourcesString));
+        match.provideFile(outputFile);
+        return output;
     }
 }

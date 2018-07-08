@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
-import match.Utilities;
+
 import java.io.File;
 import java.net.URL;
 import java.util.Map;
+
+import match.IMatch;
+import match.ITarget;
+import match.Utilities;
 
 public class Library extends Function {
 
@@ -34,38 +37,41 @@ public class Library extends Function {
     private static final String URL_MAC = "location-mac";
     private static final String URL_WINDOWS = "location-windows";
 
-    private final File mDir;
-    private final String mName;
-    private final File mFile;
-    private final String mFilePath;
-    private URL mURL;
+    private final File directory;
+    private final String name;
+    private final File file;
+    private final String filePath;
+    private URL url;
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public Library(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        mDir = match.getLibrariesDir();
-        mDir.mkdirs();
-        IExpression name = getParameter(NAME);
-        if (!(name instanceof Literal)) {
-            mMatch.error("Library function expects a String name");
+        directory = match.getLibrariesDir();
+        directory.mkdirs();
+        IExpression n = getParameter(NAME);
+        if (!(n instanceof Literal)) {
+            match.error("Library function expects a String name");
         }
-        mName = name.resolve();
-        target.setName("Library:" + mName);
+        name = n.resolve();
+        target.setName("Library:" + name);
 
         String filename = null;
         String location = null;
         if (hasParameter(FILE)) {
             IExpression file = getParameter(FILE);
             if (!(file instanceof Literal)) {
-                mMatch.error("Library function expects a String file");
+                match.error("Library function expects a String file");
             }
             filename = file.resolve();
         }
         if (hasParameter(LOCATION)) {
-            IExpression url = getParameter(LOCATION);
-            if (!(url instanceof Literal)) {
-                mMatch.error("Library function expects a String URL");
+            IExpression u = getParameter(LOCATION);
+            if (!(u instanceof Literal)) {
+                match.error("Library function expects a String URL");
             }
-            location = url.resolve();
+            location = u.resolve();
         }
 
         // Platform overrides
@@ -73,65 +79,65 @@ public class Library extends Function {
             if (hasParameter(FILE_LINUX)) {
                 IExpression file = getParameter(FILE_LINUX);
                 if (!(file instanceof Literal)) {
-                    mMatch.error("Library function expects a String file-linux");
+                    match.error("Library function expects a String file-linux");
                 }
                 filename = file.resolve();
             }
             if (hasParameter(URL_LINUX)) {
-                IExpression url = getParameter(URL_LINUX);
-                if (!(url instanceof Literal)) {
-                    mMatch.error("Library function expects a String location-linux");
+                IExpression u = getParameter(URL_LINUX);
+                if (!(u instanceof Literal)) {
+                    match.error("Library function expects a String location-linux");
                 }
-                location = url.resolve();
+                location = u.resolve();
             }
         }
         if (Utilities.isMac()) {
             if (hasParameter(FILE_MAC)) {
                 IExpression file = getParameter(FILE_MAC);
                 if (!(file instanceof Literal)) {
-                    mMatch.error("Library function expects a String file-mac");
+                    match.error("Library function expects a String file-mac");
                 }
                 filename = file.resolve();
             }
             if (hasParameter(URL_MAC)) {
-                IExpression url = getParameter(URL_MAC);
-                if (!(url instanceof Literal)) {
-                    mMatch.error("Library function expects a String location-mac");
+                IExpression u = getParameter(URL_MAC);
+                if (!(u instanceof Literal)) {
+                    match.error("Library function expects a String location-mac");
                 }
-                location = url.resolve();
+                location = u.resolve();
             }
         }
         if (Utilities.isWindows()) {
             if (hasParameter(FILE_WINDOWS)) {
                 IExpression file = getParameter(FILE_WINDOWS);
                 if (!(file instanceof Literal)) {
-                    mMatch.error("Library function expects a String file-windows");
+                    match.error("Library function expects a String file-windows");
                 }
                 filename = file.resolve();
             }
             if (hasParameter(URL_WINDOWS)) {
-                IExpression url = getParameter(URL_WINDOWS);
-                if (!(url instanceof Literal)) {
-                    mMatch.error("Library function expects a String location-windows");
+                IExpression u = getParameter(URL_WINDOWS);
+                if (!(u instanceof Literal)) {
+                    match.error("Library function expects a String location-windows");
                 }
-                location = url.resolve();
+                location = u.resolve();
             }
         }
 
         if (filename == null) {
-            mMatch.error("Library function expects a String file");
+            match.error("Library function expects a String file");
         }
-        mFile = new File(mDir, filename);
-        mFilePath = mFile.toPath().normalize().toAbsolutePath().toString();
+        file = new File(directory, filename);
+        filePath = file.toPath().normalize().toAbsolutePath().toString();
         if (location != null) {
             try {
                 // JUnit - http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar
                 // Hamcrest - http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar
                 // Mockito - http://search.maven.org/remotecontent?filepath=org/mockito/mockito-core/2.15.0/mockito-core-2.15.0.jar
                 // Protobuf - http://search.maven.org/remotecontent?filepath=com/google/protobuf/protobuf-java/3.5.1/protobuf-java-3.5.1.jar
-                mURL = new URL(location + filename);
+                url = new URL(location + filename);
             } catch (Exception e) {
-                mMatch.error(e);
+                match.error(e);
             }
         }
     }
@@ -141,8 +147,8 @@ public class Library extends Function {
      */
     @Override
     public void configure() {
-        mMatch.setProperty(mName, mFilePath);
-        mMatch.addFile(mFilePath);
+        match.setProperty(name, filePath);
+        match.addFile(filePath);
     }
 
     /**
@@ -150,16 +156,16 @@ public class Library extends Function {
      */
     @Override
     public String resolve() {
-        if (!mFile.exists()) {
-            if (mURL != null) {
-                mTarget.runCommand(String.format(CURL_COMMAND, mURL.toString(), mFilePath));
+        if (!file.exists()) {
+            if (url != null) {
+                target.runCommand(String.format(CURL_COMMAND, url.toString(), filePath));
             } else {
-                mMatch.error(mFilePath + " does not exist");
+                match.error(filePath + " does not exist");
             }
         }
-        if (mFile.exists()) {
-            mMatch.provideFile(mFile);
+        if (file.exists()) {
+            match.provideFile(file);
         }
-        return mFilePath;
+        return filePath;
     }
 }

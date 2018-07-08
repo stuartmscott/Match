@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package expression;
 
-import match.IMatch;
-import match.ITarget;
-import match.Utilities;
+package expression;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import match.IMatch;
+import match.ITarget;
+import match.Utilities;
+
 public class ExpressionList extends Expression {
 
-    private List<IExpression> mElements;
+    private List<IExpression> elements;
 
     public ExpressionList(IMatch match, ITarget target, IExpression element) {
         this(match, target, Collections.singletonList(element));
@@ -33,7 +34,7 @@ public class ExpressionList extends Expression {
 
     public ExpressionList(IMatch match, ITarget target, List<IExpression> elements) {
         super(match, target);
-        mElements = elements;
+        this.elements = elements;
     }
 
     /**
@@ -41,7 +42,7 @@ public class ExpressionList extends Expression {
      */
     @Override
     public void configure() {
-        for (IExpression element : mElements) {
+        for (IExpression element : elements) {
             element.configure();
         }
     }
@@ -60,7 +61,7 @@ public class ExpressionList extends Expression {
     @Override
     public List<String> resolveList() {
         List<String> values = new ArrayList<String>();
-        for (IExpression element : mElements) {
+        for (IExpression element : elements) {
             values.addAll(element.resolveList());
         }
         return values;

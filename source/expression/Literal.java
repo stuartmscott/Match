@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression;
 
 import match.IMatch;
@@ -20,11 +21,11 @@ import match.ITarget;
 
 public class Literal extends Expression {
 
-    private String mValue;
+    private String value;
 
     public Literal(IMatch match, ITarget target, String value) {
         super(match, target);
-        mValue = value;
+        this.value = value;
     }
 
     /**
@@ -32,7 +33,7 @@ public class Literal extends Expression {
      */
     @Override
     public String resolve() {
-        return mValue;
+        return value;
     }
 
     /**

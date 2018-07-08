@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package match;
+
+import config.Config;
+
+import frontend.Category;
+import frontend.Lexem;
+import frontend.Lexer;
+import frontend.Parser;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -21,6 +29,7 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -29,45 +38,45 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import frontend.Category;
-import frontend.Lexem;
-import frontend.Lexer;
-import frontend.Parser;
-
-import config.Config;
-
+/**
+ * A lightweight, fast and extensible build system.
+ */
 public class Match implements IMatch {
 
     public static final String MATCH = "match";
+
     public static final int ERROR = -1;
-    public static final List<Lexem> LEXEMS = new ArrayList<Lexem>();
-    static {
-        LEXEMS.add(new Lexem(Category.NEWLINE, "\n"));
-        LEXEMS.add(new Lexem(Category.WHITESPACE, "\\s"));
-        LEXEMS.add(new Lexem(Category.ASSIGN, "="));
-        LEXEMS.add(new Lexem(Category.COMMENT, "#.*\n"));
-        LEXEMS.add(new Lexem(Category.ORB, "\\("));
-        LEXEMS.add(new Lexem(Category.CRB, "\\)"));
-        LEXEMS.add(new Lexem(Category.OSB, "\\["));
-        LEXEMS.add(new Lexem(Category.CSB, "\\]"));
-        LEXEMS.add(new Lexem(Category.STRING_LITERAL, "\".*\""));
-        LEXEMS.add(new Lexem(Category.UPPER_CASE, "[A-Z][-a-zA-Z0-9]*"));
-        LEXEMS.add(new Lexem(Category.LOWER_CASE, "[a-z][-a-zA-Z0-9]*"));
-    }
 
-    private final Config mConfig;
-    private final File mRoot;
-    private final File mLibraries;
-    private final boolean mQuiet;
-    private final Map<String, CountDownLatch> mFiles = new ConcurrentHashMap<>();
-    private final List<File> mMatchFiles = new ArrayList<>();
-    private final List<File> mAllFiles = new ArrayList<>();
+    public static final List<Lexem> LEXEMS = Arrays.asList(
+            new Lexem(Category.NEWLINE, "\n"),
+            new Lexem(Category.WHITESPACE, "\\s"),
+            new Lexem(Category.ASSIGN, "="),
+            new Lexem(Category.COMMENT, "#.*\n"),
+            new Lexem(Category.ORB, "\\("),
+            new Lexem(Category.CRB, "\\)"),
+            new Lexem(Category.OSB, "\\["),
+            new Lexem(Category.CSB, "\\]"),
+            new Lexem(Category.STRING_LITERAL, "\".*\""),
+            new Lexem(Category.UPPER_CASE, "[A-Z][-a-zA-Z0-9]*"),
+            new Lexem(Category.LOWER_CASE, "[a-z][-a-zA-Z0-9]*")
+    );
 
+    private final Config config;
+    private final File root;
+    private final File libraries;
+    private final boolean quiet;
+    private final Map<String, CountDownLatch> files = new ConcurrentHashMap<>();
+    private final List<File> matchFiles = new ArrayList<>();
+    private final List<File> allFiles = new ArrayList<>();
+
+    /**
+     * Creates a new Match instance with the given config.
+     */
     public Match(Config config) {
-        mConfig = config;
-        mRoot = new File(config.get("root"));
-        mLibraries = new File(config.has("libraries") ? config.get("libraries") : System.getProperty("java.io.tmpdir"));
-        mQuiet = config.getBoolean("quiet");
+        this.config = config;
+        root = new File(config.get("root"));
+        libraries = new File(config.has("libraries") ? config.get("libraries") : System.getProperty("java.io.tmpdir"));
+        quiet = config.getBoolean("quiet");
         // TODO exec targets to allow supporting custom commands, or add AndroidGradle and AndroidAnt functions to build with gradle or ant resp.
         // TODO parallel builds
         // TODO incremental builds
@@ -75,39 +84,48 @@ public class Match implements IMatch {
         // TODO function to create distributions
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public File getRootDir() {
-        return mRoot;
+        return root;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public File getLibrariesDir() {
-        return mLibraries;
+        return libraries;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isQuiet() {
-        return mQuiet;
+        return quiet;
     }
 
     List<File> getAllFiles() {
-        return mAllFiles;
+        return allFiles;
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public boolean hasProperty(String key) {
-        return mConfig.has(key);
+        return config.has(key);
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public String getProperty(String key) {
-        String property = mConfig.get(key);
+        String property = config.get(key);
         if (property == null) {
             error(String.format("no targets set property %s", key));
         }
@@ -115,23 +133,23 @@ public class Match implements IMatch {
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void setProperty(String key, String value) {
-        mConfig.put(key, value);
+        config.put(key, value);
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void addFile(String file) {
-        mFiles.put(file, new CountDownLatch(1));
+        files.put(file, new CountDownLatch(1));
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void addDirectory(File directory) {
@@ -145,7 +163,7 @@ public class Match implements IMatch {
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void provideFile(File file) {
@@ -156,10 +174,10 @@ public class Match implements IMatch {
         if (file.isDirectory()) {
             error(String.format("provideFile called with directory %s", filename));
         }
-        CountDownLatch latch = mFiles.get(filename);
+        CountDownLatch latch = files.get(filename);
         if (latch == null) {
             /*
-            for (String f : mFiles.keySet()) {
+            for (String f : files.keySet()) {
                 System.out.println("File " + f);
             }
             for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
@@ -171,14 +189,14 @@ public class Match implements IMatch {
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void awaitFile(String file) {
-        CountDownLatch latch = mFiles.get(file);
+        CountDownLatch latch = files.get(file);
         if (latch == null) {
             /*
-            for (String f : mFiles.keySet()) {
+            for (String f : files.keySet()) {
                 System.out.println("File " + f);
             }
             for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
@@ -190,7 +208,7 @@ public class Match implements IMatch {
             if (!latch.await(10, TimeUnit.MINUTES)) {
                 error(file + " took too long (> 10mins)");
             }
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             error("await interrupted");
         }
     }
@@ -219,20 +237,20 @@ public class Match implements IMatch {
     }
 
     private void addScannedFile(File file) {
-        mAllFiles.add(file);
+        allFiles.add(file);
         if (file.getName().equals(MATCH)) {
-            mMatchFiles.add(file);
+            matchFiles.add(file);
         }
     }
 
     void light() {
         long start = System.currentTimeMillis();
         println("Scanning");
-        scanRoot(mRoot);
-        println("Matches: " + mMatchFiles);
+        scanRoot(root);
+        println("Matches: " + matchFiles);
         println("Parsing");
         List<ITarget> targets = new ArrayList<ITarget>();
-        for (File match : mMatchFiles) {
+        for (File match : matchFiles) {
             Lexer lexer = new Lexer(this, LEXEMS, match);
             Parser parser = new Parser(this, lexer);
             targets.addAll(parser.parse());
@@ -241,7 +259,7 @@ public class Match implements IMatch {
         println("Configuring");
         // Create a thread for each target, but only start a thread if the number of targets that
         // aren't blocked is under MAX_THREADS. If all targets are blocked there is a deadlock.
-        for (File file : mAllFiles) {
+        for (File file : allFiles) {
             addFile(file.toPath().normalize().toAbsolutePath().toString());
             provideFile(file);
         }
@@ -262,7 +280,7 @@ public class Match implements IMatch {
                 }
                 error("build took too long (> 15mins)");
             }
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             error("build interrupted");
         }
         long delta = (System.currentTimeMillis() - start) / 1000;
@@ -289,7 +307,7 @@ public class Match implements IMatch {
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void warn(String message) {
@@ -297,17 +315,17 @@ public class Match implements IMatch {
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public synchronized void println(String message) {
-        if (!mQuiet) {
+        if (!quiet) {
             System.out.println(message);
         }
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void error(String message) {
@@ -316,7 +334,7 @@ public class Match implements IMatch {
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void error(Exception exception) {
@@ -325,28 +343,31 @@ public class Match implements IMatch {
         error(sw.toString());
     }
 
-    public static void main(String args[]) {
+    /**
+     * Creates and ignites a Match instance using a config file from ~/match/config.
+     */
+    public static void main(String[] args) {
         File[] files = { new File(System.getProperty("user.home") + "/match/config") };
         Match match = new Match(Config.create(args, files));
         match.light();
     }
 
-    public static class BuildThread extends Thread {
+    private static class BuildThread extends Thread {
 
-        private final ITarget mTarget;
-        private final CountDownLatch mLatch;
+        private final ITarget target;
+        private final CountDownLatch latch;
 
         private BuildThread(ITarget target, CountDownLatch latch) {
-            mTarget = target;
-            mLatch = latch;
+            this.target = target;
+            this.latch = latch;
         }
 
         @Override
         public void run() {
             try {
-                mTarget.build();
+                target.build();
             } finally {
-                mLatch.countDown();
+                latch.countDown();
             }
         }
     }

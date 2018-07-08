@@ -13,39 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import match.IMatch;
+import match.ITarget;
+
+/**
+ * Finds all files in the given directory, optionally matching the given pattern.
+ */
 public class Find extends Function {
 
-    private IExpression mDirectory;
-    private IExpression mPattern;
-    private Set<String> mFiles = new HashSet<String>();
+    private IExpression directory;
+    private IExpression pattern;
+    private Set<String> files = new HashSet<String>();
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public Find(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
         if (hasParameter(DIRECTORY)) {
-            mDirectory = getParameter(DIRECTORY);
-            mPattern = getParameter(PATTERN);
+            directory = getParameter(DIRECTORY);
+            pattern = getParameter(PATTERN);
         } else {
-            mDirectory = getParameter(ANONYMOUS);
+            directory = getParameter(ANONYMOUS);
         }
-        target.setName("Find:" + mPattern + " " + mDirectory);
+        target.setName("Find:" + pattern + " " + directory);
     }
 
     /**
@@ -53,24 +61,24 @@ public class Find extends Function {
      */
     @Override
     public void configure() {
-        File match = mTarget.getFile();
+        File match = target.getFile();
         File matchDir = match.getParentFile();
         Path matchDirPath = matchDir.toPath();
-        String dir = mDirectory.resolve();
-        File directory = null;
+        String dir = directory.resolve();
+        File dirFile = null;
         if (dir == null || dir.isEmpty()) {
-            directory = matchDir;
+            dirFile = matchDir;
         } else {
-            directory = new File(matchDir, dir);
+            dirFile = new File(matchDir, dir);
         }
-        Path dirPath = directory.toPath();
+        Path dirPath = dirFile.toPath();
         String path = matchDirPath.relativize(dirPath).toString();
         if (!path.isEmpty()) {
             path += "/";
         }
         // System.out.println("Searching path " + path);
-        scanFiles(directory, path, mFiles, mPattern == null ? ".*" : mPattern.resolve());
-        // System.out.println("Found " + mFiles);
+        scanFiles(dirFile, path, files, pattern == null ? ".*" : pattern.resolve());
+        // System.out.println("Found " + files);
     }
 
     /**
@@ -78,20 +86,26 @@ public class Find extends Function {
      */
     @Override
     public List<String> resolveList() {
-        List<String> files = new ArrayList<String>();
-        for (String file : mFiles) {
-            File f = new File(mTarget.getFile().getParentFile(), file);
+        List<String> fs = new ArrayList<String>();
+        for (String file : files) {
+            File f = new File(target.getFile().getParentFile(), file);
             String path = f.toPath().normalize().toAbsolutePath().toString();
-            mMatch.awaitFile(path);
-            files.add(file);
+            match.awaitFile(path);
+            fs.add(file);
         }
-        return files;
+        return fs;
     }
 
+    /**
+     * Scans the given directory adding all files matching the given pattern to the given collection.
+     */
     public static void scanFiles(File directory, String path, Collection<String> files, String pattern) {
         scanFiles(directory, path, files, Pattern.compile(pattern));
     }
 
+    /**
+     * Scans the given directory adding all files matching the given pattern to the given collection.
+     */
     public static void scanFiles(File directory, String path, Collection<String> files, Pattern pattern) {
         for (File file : directory.listFiles()) {
             String filename = file.getName();

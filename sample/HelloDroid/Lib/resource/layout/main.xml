@@ -19,13 +19,13 @@ limitations under the License.
               android:layout_height="match_parent"
               android:orientation="vertical" >
 
-    <TextView android:id="@+hello.droid.common:id/text_view"
+    <TextView android:id="@+id/text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-    <Button android:id="@+hello.droid.common:id/button"
+    <Button android:id="@+id/button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@hello.droid.common:string/say_hello" />
+            android:text="@string/say_hello" />
 
 </LinearLayout>

@@ -13,10 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package echo;
 
 public class Echo {
 
+    /**
+     * Echoes the given arguments.
+     *
+     * @return a new string containing the echoed arguments.
+     */
     public String in(String[] args) {
         StringBuilder sb = new StringBuilder();
         if (args.length > 0) {

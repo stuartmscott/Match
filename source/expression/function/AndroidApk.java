@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
-import match.Utilities;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -32,12 +30,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import match.IMatch;
+import match.ITarget;
+import match.Utilities;
+
 public class AndroidApk extends Function {
 
     public static final String AAPT_PACKAGE_COMMAND = "%saapt package -v -m -f -F %s -M %s -J %s --output-text-symbols %s -P %s/public_resources.xml -G %s/proguard.txt -I %s %s";
     public static final String AAPT_PACKAGE_LIB_COMMAND = "%saapt package -v -m -f -F %s -M %s -J %s --non-constant-id --output-text-symbols %s -P %s/public_resources.xml -G %s/proguard.txt -I %s %s";
     public static final String AAPT2_COMPILE_COMMAND = "%saapt2 compile -o %s %s";
-    public static final String AAPT2_LINK_COMMAND = "%saapt2 link --auto-add-overlay -o %s --manifest %s --java %s -I %s %s %s";
+    public static final String AAPT2_LINK_COMMAND = "%saapt2 link --auto-add-overlay --no-static-lib-packages -o %s --manifest %s --java %s -I %s %s %s %s";
     public static final String AAPT2_LINK_LIB_COMMAND = "%saapt2 link --auto-add-overlay --static-lib -o %s --manifest %s --java %s -I %s %s %s";
     public static final String AAR_OUTPUT = "out/android/aar/";
     public static final String API_VERSION = "api-version";
@@ -50,6 +52,8 @@ public class AndroidApk extends Function {
     public static final String COPY_COMMAND = "cp -R %s %s";
     public static final String DEX_OUTPUT = "out/android/dex/";
     public static final String DX_COMMAND = "%sdx --dex --output=%s %s %s";
+    public static final String EXTRA_PACKAGE = "extra-package";
+    public static final String FIND_RM_COMMAND = "find %s -name %s -print0 | xargs -0 rm";
     public static final String JAR_COMMAND = "jar cf %s -C %s %s";
     public static final String JAVAC_COMMAND = "javac -bootclasspath %s %s -sourcepath %s %s -d %s";
     public static final String JAVA_OUTPUT = "out/android/java/";
@@ -67,86 +71,92 @@ public class AndroidApk extends Function {
     public static final String ZIP_ADD_COMMAND = "zip -jX %s %s";
     public static final String ZIP_ALIGN_COMMAND = "%szipalign -f 4 %s %s";
 
-    private IExpression mSource;
-    private IExpression mProtoSource;
-    private IExpression mAssetDirs;
-    private IExpression mResourceDirs;
-    private boolean mIsLibrary = false;
-    private boolean mUseAapt2 = false;
-    private String mName;
-    private String mApiVersion;
-    private String mBuildToolsVersion;
-    private String mKeyStore;
-    private String mKeyStorePassword;
-    private String mManifest;
-    private String mIntermediateAars;
-    private String mIntermediateApks;
-    private String mIntermediateClasses;
-    private String mIntermediateDex;
-    private String mIntermediateJars;
-    private String mIntermediateJava;
-    private String mIntermediateProtos;
-    private String mIntermediateResources;
-    private String mOutput;
-    private File mOutputFile;
-    private String mOutputJar;
-    private File mOutputJarFile;
+    private IExpression source;
+    private IExpression protoSource;
+    private IExpression assetDirectories;
+    private IExpression resourceDirectories;
+    private IExpression extraPackages;
+    private boolean isLibrary = false;
+    private boolean useAapt2 = false;
+    private String name;
+    private String apiVersion;
+    private String buildToolsVersion;
+    private String keyStore;
+    private String keyStorePassword;
+    private String manifest;
+    private String intermediateAars;
+    private String intermediateApks;
+    private String intermediateClasses;
+    private String intermediateDex;
+    private String intermediateJars;
+    private String intermediateJava;
+    private String intermediateProtos;
+    private String intermediateResources;
+    private String output;
+    private File outputFile;
+    private String outputJar;
+    private File outputJarFile;
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public AndroidApk(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        IExpression name = getParameter(NAME);
-        if (!(name instanceof Literal)) {
-            mMatch.error("AndroidApk function expects a String name");
+        IExpression n = getParameter(NAME);
+        if (!(n instanceof Literal)) {
+            match.error("AndroidApk function expects a String name");
         }
-        mName = name.resolve();
-        target.setName(mName);
-        mSource = getParameter(SOURCE);
-        mApiVersion = getParameter(API_VERSION).resolve();
-        mBuildToolsVersion = getParameter(BUILD_TOOLS_VERSION).resolve();
-        mKeyStore = getParameter(KEYSTORE).resolve();
-        mKeyStorePassword = getParameter(KEYSTORE_PASSWORD_FILE).resolve();
-        mIntermediateAars = String.format("%s%s/", AAR_OUTPUT, mName);
-        mIntermediateApks = String.format("%s%s/", APK_OUTPUT, mName);
-        mIntermediateClasses = String.format("%s%s/", CLASS_OUTPUT, mName);
-        mIntermediateDex = String.format("%s%s/", DEX_OUTPUT, mName);
-        mIntermediateJars = String.format("%s%s/", JAR_OUTPUT, mName);
-        mIntermediateJava = String.format("%s%s/", JAVA_OUTPUT, mName);
-        mIntermediateResources = String.format("%s%s/", RESOURCE_OUTPUT, mName);
+        name = n.resolve();
+        target.setName(name);
+        source = getParameter(SOURCE);
+        apiVersion = getParameter(API_VERSION).resolve();
+        buildToolsVersion = getParameter(BUILD_TOOLS_VERSION).resolve();
+        keyStore = getParameter(KEYSTORE).resolve();
+        keyStorePassword = getParameter(KEYSTORE_PASSWORD_FILE).resolve();
+        intermediateAars = String.format("%s%s/", AAR_OUTPUT, name);
+        intermediateApks = String.format("%s%s/", APK_OUTPUT, name);
+        intermediateClasses = String.format("%s%s/", CLASS_OUTPUT, name);
+        intermediateDex = String.format("%s%s/", DEX_OUTPUT, name);
+        intermediateJars = String.format("%s%s/", JAR_OUTPUT, name);
+        intermediateJava = String.format("%s%s/", JAVA_OUTPUT, name);
+        intermediateResources = String.format("%s%s/", RESOURCE_OUTPUT, name);
         if (hasParameter(MANIFEST)) {
-            IExpression manifest = getParameter(MANIFEST);
-            if (!(manifest instanceof Literal)) {
-                mMatch.error("AndroidApk function expects a String manifest");
+            IExpression m = getParameter(MANIFEST);
+            if (!(m instanceof Literal)) {
+                match.error("AndroidApk function expects a String manifest");
             }
-            mManifest = manifest.resolve();
+            manifest = m.resolve();
         } else {
-            mManifest = "AndroidManifest.xml";
+            manifest = "AndroidManifest.xml";
         }
         if (hasParameter(PROTO)) {
-            mProtoSource = getParameter(PROTO);
-            mIntermediateProtos = String.format("%s%s/", PROTO_OUTPUT, mName);
+            protoSource = getParameter(PROTO);
+            intermediateProtos = String.format("%s%s/", PROTO_OUTPUT, name);
         }
         if (hasParameter(ASSET_DIRECTORY)) {
-            mAssetDirs = getParameter(ASSET_DIRECTORY);
+            assetDirectories = getParameter(ASSET_DIRECTORY);
         }
         if (hasParameter(RESOURCE_DIRECTORY)) {
-            mResourceDirs = getParameter(RESOURCE_DIRECTORY);
+            resourceDirectories = getParameter(RESOURCE_DIRECTORY);
+        }
+        if (hasParameter(EXTRA_PACKAGE)) {
+            extraPackages = getParameter(EXTRA_PACKAGE);
         }
         if (hasParameter(IS_LIBRARY)) {
-            mIsLibrary = Boolean.parseBoolean(getParameter(IS_LIBRARY).resolve());
+            isLibrary = Boolean.parseBoolean(getParameter(IS_LIBRARY).resolve());
         }
         if (hasParameter(USE_AAPT2)) {
-            // TODO use to determine what gets built and how
-            mUseAapt2 = Boolean.parseBoolean(getParameter(USE_AAPT2).resolve());
+            useAapt2 = Boolean.parseBoolean(getParameter(USE_AAPT2).resolve());
         }
-        if (mIsLibrary && !mUseAapt2) {
-            mOutputFile = new File(target.getDirectory(), mIntermediateAars + mName + ".aar");
-            mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
+        if (isLibrary && !useAapt2) {
+            outputFile = new File(target.getDirectory(), intermediateAars + name + ".aar");
+            output = outputFile.toPath().normalize().toAbsolutePath().toString();
         } else {
-            mOutputFile = new File(target.getDirectory(), mIntermediateApks + mName + ".apk");
-            mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
+            outputFile = new File(target.getDirectory(), intermediateApks + name + ".apk");
+            output = outputFile.toPath().normalize().toAbsolutePath().toString();
         }
-        mOutputJarFile = new File(target.getDirectory(), mIntermediateJars + mName + ".jar");
-        mOutputJar = mOutputJarFile.toPath().normalize().toAbsolutePath().toString();
+        outputJarFile = new File(target.getDirectory(), intermediateJars + name + ".jar");
+        outputJar = outputJarFile.toPath().normalize().toAbsolutePath().toString();
     }
 
     /**
@@ -154,19 +164,19 @@ public class AndroidApk extends Function {
      */
     @Override
     public void configure() {
-        mMatch.addFile(mOutput);
-        mMatch.setProperty(mName, mOutput);
-        mMatch.addFile(mOutputJar);
-        mMatch.setProperty(mName + "-jar", mOutputJar);
-        mSource.configure();
-        if (mProtoSource != null) {
-            mProtoSource.configure();
+        match.addFile(output);
+        match.setProperty(name, output);
+        match.addFile(outputJar);
+        match.setProperty(name + "-jar", outputJar);
+        source.configure();
+        if (protoSource != null) {
+            protoSource.configure();
         }
-        if (mAssetDirs != null) {
-            mAssetDirs.configure();
+        if (assetDirectories != null) {
+            assetDirectories.configure();
         }
-        if (mResourceDirs != null) {
-            mResourceDirs.configure();
+        if (resourceDirectories != null) {
+            resourceDirectories.configure();
         }
     }
 
@@ -175,78 +185,75 @@ public class AndroidApk extends Function {
      */
     @Override
     public String resolve() {
-        File matchDir = mTarget.getFile().getParentFile();
-        String sdkLocation = mMatch.getProperty(SDK_LOCATION);
-        String buildToolsDir = String.format(BUILD_TOOLS, sdkLocation, mBuildToolsVersion);
-        String platform = String.format(PLATFORM, sdkLocation, mApiVersion);
-        String unalignedApk = String.format("%s%s.unaligned.apk", mIntermediateApks, mName);
+        File matchDir = target.getFile().getParentFile();
+        String sdkLocation = match.getProperty(SDK_LOCATION);
+        String buildToolsDir = String.format(BUILD_TOOLS, sdkLocation, buildToolsVersion);
+        String platform = String.format(PLATFORM, sdkLocation, apiVersion);
+        String unalignedApk = String.format("%s%s.unaligned.apk", intermediateApks, name);
         Set<String> assetDirs = new HashSet<>();
-        if (mAssetDirs != null) {
-            assetDirs.addAll(mAssetDirs.resolveList());
+        if (assetDirectories != null) {
+            assetDirs.addAll(assetDirectories.resolveList());
         }
         Set<String> libraries = new HashSet<>();
         List<String> resources = new ArrayList<>();// Resources need to be ordered overlay first
         Set<String> resourceDirs = new HashSet<>();
-        if (mResourceDirs != null) {
-            resourceDirs.addAll(mResourceDirs.resolveList());
+        if (resourceDirectories != null) {
+            resourceDirs.addAll(resourceDirectories.resolveList());
         }
         Set<String> sources = new HashSet<>();
-        sources.addAll(mSource.resolveList());
+        sources.addAll(source.resolveList());
         String javacClasspath = "";
         if (hasParameter(LIBRARY)) {
             for (String library : getParameter(LIBRARY).resolveList()) {
-                String path = mMatch.getProperty(library);
-                mMatch.awaitFile(path);
+                String path = match.getProperty(library);
+                match.awaitFile(path);
                 if (path.endsWith(".aar")) {
                     // Extract classes.jar to temp file
                     try {
                         Path p = Files.createTempDirectory(library);
                         File dir = p.toFile();
                         dir.deleteOnExit();
-                        mTarget.runCommand(String.format(UNZIP_FILE_COMMAND, path, CLASSES_JAR, p.normalize().toAbsolutePath().toString()));
+                        target.runCommand(String.format(UNZIP_FILE_COMMAND, path, CLASSES_JAR, p.normalize().toAbsolutePath().toString()));
                         File classesJar = new File(dir, CLASSES_JAR);
                         if (classesJar.exists()) {
                             libraries.add(classesJar.toPath().normalize().toAbsolutePath().toString());
                         }
                     } catch (Exception e) {
-                        mMatch.error(e);
+                        match.error(e);
                     }
                 } else if (path.endsWith(".apk")) {
                     // Add to the resources
                     resources.add(path);
                     // Get the libraries classes.jar
-                    String jar = mMatch.getProperty(library + "-jar");
-                    System.out.println("Apk: " + path + " Jar: " + jar);
-                    mMatch.awaitFile(jar);
+                    String jar = match.getProperty(library + "-jar");
+                    match.awaitFile(jar);
                     libraries.add(jar);
                 } else if (path.endsWith(".jar")) {
                     libraries.add(path);
                 } else {
-                    mMatch.error("AndroidApk encountered unknown library type: " + path);
+                    match.error("AndroidApk encountered unknown library type: " + path);
                 }
             }
             javacClasspath = String.format("-cp %s", Utilities.join(":", libraries));
         }
-        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateApks));
-        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateClasses));
-        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateDex));
-        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateJars));
-        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateJava));
-        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateResources));
+        target.runCommand(String.format(MKDIR_COMMAND, intermediateClasses));
+        target.runCommand(String.format(MKDIR_COMMAND, intermediateJars));
+        target.runCommand(String.format(MKDIR_COMMAND, intermediateJava));
+        target.runCommand(String.format(MKDIR_COMMAND, intermediateResources));
 
         // Compile protos
-        if (mProtoSource != null) {
+        if (protoSource != null) {
             /* TODO
-            File dir = mTarget.getFile().getParentFile();
-            mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateProtos));
+            File dir = target.getFile().getParentFile();
+            target.runCommand(String.format(MKDIR_COMMAND, intermediateProtos));
             if (hasParameter(PROTO_LITE) && getParameter(PROTO_LITE).resolve().equals("true")) {
-                mTarget.runCommand(String.format(PROTOC_LITE_COMMAND, dir, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+                target.runCommand(String.format(PROTOC_LITE_COMMAND, dir, intermediateProtos, Utilities.join(" ", protoSource.resolveList())));
             } else {
-                mTarget.runCommand(String.format(PROTOC_COMMAND, dir, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+                target.runCommand(String.format(PROTOC_COMMAND, dir, intermediateProtos, Utilities.join(" ", protoSource.resolveList())));
             }
-            File directory = new File(mIntermediateProtos);
+            File directory = new File(intermediateProtos);
             // Add to the build
-            mMatch.addDirectory(directory);
+            match.addDirectory(directory);
             // Get the relative paths of all java files generated
             String path = directory.toPath().toString() + "/";
             Set<String> generated = new HashSet<>();
@@ -255,7 +262,7 @@ public class AndroidApk extends Function {
             */
         }
 
-        if (mUseAapt2) {
+        if (useAapt2) {
             // Find all resource files
             Set<String> resourceFiles = new HashSet<>();
             for (String dir : resourceDirs) {
@@ -263,15 +270,15 @@ public class AndroidApk extends Function {
             }
             // Compile resources
             for (String f : resourceFiles) {
-                mTarget.runCommand(String.format(AAPT2_COMPILE_COMMAND, buildToolsDir, mIntermediateResources, f));
+                target.runCommand(String.format(AAPT2_COMPILE_COMMAND, buildToolsDir, intermediateResources, f));
             }
 
             // Add to the build
-            mMatch.addDirectory(new File(matchDir, mIntermediateResources));
+            match.addDirectory(new File(matchDir, intermediateResources));
 
             // Link APK
             StringBuilder resBuilder = new StringBuilder();
-            Find.scanFiles(new File(matchDir, mIntermediateResources), mIntermediateResources, resources, ".*");
+            Find.scanFiles(new File(matchDir, intermediateResources), intermediateResources, resources, ".*");
             for (String r : resources) {
                 resBuilder.append(" -R ");
                 resBuilder.append(r);
@@ -281,64 +288,91 @@ public class AndroidApk extends Function {
                 assetBuilder.append(" -A ");
                 assetBuilder.append(a);
             }
-            mTarget.runCommand(String.format(mIsLibrary ? AAPT2_LINK_LIB_COMMAND : AAPT2_LINK_COMMAND, buildToolsDir, unalignedApk, mManifest, mIntermediateJava, platform, resBuilder.toString(), assetBuilder.toString()));
+            StringBuilder extraPackagesBuilder = new StringBuilder();
+            if (extraPackages != null) {
+                extraPackagesBuilder.append(" --extra-packages ");
+                for (String p : extraPackages.resolveList()) {
+                    extraPackagesBuilder.append(p);
+                    extraPackagesBuilder.append(" ");
+                }
+            }
+            target.runCommand(String.format(MKDIR_COMMAND, intermediateApks));
+            if (isLibrary) {
+                target.runCommand(String.format(AAPT2_LINK_LIB_COMMAND, buildToolsDir, unalignedApk, manifest, intermediateJava, platform, resBuilder.toString(), assetBuilder.toString()));
+            } else {
+                target.runCommand(String.format(AAPT2_LINK_COMMAND, buildToolsDir, unalignedApk, manifest, intermediateJava, platform, resBuilder.toString(), assetBuilder.toString(), extraPackagesBuilder.toString()));
+            }
         } else {
             StringBuilder resBuilder = new StringBuilder();
             for (String r : resourceDirs) {
                 resBuilder.append(" -S ");
                 resBuilder.append(r);
             }
-            if (mIsLibrary) {
-                mTarget.runCommand(String.format(AAPT_PACKAGE_LIB_COMMAND, buildToolsDir, mOutput, mManifest, mIntermediateJava, mIntermediateResources, mIntermediateResources, mIntermediateResources, platform, resBuilder.toString()));
+            if (isLibrary) {
+                target.runCommand(String.format(MKDIR_COMMAND, intermediateAars));
+                target.runCommand(String.format(AAPT_PACKAGE_LIB_COMMAND, buildToolsDir, output, manifest, intermediateJava, intermediateResources, intermediateResources, intermediateResources, platform, resBuilder.toString()));
             } else {
-                mTarget.runCommand(String.format(AAPT_PACKAGE_COMMAND, buildToolsDir, unalignedApk, mManifest, mIntermediateJava, mIntermediateResources, mIntermediateResources, platform, resBuilder.toString()));
+                target.runCommand(String.format(MKDIR_COMMAND, intermediateApks));
+                target.runCommand(String.format(AAPT_PACKAGE_COMMAND, buildToolsDir, unalignedApk, manifest, intermediateJava, intermediateResources, intermediateResources, intermediateResources, platform, resBuilder.toString()));
             }
         }
 
         // Add to the build
-        mMatch.addDirectory(new File(matchDir, mIntermediateJava));
+        match.addDirectory(new File(matchDir, intermediateJava));
 
         if (!sources.isEmpty()) {
             // Compile Java
-            mTarget.runCommand(String.format(JAVAC_COMMAND, platform, javacClasspath, mIntermediateJava, Utilities.join(" ", sources), mIntermediateClasses));
+            target.runCommand(String.format(JAVAC_COMMAND, platform, javacClasspath, intermediateJava, Utilities.join(" ", sources), intermediateClasses));
+        }
+
+        if (isLibrary && useAapt2) {
+            // Delete R files so they wont cause errors with DX:
+            // Uncaught translation error:
+            // java.lang.IllegalArgumentException: already added: Lhello/droid/common/R;
+            //    at com.android.dx.dex.file.ClassDefsSection.add(ClassDefsSection.java:122)
+            // The App which links this library will generate its own R files through use of --no-static-lib-package and --extra-packages.
+            target.runCommand(String.format(FIND_RM_COMMAND, intermediateClasses, "R.class"));
+            target.runCommand(String.format(FIND_RM_COMMAND, intermediateClasses, "R'$'*.class"));
         }
 
         // Add to the build
-        mMatch.addDirectory(new File(matchDir, mIntermediateClasses));
+        match.addDirectory(new File(matchDir, intermediateClasses));
 
         // Package jar
-        mTarget.runCommand(String.format(JAR_COMMAND, mOutputJar, mIntermediateClasses, "."));
+        target.runCommand(String.format(JAR_COMMAND, outputJar, intermediateClasses, "."));
 
-        System.out.println("Android Jar " + mOutputJar);
-        mMatch.provideFile(mOutputJarFile);
+        System.out.println("Android Jar " + outputJar);
+        match.provideFile(outputJarFile);
 
-        if (mIsLibrary && !mUseAapt2) {
-            String classesJar = String.format("%sclasses.jar", mIntermediateJars);
+        if (isLibrary && !useAapt2) {
+            String classesJar = String.format("%sclasses.jar", intermediateJars);
 
-            // Copy mOutputJar to classes.jar
-            mTarget.runCommand(String.format(COPY_COMMAND, mOutputJar, classesJar));
+            // Copy outputJar to classes.jar
+            target.runCommand(String.format(COPY_COMMAND, outputJar, classesJar));
 
             // Add classes.jar
-            mTarget.runCommand(String.format(ZIP_ADD_COMMAND, mOutput, classesJar));
-            System.out.println("Android AAR " + mOutput);
+            target.runCommand(String.format(ZIP_ADD_COMMAND, output, classesJar));
+            System.out.println("Android AAR " + output);
         } else {
-            String classesDex = String.format("%sclasses.dex", mIntermediateDex);
+            target.runCommand(String.format(MKDIR_COMMAND, intermediateDex));
+
+            String classesDex = String.format("%sclasses.dex", intermediateDex);
 
             // Create classes.dex
-            mTarget.runCommand(String.format(DX_COMMAND, buildToolsDir, classesDex, Utilities.join(" ", libraries), mIntermediateClasses));
+            target.runCommand(String.format(DX_COMMAND, buildToolsDir, classesDex, Utilities.join(" ", libraries), intermediateClasses));
 
             // Add classes.dex
-            mTarget.runCommand(String.format(ZIP_ADD_COMMAND, unalignedApk, classesDex));
+            target.runCommand(String.format(ZIP_ADD_COMMAND, unalignedApk, classesDex));
 
             // Align APK
-            String alignedApk = String.format("%s%s.aligned.apk", mIntermediateApks, mName);
-            mTarget.runCommand(String.format(ZIP_ALIGN_COMMAND, buildToolsDir, unalignedApk, alignedApk));
+            String alignedApk = String.format("%s%s.aligned.apk", intermediateApks, name);
+            target.runCommand(String.format(ZIP_ALIGN_COMMAND, buildToolsDir, unalignedApk, alignedApk));
 
             // Sign APK
-            mTarget.runCommand(String.format(APK_SIGNER_COMMAND, buildToolsDir, mKeyStore, mKeyStorePassword, mOutput, alignedApk));
-            System.out.println("Android APK " + mOutput);
+            target.runCommand(String.format(APK_SIGNER_COMMAND, buildToolsDir, keyStore, keyStorePassword, output, alignedApk));
+            System.out.println("Android APK " + output);
         }
-        mMatch.provideFile(mOutputFile);
-        return mOutput;
+        match.provideFile(outputFile);
+        return output;
     }
 }

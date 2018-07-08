@@ -13,29 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package match;
 
-import org.junit.runners.Suite;
 import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    expression.function.FindTest.class,
-    expression.function.FunctionTest.class,
-    expression.function.GetFileTest.class,
-    expression.function.GetTest.class,
-    expression.function.JavaJarTest.class,
-    expression.function.JavaJUnitTest.class,
-    expression.function.SetFileTest.class,
-    expression.function.SetTest.class,
-    expression.function.ZipTest.class,
-    expression.ExpressionListTest.class,
-    expression.LiteralTest.class,
-    frontend.LexerTest.class,
-    frontend.ParserTest.class,
-    match.MatchTest.class,
-    match.TargetTest.class,
-    match.UtilitiesTest.class
+        expression.function.FindTest.class,
+        expression.function.FunctionTest.class,
+        expression.function.GetFileTest.class,
+        expression.function.GetTest.class,
+        expression.function.JavaJarTest.class,
+        expression.function.JavaJUnitTest.class,
+        expression.function.SetFileTest.class,
+        expression.function.SetTest.class,
+        expression.function.ZipTest.class,
+        expression.ExpressionListTest.class,
+        expression.LiteralTest.class,
+        frontend.LexerTest.class,
+        frontend.ParserTest.class,
+        match.MatchTest.class,
+        match.TargetTest.class,
+        match.UtilitiesTest.class
 })
 public class AllTests {
     //nothing

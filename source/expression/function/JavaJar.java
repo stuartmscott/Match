@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
-import match.Utilities;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,9 +28,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import match.IMatch;
+import match.ITarget;
+import match.Utilities;
+
 public class JavaJar extends Function {
 
-    public static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\n%s\" > %s";
+    public static final String ECHO_COMMAND = "echo \"Manifest-Version: 1.0\nMain-Class: %s\" > %s";
     public static final String JAR_COMMAND = "jar cfm %s %s %s -C %s .";
     public static final String JAVAC_COMMAND = "javac %s %s -d %s";
     public static final String MAIN_CLASS = "main-class";
@@ -40,42 +42,45 @@ public class JavaJar extends Function {
     // This assumes protoc-gen-javalite and protoc share directory
     public static final String PROTOC_LITE_COMMAND = "protoc --plugin=$(dirname $(which protoc))/protoc-gen-javalite --proto_path=%s --javalite_out=%s %s";
 
-    private IExpression mSource;
-    private IExpression mProtoSource;
-    private IExpression mResource;
-    private IExpression mMainClass;
-    private String mName;
-    private File mManifestFile;
-    private String mManifest;
-    private String mIntermediateClasses;
-    private String mIntermediateManifests;
-    private String mIntermediateProtos;
-    private String mOutput;
-    private File mOutputFile;
+    private IExpression source;
+    private IExpression protoSource;
+    private IExpression resource;
+    private IExpression mainClass;
+    private String name;
+    private File manifestFile;
+    private String manifest;
+    private String intermediateClasses;
+    private String intermediateManifests;
+    private String intermediateProtos;
+    private String output;
+    private File outputFile;
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public JavaJar(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        IExpression name = getParameter(NAME);
-        if (!(name instanceof Literal)) {
-            mMatch.error("JavaJar function expects a String name");
+        IExpression n = getParameter(NAME);
+        if (!(n instanceof Literal)) {
+            match.error("JavaJar function expects a String name");
         }
-        mName = name.resolve();
-        target.setName(mName);
-        mSource = getParameter(SOURCE);
-        mOutputFile = new File(target.getDirectory(), JAR_OUTPUT + mName + ".jar");
-        mOutput = mOutputFile.toPath().normalize().toAbsolutePath().toString();
-        mIntermediateClasses = String.format("%s%s/", CLASS_OUTPUT, mName);
+        name = n.resolve();
+        target.setName(name);
+        source = getParameter(SOURCE);
+        outputFile = new File(target.getDirectory(), JAR_OUTPUT + name + ".jar");
+        output = outputFile.toPath().normalize().toAbsolutePath().toString();
+        intermediateClasses = String.format("%s%s/", CLASS_OUTPUT, name);
         if (hasParameter(PROTO)) {
-            mProtoSource = getParameter(PROTO);
-            mIntermediateProtos = String.format("%s%s/", PROTO_OUTPUT, mName);
+            protoSource = getParameter(PROTO);
+            intermediateProtos = String.format("%s%s/", PROTO_OUTPUT, name);
         }
         if (hasParameter(RESOURCE)) {
-            mResource = getParameter(RESOURCE);
+            resource = getParameter(RESOURCE);
         }
-        mIntermediateManifests = String.format("%s%s/", MANIFEST_OUTPUT, mName);
-        mManifestFile = new File(target.getDirectory(), mIntermediateManifests + "MANIFEST.MF");
-        mManifest = mManifestFile.toPath().normalize().toAbsolutePath().toString();
-        mMainClass = getParameter(MAIN_CLASS);
+        intermediateManifests = String.format("%s%s/", MANIFEST_OUTPUT, name);
+        manifestFile = new File(target.getDirectory(), intermediateManifests + "MANIFEST.MF");
+        manifest = manifestFile.toPath().normalize().toAbsolutePath().toString();
+        mainClass = getParameter(MAIN_CLASS);
     }
 
     /**
@@ -83,15 +88,15 @@ public class JavaJar extends Function {
      */
     @Override
     public void configure() {
-        mMatch.addFile(mManifest);
-        mMatch.addFile(mOutput);
-        mMatch.setProperty(mName, mOutput);
-        mSource.configure();
-        if (mProtoSource != null) {
-            mProtoSource.configure();
+        match.addFile(manifest);
+        match.addFile(output);
+        match.setProperty(name, output);
+        source.configure();
+        if (protoSource != null) {
+            protoSource.configure();
         }
-        if (mResource != null) {
-            mResource.configure();
+        if (resource != null) {
+            resource.configure();
         }
     }
 
@@ -100,47 +105,36 @@ public class JavaJar extends Function {
      */
     @Override
     public String resolve() {
-        File matchDir = mTarget.getDirectory();
+        File matchDir = target.getDirectory();
         List<String> libraries = new ArrayList<String>();
         String javacClasspath = "";
-        String jarClasspath = "";
         // TODO consider extract libraries into intermediate classes directory
         if (hasParameter(LIBRARY)) {
             for (String library : getParameter(LIBRARY).resolveList()) {
-                String path = mMatch.getProperty(library);
-                mMatch.awaitFile(path);
+                String path = match.getProperty(library);
+                match.awaitFile(path);
                 libraries.add(path);
             }
-            // TODO this is broken:
-            // error: java.io.IOException: line too long
-            // error:  at java.util.jar.Attributes.read(Attributes.java:379)
-            // error:  at java.util.jar.Manifest.read(Manifest.java:199)
-            // error:  at java.util.jar.Manifest.<init>(Manifest.java:69)
-            // error:  at sun.tools.jar.Main.run(Main.java:176)
-            // error:  at sun.tools.jar.Main.main(Main.java:1288)
-            // error: jar cfm out/java/jar/JoyTest.jar out/java/manifest/JoyTest/MANIFEST.MF  -C out/java/classes/JoyTest/ .
-            // TODO maybe extract libraries into intermediate directory then jar together
             javacClasspath = String.format("-cp %s", Utilities.join(":", libraries));
-            //jarClasspath = String.format("Class-Path: %s\n", Utilities.join(":", libraries));
         }
-        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateClasses));
-        mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateManifests));
-        mTarget.runCommand(String.format(MKDIR_COMMAND, JAR_OUTPUT));
-        mTarget.runCommand(String.format(ECHO_COMMAND, mMainClass.resolve(), jarClasspath, mManifest));
-        mMatch.provideFile(mManifestFile);
+        target.runCommand(String.format(MKDIR_COMMAND, intermediateClasses));
+        target.runCommand(String.format(MKDIR_COMMAND, intermediateManifests));
+        target.runCommand(String.format(MKDIR_COMMAND, JAR_OUTPUT));
+        target.runCommand(String.format(ECHO_COMMAND, mainClass.resolve(), manifest));
+        match.provideFile(manifestFile);
         Set<String> sources = new HashSet<String>();
-        sources.addAll(mSource.resolveList());
+        sources.addAll(source.resolveList());
         // Compile protos
-        if (mProtoSource != null) {
-            mTarget.runCommand(String.format(MKDIR_COMMAND, mIntermediateProtos));
+        if (protoSource != null) {
+            target.runCommand(String.format(MKDIR_COMMAND, intermediateProtos));
             if (hasParameter(PROTO_LITE) && getParameter(PROTO_LITE).resolve().equals("true")) {
-                mTarget.runCommand(String.format(PROTOC_LITE_COMMAND, matchDir, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+                target.runCommand(String.format(PROTOC_LITE_COMMAND, matchDir, intermediateProtos, Utilities.join(" ", protoSource.resolveList())));
             } else {
-                mTarget.runCommand(String.format(PROTOC_COMMAND, matchDir, mIntermediateProtos, Utilities.join(" ", mProtoSource.resolveList())));
+                target.runCommand(String.format(PROTOC_COMMAND, matchDir, intermediateProtos, Utilities.join(" ", protoSource.resolveList())));
             }
-            File directory = new File(matchDir, mIntermediateProtos);
+            File directory = new File(matchDir, intermediateProtos);
             // Add to the build
-            mMatch.addDirectory(directory);
+            match.addDirectory(directory);
             // Get the relative paths of all java files generated
             String path = directory.toPath().toString() + "/";
             Set<String> generated = new HashSet<String>();
@@ -148,13 +142,13 @@ public class JavaJar extends Function {
             sources.addAll(generated);
         }
         // Compile java
-        mTarget.runCommand(String.format(JAVAC_COMMAND, javacClasspath, Utilities.join(" ", sources), mIntermediateClasses));
+        target.runCommand(String.format(JAVAC_COMMAND, javacClasspath, Utilities.join(" ", sources), intermediateClasses));
         // Add to the build
-        mMatch.addDirectory(new File(matchDir, mIntermediateClasses));
+        match.addDirectory(new File(matchDir, intermediateClasses));
         // Package jar
-        String resources = (mResource == null) ? "" : Utilities.join(" ", mResource.resolveList());
-        mTarget.runCommand(String.format(JAR_COMMAND, mOutput, mManifest, resources, mIntermediateClasses));
-        mMatch.provideFile(mOutputFile);
-        return mOutput;
+        String resources = (resource == null) ? "" : Utilities.join(" ", resource.resolveList());
+        target.runCommand(String.format(JAR_COMMAND, output, manifest, resources, intermediateClasses));
+        match.provideFile(outputFile);
+        return output;
     }
 }

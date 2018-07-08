@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package match;
 
 import expression.function.IFunction;
@@ -22,22 +23,28 @@ import java.io.File;
 public interface ITarget {
 
     /**
-     * @return the target name
+     * Gets the Target's name.
+     *
+     * @return the target name.
      */
     String getName();
 
     /**
-     * Sets the target name
+     * Sets the target name.
      */
     void setName(String name);
 
     /**
-     * @return the match file
+     * Gets the Target's match file.
+     *
+     * @return the match file.
      */
     File getFile();
 
     /**
-     * @return the match file's enclosing directory
+     * Gets the directory containing the Target's match file.
+     *
+     * @return the match file's enclosing directory.
      */
     File getDirectory();
 
@@ -57,7 +64,9 @@ public interface ITarget {
     void build();
 
     /**
-     * @return true if this target has been built
+     * Checks if the Target has been built yet.
+     *
+     * @return true if this target has been built.
      */
     boolean isBuilt();
 
@@ -67,7 +76,9 @@ public interface ITarget {
     int runCommand(String command);
 
     /**
-     * @return the most recent command run by this target.
+     * Gets the most recent command executed by this target.
+     *
+     * @return the most recent command run.
      */
     String getLastCommand();
 

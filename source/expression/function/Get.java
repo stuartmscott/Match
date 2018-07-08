@@ -13,27 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
+
 import java.util.Map;
 
+import match.IMatch;
+import match.ITarget;
+
+/**
+ * Gets the property associated to the given key.
+ */
 public class Get extends Function {
 
-    private String mKey;
+    private String key;
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public Get(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
         String parameterName = hasParameter(NAME) ? NAME : ANONYMOUS;
-        IExpression key = getParameter(parameterName);
-        if (!(key instanceof Literal)) {
-            mMatch.error("Get function expects a String key");
+        IExpression k = getParameter(parameterName);
+        if (!(k instanceof Literal)) {
+            match.error("Get function expects a String key");
         }
-        mKey = key.resolve();
-        target.setName("Get:" + mKey);
+        key = k.resolve();
+        target.setName("Get:" + key);
     }
 
     /**
@@ -41,6 +50,6 @@ public class Get extends Function {
      */
     @Override
     public String resolve() {
-        return mMatch.getProperty(mKey);
+        return match.getProperty(key);
     }
 }

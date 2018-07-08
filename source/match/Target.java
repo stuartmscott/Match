@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package match;
 
 import expression.function.IFunction;
@@ -24,89 +25,89 @@ import java.io.InputStreamReader;
 
 public class Target implements ITarget {
 
-    private IMatch mMatch;
-    private File mFile;
-    private String mName = "";
-    private IFunction mFunction;
-    private String mLastCommand;
-    private volatile boolean mFinished = false;
+    private IMatch match;
+    private File file;
+    private String name = "";
+    private IFunction function;
+    private String lastCommand;
+    private volatile boolean finished = false;
 
     public Target(IMatch match, File file) {
-        mMatch = match;
-        mFile = file;
+        this.match = match;
+        this.file = file;
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public String getName() {
-        return mName;
+        return name;
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void setName(String name) {
-        mName = name;
+        this.name = name;
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public File getFile() {
-        return mFile;
+        return file;
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public File getDirectory() {
-        return mFile.getParentFile();
+        return file.getParentFile();
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void setFunction(IFunction function) {
-        mFunction = function;
+        this.function = function;
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void configure() {
-        mFunction.configure();
+        function.configure();
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void build() {
         try {
-            mFunction.resolve();
+            function.resolve();
             // TODO put this target's input and output files in the database
         } finally {
-            mFinished = true;
+            finished = true;
         }
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public boolean isBuilt() {
-        return mFinished;
+        return finished;
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public String toString() {
@@ -114,14 +115,14 @@ public class Target implements ITarget {
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public int runCommand(String command) {
         int result = 0;
         try {
-            mLastCommand = command;
-            // mMatch.println(command);
+            lastCommand = command;
+            // match.println(command);
             ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
             pb.directory(getDirectory());
             Process process = pb.start();
@@ -133,30 +134,30 @@ public class Target implements ITarget {
             while (loop) {
                 loop = false;
                 if ((line = input.readLine()) != null) {
-                    mMatch.println(line);
+                    match.println(line);
                     loop = true;
                 }
                 if ((line = error.readLine()) != null) {
                     if (result != 0) {
-                        mMatch.println(String.format("error: %s", line));
+                        match.println(String.format("error: %s", line));
                     }
                     loop = true;
                 }
             }
             if (result != 0) {
-                mMatch.error("error: " + command);
+                match.error("error: " + command);
             }
         } catch (Exception e) {
-            mMatch.error(e);
+            match.error(e);
         }
         return result;
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public String getLastCommand() {
-        return mLastCommand;
+        return lastCommand;
     }
 }

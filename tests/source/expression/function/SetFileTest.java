@@ -13,24 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
+import match.IMatch;
+import match.ITarget;
+
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
+/**
+ * Tests for SetFile function.
+ */
 public class SetFileTest {
 
     private static final String FOO = "foo";
@@ -41,27 +47,33 @@ public class SetFileTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
-    private File mFile = null;
-    private String mFilename;
+    private File file = null;
+    private String filename;
 
+    /**
+     * Cleans up the file set by the test.
+     */
     @After
     public void tearDown() {
-        if (mFile != null) {
-            mFile.delete();
-            mFile = null;
+        if (file != null) {
+            file.delete();
+            file = null;
         }
     }
 
+    /**
+     * Tests that the Set function sets the property, adds the file, and provides it.
+     */
     @Test
     public void setFile() throws Exception {
         IMatch match = Mockito.mock(IMatch.class);
         ITarget target = Mockito.mock(ITarget.class);
-        mFile = folder.newFile(FOO);
-        mFilename = mFile.toPath().toString();
-        SetFileTest.setFile(match, target, mFile);
-        Mockito.verify(match, Mockito.times(1)).setProperty(FOO, mFilename);
-        Mockito.verify(match, Mockito.times(1)).addFile(mFilename);
-        Mockito.verify(match, Mockito.times(1)).provideFile(mFile);
+        file = folder.newFile(FOO);
+        filename = file.toPath().toString();
+        setFile(match, target, file);
+        Mockito.verify(match, Mockito.times(1)).setProperty(FOO, filename);
+        Mockito.verify(match, Mockito.times(1)).addFile(filename);
+        Mockito.verify(match, Mockito.times(1)).provideFile(file);
     }
 
     static void setFile(IMatch match, ITarget target, File file) throws Exception {

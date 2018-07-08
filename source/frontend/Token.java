@@ -13,22 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package frontend;
 
 public class Token {
 
-    public int mLine;
-    public Category mCategory;
-    public String mValue;
+    public int line;
+    public Category category;
+    public String value;
 
+    /**
+     * Creates a Token with the given line number and category.
+     */
     public Token(int line, Category category) {
         this(line, category, "");
     }
 
+    /**
+     * Creates a Token with the given line number, category, and value.
+     */
     public Token(int line, Category category, String value) {
-        mLine = line;
-        mCategory = category;
-        mValue = value;
+        this.line = line;
+        this.category = category;
+        this.value = value;
     }
 
     /**
@@ -36,7 +43,7 @@ public class Token {
      */
     @Override
     public String toString() {
-        return mCategory + " : " + mValue;
+        return category + " : " + value;
     }
 
 }

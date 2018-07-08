@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package frontend;
 
 import expression.ExpressionList;
@@ -20,9 +21,6 @@ import expression.IExpression;
 import expression.Literal;
 import expression.function.Function;
 import expression.function.IFunction;
-import match.IMatch;
-import match.ITarget;
-import match.Target;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,17 +28,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import match.IMatch;
+import match.ITarget;
+import match.Target;
+
 public class Parser implements IParser {
 
-    private ILexer mLexer;
-    private IMatch mMatch;
-    private File mFile;
-    private ITarget mTarget;
+    private ILexer lexer;
+    private IMatch match;
+    private File file;
+    private ITarget target;
 
+    /**
+     * Creates a parser with the given Lexer.
+     */
     public Parser(IMatch match, ILexer lexer) {
-        mMatch = match;
-        mLexer = lexer;
-        mFile = lexer.getFile();
+        this.match = match;
+        this.lexer = lexer;
+        file = lexer.getFile();
     }
 
     /**
@@ -49,11 +54,11 @@ public class Parser implements IParser {
     @Override
     public List<ITarget> parse() {
         List<ITarget> targets = new ArrayList<ITarget>();
-        mLexer.move();
-        while (!mLexer.currentIs(Category.EOF)) {
-            mTarget = new Target(mMatch, mFile);
-            mTarget.setFunction(matchFunction());
-            targets.add(mTarget);
+        lexer.move();
+        while (!lexer.currentIs(Category.EOF)) {
+            target = new Target(match, file);
+            target.setFunction(matchFunction());
+            targets.add(target);
         }
         return targets;
     }
@@ -63,8 +68,8 @@ public class Parser implements IParser {
      */
     @Override
     public IFunction matchFunction() {
-        String name = mLexer.match(Category.UPPER_CASE);
-        return Function.getFunction(name, mMatch, mTarget, matchParameters());
+        String name = lexer.match(Category.UPPER_CASE);
+        return Function.getFunction(name, match, target, matchParameters());
     }
 
     /**
@@ -73,11 +78,11 @@ public class Parser implements IParser {
     @Override
     public Map<String, IExpression> matchParameters() {
         Map<String, IExpression> expressions = new HashMap<String, IExpression>();
-        mLexer.match(Category.ORB);
-        while (!mLexer.currentIs(Category.CRB)) {
-            if (mLexer.currentIs(Category.LOWER_CASE)) {
-                String name = mLexer.match(Category.LOWER_CASE);
-                mLexer.match(Category.ASSIGN);
+        lexer.match(Category.ORB);
+        while (!lexer.currentIs(Category.CRB)) {
+            if (lexer.currentIs(Category.LOWER_CASE)) {
+                String name = lexer.match(Category.LOWER_CASE);
+                lexer.match(Category.ASSIGN);
                 expressions.put(name, matchExpression());
             } else {
                 // Single parameters can be anonymous
@@ -85,7 +90,7 @@ public class Parser implements IParser {
                 break;
             }
         }
-        mLexer.match(Category.CRB);
+        lexer.match(Category.CRB);
         return expressions;
     }
 
@@ -94,20 +99,20 @@ public class Parser implements IParser {
      */
     @Override
     public IExpression matchExpression() {
-        switch (mLexer.getCurrentCategory()) {
+        switch (lexer.getCurrentCategory()) {
             case UPPER_CASE:
                 return matchFunction();
             case OSB:
                 List<IExpression> expressions = new ArrayList<IExpression>();
-                mLexer.move();
-                while (!mLexer.currentIs(Category.CSB)) {
+                lexer.move();
+                while (!lexer.currentIs(Category.CSB)) {
                     expressions.add(matchExpression());
                 }
-                mLexer.move();
-                return new ExpressionList(mMatch, mTarget, expressions);
+                lexer.move();
+                return new ExpressionList(match, target, expressions);
             default:
-                String literal = mLexer.match(Category.STRING_LITERAL);
-                return new Literal(mMatch, mTarget, literal.substring(1, literal.length() - 1));
+                String literal = lexer.match(Category.STRING_LITERAL);
+                return new Literal(match, target, literal.substring(1, literal.length() - 1));
         }
     }
 }

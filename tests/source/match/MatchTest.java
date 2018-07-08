@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package match;
 
 import config.Config;
@@ -39,6 +40,9 @@ public class MatchTest {
     public File root;
     public Config config;
 
+    /**
+     * Sets up the file structure, config, and security manager for the tests.
+     */
     @Before
     public void setUp() throws IOException {
         root = folder.getRoot();
@@ -48,22 +52,33 @@ public class MatchTest {
         System.setSecurityManager(new ExitSecurityManager());
     }
 
+    /**
+     * Tears down the security manager used by the tests.
+     */
     @After
     public void tearDown() throws Exception {
         System.setSecurityManager(null);
     }
 
+    /**
+     * Tests the handling properties.
+     */
     @Test
     public void properties() throws Exception {
         Match match = createMatch(config);
         try {
             match.getProperty(FOO);
             Assert.fail("Match should fail if property is not set");
-        } catch (ExitException e) {}
+        } catch (ExitException e) {
+            /* ignored */
+        }
         match.setProperty(FOO, BAR);
         Assert.assertEquals("Wrong property", BAR, match.getProperty(FOO));
     }
 
+    /**
+     * Tests the handling of files.
+     */
     @Test
     public void files() throws Exception {
         Match match = createMatch(config);
@@ -73,12 +88,16 @@ public class MatchTest {
         Worker worker = new Worker(match, fileName);
         worker.start();
         worker.await();
-        Assert.assertFalse("Worker should not have ended", worker.mEnded);
+        // Worker should wait until the file is provided
+        Assert.assertFalse("Worker should not have ended", worker.ended);
         match.provideFile(file);
         worker.join();
-        Assert.assertTrue("Worker should have ended", worker.mEnded);
+        Assert.assertTrue("Worker should have ended", worker.ended);
     }
 
+    /**
+     * Test errors are generated if a file is provided or awaited before being added.
+     */
     @Test
     public void files_noAdd() throws Exception {
         Match match = createMatch(config);
@@ -86,14 +105,21 @@ public class MatchTest {
             // Provide a file that wasn't added
             match.provideFile(new File(FOO));
             Assert.fail("Match should fail if file wasn't added");
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            /* ignored */
+        }
         try {
             // Await on a file that wasn't added
             match.awaitFile(FOO);
             Assert.fail("Match should fail if file wasn't added");
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            /* ignored */
+        }
     }
 
+    /**
+     * Tests correct number of files are loaded.
+     */
     @Test
     public void loadFiles() throws Exception {
         Match match = createMatch(config);
@@ -106,6 +132,19 @@ public class MatchTest {
         return new Match(config);
     }
 
+    /**
+     * Utility to create file structure.
+     *
+     * <p>
+     * a
+     * -b
+     * c
+     * -d
+     * --e
+     * --f
+     * bar
+     * </p>
+     */
     public static File createFileStructure(File root) throws IOException {
         root.mkdirs();
         Assert.assertTrue("Root doesn't exist", root.exists());
@@ -128,19 +167,25 @@ public class MatchTest {
     }
 
     private static class ExitException extends SecurityException {
+
         public static final long serialVersionUID = -1;
-        final int mStatus;
+
+        final int status;
+
         ExitException(int status) {
             super("ExitException");
-            mStatus = status;
+            this.status = status;
         }
     }
 
     private static class ExitSecurityManager extends SecurityManager {
+
         @Override
         public void checkPermission(Permission permission) {}
+
         @Override
         public void checkPermission(Permission permission, Object context) {}
+
         @Override
         public void checkExit(int status) {
             super.checkExit(status);
@@ -149,24 +194,30 @@ public class MatchTest {
     }
 
     private static class Worker extends Thread {
-        private Match mMatch;
-        private String mFileName;
-        private CountDownLatch mLatch = new CountDownLatch(1);
-        private volatile boolean mEnded = false;
+
+        private Match match;
+        private String fileName;
+        private CountDownLatch latch = new CountDownLatch(1);
+        private volatile boolean ended = false;
+
         Worker(Match match, String fileName) {
-            mMatch = match;
-            mFileName = fileName;
+            this.match = match;
+            this.fileName = fileName;
         }
+
         @Override
         public void run() {
-            mLatch.countDown();
-            mMatch.awaitFile(mFileName);
-            mEnded = true;
+            latch.countDown();
+            match.awaitFile(fileName);
+            ended = true;
         }
+
         void await() {
             try {
-                mLatch.await();
-            } catch (InterruptedException e) {}
+                latch.await();
+            } catch (InterruptedException e) {
+                /* ignored */
+            }
         }
     }
 }

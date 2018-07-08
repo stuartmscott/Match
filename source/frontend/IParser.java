@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package frontend;
 
 import expression.IExpression;
 import expression.function.IFunction;
-import match.ITarget;
 
 import java.util.List;
 import java.util.Map;
+
+import match.ITarget;
 
 public interface IParser {
 
@@ -34,23 +36,29 @@ public interface IParser {
     /**
      * Matches a function.
      *
+     * <p>
      * &lt;identifier&gt;&lt;parameters&gt;
+     * </p>
      */
     IFunction matchFunction();
 
     /**
      * Matches parameters to a function.
      *
+     * <p>
      * "(" &lt;expression&gt;* ")"
+     * </p>
      */
     Map<String, IExpression> matchParameters();
 
     /**
      * Matches an expression.
      *
+     * <p>
      * &lt;function&gt;
      * "[" &lt;expression&gt;+ "]"
      * &lt;literal&gt;
+     * </p>
      */
     IExpression matchExpression();
 }

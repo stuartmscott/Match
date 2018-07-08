@@ -19,9 +19,38 @@ Library(
 )
 
 Library(
+    name = "checkstyle"
+    file = "checkstyle-8.11-all.jar"
+    location = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.11/"
+)
+
+Library(
     name = "junit"
     file = "junit-4.12.jar"
     location = "http://search.maven.org/remotecontent?filepath=junit/junit/4.12/"
+)
+
+CheckStyle(
+    name = "HelloDroidCheckStyleResult"
+    config = "$HOME/match/checkstyle.xml"
+    source = [
+        Find(
+            directory = "App/source"
+            pattern = ".*.java"
+        )
+        Find(
+            directory = "Lib/source"
+            pattern = ".*.java"
+        )
+        Find(
+            directory = "App/tests/"
+            pattern = ".*.java"
+        )
+        Find(
+            directory = "Lib/tests/source"
+            pattern = ".*.java"
+        )
+    ]
 )
 
 # Build Library
@@ -59,7 +88,7 @@ AndroidApk(
     build-tools-version = "27.0.3"
     keystore = "private/hellodroid-release-key.keystore"
     keystore-password-file = "private/hellodroid-release-key.password"
-    manifest = "App/AndroidManifest.xml"
+    manifest = "App/AndroidManifest-AAPT2.xml"
     use-aapt2 = "true"
 )
 

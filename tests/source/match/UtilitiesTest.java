@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package match;
 
 import java.util.ArrayList;
@@ -46,13 +47,6 @@ public class UtilitiesTest {
         list.add("bar");
         list.add("blah");
         Assert.assertEquals("Incorrect join", "foo:bar:blah", Utilities.<String>join(SEPARATOR, list));
-    }
-
-    @Test
-    public void newList() {
-        List<String> list = Utilities.<String>newList("foo");
-        Assert.assertEquals("Incorrect list length", 1, list.size());
-        Assert.assertEquals("Incorrect list element", "foo", list.get(0));
     }
 
 }

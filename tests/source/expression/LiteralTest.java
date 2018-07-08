@@ -13,18 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression;
 
 import match.IMatch;
 import match.ITarget;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+/**
+ * Tests for Literals.
+ */
 public class LiteralTest {
 
     private static final String FOO = "foo";
 
+    /**
+     * Tests that Literals resolve correctly.
+     */
     @Test
     public void literal() {
         IMatch match = Mockito.mock(IMatch.class);

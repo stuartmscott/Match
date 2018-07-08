@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package match;
 
 import expression.function.IFunction;
-import match.IMatch;
-import match.ITarget;
 
 import java.io.File;
+
+import match.IMatch;
+import match.ITarget;
 
 import org.junit.Test;
 import org.mockito.Mockito;

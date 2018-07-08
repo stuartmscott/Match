@@ -13,32 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
+
 import java.util.Map;
 
+import match.IMatch;
+import match.ITarget;
+
+/**
+ * Sets the key/value pair as a property in the build.
+ */
 public class Set extends Function {
 
-    protected String mKey;
-    protected String mValue;
+    protected String key;
+    protected String value;
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public Set(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        IExpression key = getParameter(NAME);
-        IExpression value = getParameter(VALUE);
-        if (!(key instanceof Literal)) {
-            mMatch.error("Set function expects a String key");
+        IExpression k = getParameter(NAME);
+        IExpression v = getParameter(VALUE);
+        if (!(k instanceof Literal)) {
+            match.error("Set function expects a String key");
         }
-        if (!(value instanceof Literal)) {
-            mMatch.error("Set function expects a String value");
+        if (!(v instanceof Literal)) {
+            match.error("Set function expects a String value");
         }
-        mKey = key.resolve();
-        mValue = value.resolve();
-        target.setName("Set:" + mKey);
+        key = k.resolve();
+        value = v.resolve();
+        target.setName("Set:" + key);
     }
 
     /**
@@ -46,7 +55,7 @@ public class Set extends Function {
      */
     @Override
     public void configure() {
-        mMatch.setProperty(mKey, mValue);
+        match.setProperty(key, value);
     }
 
     /**
@@ -54,6 +63,6 @@ public class Set extends Function {
      */
     @Override
     public String resolve() {
-        return mValue;
+        return value;
     }
 }

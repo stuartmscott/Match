@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
-import match.Utilities;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,25 +29,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import match.IMatch;
+import match.ITarget;
+import match.Utilities;
+
 public class Release extends Function {
 
-    public final static String AWAIT = "await";
-    public final static String CHANNEL = "channel";
+    public static final String AWAIT = "await";
+    public static final String CHANNEL = "channel";
 
-    private IExpression mAwait;
-    private IExpression mChannel;
-    private String mSource;
+    private IExpression await;
+    private IExpression channel;
+    private String source;
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public Release(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        IExpression source = getParameter(SOURCE);
-        if (!(source instanceof Literal)) {
-            mMatch.error("Release function expects a String source");
+        IExpression s = getParameter(SOURCE);
+        if (!(s instanceof Literal)) {
+            match.error("Release function expects a String source");
         }
-        mSource = source.resolve();
-        target.setName("Release:" + mSource);
-        mAwait = getParameter(AWAIT);
-        mChannel = getParameter(CHANNEL);
+        source = s.resolve();
+        target.setName("Release:" + source);
+        await = getParameter(AWAIT);
+        channel = getParameter(CHANNEL);
         // TODO ensure release isn't re-created if the inputs haven't been modified
     }
 
@@ -58,8 +63,8 @@ public class Release extends Function {
      */
     @Override
     public void configure() {
-        mAwait.configure();
-        mChannel.configure();
+        await.configure();
+        channel.configure();
     }
 
     /**
@@ -68,16 +73,16 @@ public class Release extends Function {
     @Override
     public String resolve() {
         // Await checks
-        for (String await : mAwait.resolveList()) {
-            mMatch.awaitFile(mMatch.getProperty(await));
+        for (String await : await.resolveList()) {
+            match.awaitFile(match.getProperty(await));
         }
         // Get the source file
-        String source = mMatch.getProperty(mSource);
-        mMatch.awaitFile(source);
+        String path = match.getProperty(source);
+        match.awaitFile(path);
         // Push out distribution channels
-        for (String channel : mChannel.resolveList()) {
-            if (mTarget.runCommand(String.format(channel, source)) != 0) {
-                mMatch.error("Failed to release via channel: " + channel);
+        for (String channel : channel.resolveList()) {
+            if (target.runCommand(String.format(channel, path)) != 0) {
+                match.error("Failed to release via channel: " + channel);
             }
         }
         return "";

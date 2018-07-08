@@ -13,28 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package expression.function;
 
 import expression.IExpression;
 import expression.Literal;
-import match.IMatch;
-import match.ITarget;
+
 import java.io.File;
 import java.util.Map;
 
+import match.IMatch;
+import match.ITarget;
+
+/**
+ * Sets up the given file in the build.
+ */
 public class SetFile extends Set {
 
     private File file;
     private String filename;
 
+    /**
+     * Initializes the function with the given parameters.
+     */
     public SetFile(IMatch match, ITarget target, Map<String, IExpression> parameters) {
         super(match, target, parameters);
-        file = new File(target.getDirectory(), mValue);
+        file = new File(target.getDirectory(), value);
         filename = file.toPath().normalize().toAbsolutePath().toString();
         if (!file.exists()) {
-            mMatch.error(String.format("File %s does not exist", filename));
+            match.error(String.format("File %s does not exist", filename));
         }
-        target.setName("SetFile:" + mKey);
+        target.setName("SetFile:" + key);
     }
 
     /**
@@ -43,7 +52,7 @@ public class SetFile extends Set {
     @Override
     public void configure() {
         super.configure();
-        mMatch.addFile(filename);
-        mMatch.provideFile(file);
+        match.addFile(filename);
+        match.provideFile(file);
     }
 }
