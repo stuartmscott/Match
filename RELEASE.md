@@ -1,16 +1,11 @@
 Match Release
 =============
 
-# v0.1
-- First Release!
-
-# v0.2
-- Simplifies function calling
-- Increased documentation
-
-# v0.3
-- Parallel builds
-- Supports extensions with project-, language-, and/or workspace-specific rules.
+# v0.5
+- Adds Android Library Support
+- Adds CheckStyle Support
+- Improves Library and Release handling
+- Order RELEASE.md in reverse chronological order
 
 # v0.4
 - Adds Android support
@@ -20,14 +15,13 @@ Match Release
 - Build timeouts
 - Ditch "main" package for "match"
 
-# 20180801
-- Move to YYYYMMDD-based versioning for automation
-- Leverage Config for arguments and configurations
+# v0.3
+- Parallel builds
+- Supports extensions with project-, language-, and/or workspace-specific rules.
 
-# 20180901
+# v0.2
+- Simplifies function calling
+- Increased documentation
 
-# 20181001
-
-# 20181101
-
-# 20181201
+# v0.1
+- First Release!

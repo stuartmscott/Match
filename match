@@ -85,7 +85,7 @@ JavaJUnit(
 
 Release(
     source = "Match"
-    channel = "cp %s $HOME/match/libraries/Match-0.4.jar"
+    channel = "cp %s $HOME/match/libraries/Match-0.5.jar"
     await = [
         "MatchCheckStyleResult"
         "MatchTestResult"

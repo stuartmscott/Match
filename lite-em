@@ -16,7 +16,7 @@
 
 LIBRARIES="$HOME/match/libraries"
 CONFIG_JAR="$LIBRARIES/Config-0.1.jar"
-MATCH_JAR="$LIBRARIES/Match-0.4.jar"
+MATCH_JAR="$LIBRARIES/Match-0.5.jar"
 
 if [ ! -d "$LIBRARIES" ]; then
     mkdir -p $LIBRARIES
@@ -26,7 +26,7 @@ if [ ! -f "$CONFIG_JAR" ]; then
 fi
 
 if [ ! -f "$MATCH_JAR" ]; then
-    curl -L https://github.com/stuartmscott/Match/releases/download/v0.4/Match-0.4.jar -o $MATCH_JAR
+    curl -L https://github.com/stuartmscott/Match/releases/download/v0.5/Match-0.5.jar -o $MATCH_JAR
 fi
 
 java -cp $CONFIG_JAR:$MATCH_JAR match.Match root=. libraries="$LIBRARIES"
