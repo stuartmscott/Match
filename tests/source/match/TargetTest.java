@@ -16,12 +16,11 @@
 
 package match;
 
-import expression.function.IFunction;
-
 import java.io.File;
 
 import match.IMatch;
 import match.ITarget;
+import match.expression.function.IFunction;
 
 import org.junit.Test;
 import org.mockito.Mockito;

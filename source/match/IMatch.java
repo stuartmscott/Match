@@ -35,11 +35,25 @@ public interface IMatch {
     File getLibrariesDir();
 
     /**
+     * Checks if this build is cleaning.
+     *
+     * @return true iff this execution is cleaning.
+     */
+    boolean isCleaning();
+
+    /**
      * Checks if this build is quiet.
      *
      * @return true iff this execution is quiet.
      */
     boolean isQuiet();
+
+    /**
+     * Checks if this build is verbose.
+     *
+     * @return true iff this execution is verbose.
+     */
+    boolean isVerbose();
 
     /**
      * Checks if the property has been set.

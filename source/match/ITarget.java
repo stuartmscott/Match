@@ -16,9 +16,9 @@
 
 package match;
 
-import expression.function.IFunction;
-
 import java.io.File;
+
+import match.expression.function.IFunction;
 
 public interface ITarget {
 

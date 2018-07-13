@@ -18,11 +18,6 @@ package match;
 
 import config.Config;
 
-import frontend.Category;
-import frontend.Lexem;
-import frontend.Lexer;
-import frontend.Parser;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -37,6 +32,11 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import match.frontend.Category;
+import match.frontend.Lexem;
+import match.frontend.Lexer;
+import match.frontend.Parser;
 
 /**
  * A lightweight, fast and extensible build system.
@@ -64,7 +64,9 @@ public class Match implements IMatch {
     private final Config config;
     private final File root;
     private final File libraries;
+    private final boolean clean;
     private final boolean quiet;
+    private final boolean verbose;
     private final Map<String, CountDownLatch> files = new ConcurrentHashMap<>();
     private final List<File> matchFiles = new ArrayList<>();
     private final List<File> allFiles = new ArrayList<>();
@@ -76,7 +78,9 @@ public class Match implements IMatch {
         this.config = config;
         root = new File(config.get("root"));
         libraries = new File(config.has("libraries") ? config.get("libraries") : System.getProperty("java.io.tmpdir"));
+        clean = config.getBoolean("clean");
         quiet = config.getBoolean("quiet");
+        verbose = config.getBoolean("verbose");
         // TODO exec targets to allow supporting custom commands, or add AndroidGradle and AndroidAnt functions to build with gradle or ant resp.
         // TODO parallel builds
         // TODO incremental builds
@@ -104,8 +108,24 @@ public class Match implements IMatch {
      * {@inheritDoc}
      */
     @Override
+    public boolean isCleaning() {
+        return clean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean isQuiet() {
         return quiet;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isVerbose() {
+        return verbose;
     }
 
     List<File> getAllFiles() {
@@ -205,8 +225,12 @@ public class Match implements IMatch {
             error(String.format("no targets provided %s", file));
         }
         try {
-            if (!latch.await(10, TimeUnit.MINUTES)) {
-                error(file + " took too long (> 10mins)");
+            long maxWaitTimeMins = 3; // 3 minutes
+            if (config.has("max-wait-time")) {
+                maxWaitTimeMins = (long) config.getNumber("max-wait-time");
+            }
+            if (!latch.await(maxWaitTimeMins, TimeUnit.MINUTES)) {
+                error(file + " took too long (> " + maxWaitTimeMins + "mins)");
             }
         } catch (InterruptedException e) {
             error("await interrupted");
@@ -272,13 +296,17 @@ public class Match implements IMatch {
             new BuildThread(target, latch).start();
         }
         try {
-            if (!latch.await(15, TimeUnit.MINUTES)) {
+            long maxBuildTimeMins = 5;// 5 minutes
+            if (config.has("max-build-time")) {
+                maxBuildTimeMins = (long) config.getNumber("max-build-time");
+            }
+            if (!latch.await(maxBuildTimeMins, TimeUnit.MINUTES)) {
                 for (ITarget target : targets) {
                     if (!target.isBuilt()) {
                         println(target + " still running " + target.getLastCommand());
                     }
                 }
-                error("build took too long (> 15mins)");
+                error("build took too long (> " + maxBuildTimeMins + "mins)");
             }
         } catch (InterruptedException e) {
             error("build interrupted");
@@ -304,6 +332,7 @@ public class Match implements IMatch {
         // This is difficult for java compiles because you cannot know beforehand, given source
         // files, which classes will get generated because of inner/anonymous classes.
         // Could maybe be done by a target - it just gets built last.
+        // TODO if (isCleaning()) delete all generated files
     }
 
     /**

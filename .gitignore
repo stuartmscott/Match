@@ -1,13 +1,22 @@
 *.class
-.classpath
+*.iml
 .DS_Store
+.classpath
+.externalNativeBuild
+.gradle
 .project
 .metadata
 out
-sample/out
-
-#Removed so users can see how keystore and password are stored
-#sample/private
+sample/Echo/out
+sample/HelloDroid/.idea/caches
+sample/HelloDroid/.idea/libraries
+sample/HelloDroid/.idea/modules.xml
+sample/HelloDroid/.idea/workspace.xml
+sample/HelloDroid/app/build
+sample/HelloDroid/build
+sample/HelloDroid/captures
+sample/HelloDroid/local.properties
+sample/HelloDroid/out
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

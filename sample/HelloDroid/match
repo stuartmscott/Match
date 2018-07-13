@@ -14,20 +14,9 @@
 
 # Define libraries used
 Library(
-    name = "android-support-test"
-    file = "android-support-test-0.1.aar"
-)
-
-Library(
     name = "checkstyle"
     file = "checkstyle-8.11-all.jar"
     location = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.11/"
-)
-
-Library(
-    name = "junit"
-    file = "junit-4.12.jar"
-    location = "http://search.maven.org/remotecontent?filepath=junit/junit/4.12/"
 )
 
 CheckStyle(
@@ -35,137 +24,31 @@ CheckStyle(
     config = "$HOME/match/checkstyle.xml"
     source = [
         Find(
-            directory = "App/source"
-            pattern = ".*.java"
-        )
-        Find(
-            directory = "Lib/source"
-            pattern = ".*.java"
-        )
-        Find(
-            directory = "App/tests/"
-            pattern = ".*.java"
-        )
-        Find(
-            directory = "Lib/tests/source"
+            directory = "app/src"
             pattern = ".*.java"
         )
     ]
 )
 
-# Build Library
-AndroidApk(
-    name = "HelloDroidLib"
-    source = Find(
-        directory = "Lib/source"
-        pattern = ".*.java"
-    )
-    resource-directory = [
-        "Lib/resource"
-        "Lib/resource-aapt2"
-    ]
-    api-version = "27"
-    build-tools-version = "27.0.3"
-    keystore = "private/hellodroid-release-key.keystore"
-    keystore-password-file = "private/hellodroid-release-key.password"
-    manifest = "Lib/AndroidManifest.xml"
-    is-library = "true"
-    use-aapt2 = "true"
-)
-
-# Build APK
-AndroidApk(
+# Build App
+Gradle(
     name = "HelloDroid"
-    source = Find(
-        directory = "App/source"
-        pattern = ".*.java"
-    )
-    resource-directory = "App/resource"
-    library = [
-        "HelloDroidLib"
-    ]
-    api-version = "27"
-    build-tools-version = "27.0.3"
-    keystore = "private/hellodroid-release-key.keystore"
-    keystore-password-file = "private/hellodroid-release-key.password"
-    manifest = "App/AndroidManifest-AAPT2.xml"
-    use-aapt2 = "true"
-)
-
-# Build unit tests
-JavaJar(
-    name = "HelloDroidLibTest"
-    source = Find("Lib/tests/source")
-    main-class = "hello.droid.common.AllTests"
-    library = [
-        "HelloDroidLib-jar" # Build against jar
-        "junit"
-    ]
-)
-
-# Build unit tests
-JavaJar(
-    name = "HelloDroidUnitTest"
-    source = Find("App/tests/unit")
-    main-class = "hello.droid.AllTests"
-    library = [
-        "HelloDroidLib-jar" # Build against jar
-        "HelloDroid-jar" # Build against jar
-        "junit"
-    ]
+    task = "assemble"
+    output = "app/build/outputs/apk/debug/app-debug.apk"
 )
 
 # Run unit tests
-JavaJUnit(
-    name = "HelloDroidLibTestResult"
-    library = [
-        "HelloDroidLibTest"
-        "HelloDroidLib-jar" # Build against jar
-        "junit"
-    ]
-    main-class = "hello.droid.common.AllTests"
-)
-
-# Run unit tests
-JavaJUnit(
+Gradle(
     name = "HelloDroidUnitTestResult"
-    library = [
-        "HelloDroidUnitTest"
-        "HelloDroidLib-jar" # Build against jar
-        "HelloDroid-jar" # Build against jar
-        "junit"
-    ]
-    main-class = "hello.droid.AllTests"
-)
-
-# Build instrumentation tests
-AndroidApk(
-    name = "HelloDroidInstrumentationTest"
-    source = Find(
-        directory = "App/tests/instrumentation"
-        pattern = ".*.java"
-    )
-    library = [
-        "HelloDroidLib-jar" # Build against jar
-        "HelloDroid-jar" # Build against jar
-        "android-support-test"
-        "junit"
-    ]
-    api-version = "27"
-    build-tools-version = "27.0.3"
-    keystore = "private/hellodroid-release-key.keystore"
-    keystore-password-file = "private/hellodroid-release-key.password"
-    manifest = "App/tests/instrumentation/AndroidManifest.xml"
-    use-aapt2 = "true"
+    task = "test"
+    require = "HelloDroid"
+    output = "app/build/test-results/testDebugUnitTest/TEST-hello.droid.ExampleUnitTest.xml"
 )
 
 # Run instrumentation tests
-AndroidInstrumentation(
+Gradle(
     name = "HelloDroidInstrumentationTestResult"
-    apk = "HelloDroid"
-    apk-test = "HelloDroidInstrumentationTest"
-    package = "hello.droid"
-    package-test = "hello.droid.test"
-    build-tools-version = "27.0.3"
-    runner = "android.support.test.runner.AndroidJUnitRunner"
+    task = "connectedCheck"
+    require = "HelloDroid"
+    output = "app/build/reports/androidTests/connected/index.html"
 )

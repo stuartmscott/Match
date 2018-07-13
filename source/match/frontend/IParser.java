@@ -1,0 +1,63 @@
+/*
+ * Copyright 2015 Stuart Scott
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package match.frontend;
+
+import java.util.List;
+import java.util.Map;
+
+import match.ITarget;
+import match.expression.IExpression;
+import match.expression.function.IFunction;
+
+public interface IParser {
+
+    /**
+     * Parses the files in the Lexer.
+     *
+     * @return the List of Targets declared in the match files.
+     */
+    List<ITarget> parse();
+
+    /**
+     * Matches a function.
+     *
+     * <p>
+     * &lt;identifier&gt;&lt;parameters&gt;
+     * </p>
+     */
+    IFunction matchFunction();
+
+    /**
+     * Matches parameters to a function.
+     *
+     * <p>
+     * "(" &lt;expression&gt;* ")"
+     * </p>
+     */
+    Map<String, IExpression> matchParameters();
+
+    /**
+     * Matches an expression.
+     *
+     * <p>
+     * &lt;function&gt;
+     * "[" &lt;expression&gt;+ "]"
+     * &lt;literal&gt;
+     * </p>
+     */
+    IExpression matchExpression();
+}

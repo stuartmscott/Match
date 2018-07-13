@@ -16,12 +16,12 @@
 
 package match;
 
-import expression.function.IFunction;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import match.expression.function.IFunction;
 
 public class Target implements ITarget {
 
@@ -122,7 +122,9 @@ public class Target implements ITarget {
         int result = 0;
         try {
             lastCommand = command;
-            // match.println(command);
+            if (match.isVerbose()) {
+                match.println(command);
+            }
             ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
             pb.directory(getDirectory());
             Process process = pb.start();

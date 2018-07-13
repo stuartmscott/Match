@@ -1,6 +1,16 @@
 Match Release
 =============
 
+# v0.6
+- Adds Platform for selecting options based on build platform
+- Simplifies Library by using Platform
+- Moves Protobuf support into its own function
+- Ditches Android support for Gradle support
+- Use match as a top level name for all packages
+- Adds customizable target and total build time limits
+- Adds verbose option
+- Adds initial clean option - still work-in-progress
+
 # v0.5
 - Adds Android Library Support
 - Adds CheckStyle Support
