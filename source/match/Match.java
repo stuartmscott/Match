@@ -288,7 +288,11 @@ public class Match implements IMatch {
             provideFile(file);
         }
         for (ITarget target : targets) {
-            target.configure();
+            try {
+                target.configure();
+            } catch (Exception e) {
+                error(target.getName() + " failed to configure: " + e.getMessage());
+            }
         }
         println("Building");
         CountDownLatch latch = new CountDownLatch(targets.size());
